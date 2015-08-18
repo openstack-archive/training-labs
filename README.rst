@@ -1,52 +1,46 @@
-
-Training Labs
+=============
+training labs
 =============
 
 About
 -----
 
-Training Labs will provide scripts to automate the creation of the Training
-Environment.
+Provide an automated way to deploy Vanilla OpenStack and closely follow
+.. _install-guides: https://wiki.openstack.org/wiki/Documentation/InstallGuide
 
-**Note:** Training Labs are specifically meant for OpenStack Training and are
-specifically tuned as per Training Manuals repo.
+We strove to give easy way to setup OpenStack cluster which should
+be a good starting point for beginners to learn OpenStack, and for advanced
+users to test out new features, check out different capabilities of OpenStack.
+On top of that training-labs will also be a good way to test the install
+guides on a regular basis.
 
+Training-labs is a project under OpenStack Documentation. Please checkout
+the wiki for more information: .. _training-labs: https://wiki.openstack.org/wiki/Documentation/training-labs
+
+* Free software: Apache license
+* Documentation: http://docs.openstack.org/developer/training-labs
+* Source: http://git.openstack.org/cgit/openstack/training-labs
+* Bugs: http://bugs.launchpad.net/training-labs
 
 Pre-requisite
 -------------
 
 * Download and install [VirtualBox](https://www.virtualbox.org/wiki/Downloads).
 
-
 How to run the scripts
 ----------------------
 
-1. Clone the training-guides repo which contains scripts in the labs section that will install multi-node OpenStack automatically.
+.. TODO(psalunke: fix me)
+1. Clone the training-labs repository:
 
-        $ git clone git://git.openstack.org/openstack/training-guides
-
-2. Go to the labs folder
-
-        $ cd training-guides/labs
-
-3. Run the script:
-
-        $ ./osbash -b cluster
-
-This will do the complete installation for all the nodes - Controller, Compute and Network.
-
-For more help you can check
-
-        $ ./osbash --help
-
+        $
 
 This will take some time to run the first time.
-
 
 What the script installs
 ------------------------
 
-Running this will automatically spin up 3 virtual machines in VirtualBox:
+Running this will automatically spin up 3 virtual machines in VirtualBox/KVM:
 
 * Controller node
 * Network node
@@ -92,7 +86,6 @@ Openstack Services installed on Compute node:
 * Neutron
 
     * neutron-plugin-openvswitch-agent
-
 
 How to access the services
 --------------------------
@@ -152,19 +145,18 @@ For Demo user privileges:
 
 Now you can access the OpenStack services via CLI.
 
+Specs
+-----
 
-BluePrints
-----------
-
-* Training Manuals : https://blueprints.launchpad.net/openstack-manuals/+spec/training-manuals
-* Training Labs : https://blueprints.launchpad.net/openstack-training-guides/+spec/openstack-training-labs
+* .. _training-labs: http://specs.openstack.org/openstack/docs-specs/specs/liberty/traininglabs.html
 
 Mailing Lists, IRC
 ------------------
 
 * To contribute please hop on to IRC on the channel `#openstack-doc` on IRC freenode
   or write an e-mail to the OpenStack Manuals mailing list
-  `openstack-docs@lists.openstack.org`.
+  `openstack-docs@lists.openstack.org`. Please use [training-labs] tag in the email
+  message.
 
 **NOTE:** You might consider registering on the OpenStack Manuals mailing list if
           you want to post your e-mail instantly. It may take some time for
@@ -187,14 +179,11 @@ any queries about the Labs section.
 Meetings
 --------
 
-To follow the weekly meetings for OpenStack Training, please refer
-to the following link.
-
-For IRC meetings, refer to the wiki page on training manuals.
-https://wiki.openstack.org/wiki/Meetings/training-manual
+Team meeting for training-labs is on alternating Thursdays on Google Hangouts.
+https://wiki.openstack.org/wiki/Documentation/training-labs#Meeting_Information
 
 Wiki
 ----
 
-Follow various links on OpenStack Training Manuals here:
-https://wiki.openstack.org/wiki/Training-guides
+Follow various links on training-labs here:
+https://wiki.openstack.org/wiki/Documentation/training-labs#Meeting_Information
