@@ -88,9 +88,9 @@ while getopts :be:g:-:hnt:w opt; do
     case $opt in
         e)
             if [ "$OPTARG" = ova ]; then
-                EXPORT_OVA=$IMG_DIR/oslabs-$DISTRO.ova
+                EXPORT_OVA=$IMG_DIR/labs-$DISTRO.ova
             elif [ "$OPTARG" = dir ]; then
-                EXPORT_VM_DIR=$IMG_DIR/oslabs-$DISTRO
+                EXPORT_VM_DIR=$IMG_DIR/labs-$DISTRO
             else
                 echo -e "${CError:-}Error: -e argument must be ova or dir${CReset:-}"
                 exit

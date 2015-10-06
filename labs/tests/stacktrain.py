@@ -19,7 +19,7 @@ Test StackTrain!
 Tests for `stacktrain` module.
 """
 
-from oslabs.tests import base
+from labs.tests import base
 
 
 class TestLabs(base.TestCase):

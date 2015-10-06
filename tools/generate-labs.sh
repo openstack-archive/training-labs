@@ -6,19 +6,19 @@
 #       hosting the contents of this project.
 #
 
-set -o nounset                              # Treat unset variables as an error
+set -o nounset  # Treat unset variables as an error
 
 # Create tarball of labs scripts for Linux/OS X users
 tar --exclude=*.iso \
     --exclude=*.vdi \
     --exclude=*.log \
     --exclude=*.auto \
-    -czf build/labs-scripts.tgz oslabs/osbash
+    -czf build/labs.tgz labs/osbash
 
 
 # Generate Windows batch scripts
-oslabs/osbash/osbash.sh -w cluster
+labs/osbash/osbash.sh -w cluster
 # Create zip file of labs scripts for Windows users
-zip -r build/labs-scripts.zip oslabs/osbash \
+zip -r build/labs.zip labs/osbash \
     -x *.iso *.vdi *.log *.auto
 

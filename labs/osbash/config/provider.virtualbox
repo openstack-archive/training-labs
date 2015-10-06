@@ -13,7 +13,7 @@
 : ${VBM_EXE:=$(which VBoxManage)}
 
 # VirtualBox VM group
-: ${VM_GROUP:=oslabs}
+: ${VM_GROUP:=labs}
 
 # VirtualBox VM GUI type
 : ${VM_UI:=headless}

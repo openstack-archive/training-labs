@@ -30,10 +30,9 @@ Pre-requisite
 How to run the scripts
 ----------------------
 
-.. TODO(psalunke: fix me)
 1. Clone the training-labs repository:
 
-        $
+        $ git clone git://git.openstack.org/openstack/training-labs.git
 
 This will take some time to run the first time.
 
