@@ -57,6 +57,18 @@ function yes_or_no {
 }
 
 #-------------------------------------------------------------------------------
+# Network helpers
+#-------------------------------------------------------------------------------
+
+function get_ip_from_net_and_fourth {
+    local net_name=$1
+    local net="${!net_name}"
+    local fourth_octet=$2
+
+    echo "${net%.*}.$fourth_octet"
+}
+
+#-------------------------------------------------------------------------------
 # Helpers to incrementally number files via name prefixes
 #-------------------------------------------------------------------------------
 
