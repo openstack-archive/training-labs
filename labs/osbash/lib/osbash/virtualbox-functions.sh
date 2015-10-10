@@ -157,6 +157,12 @@ function create_network {
 # Disk functions
 #-------------------------------------------------------------------------------
 
+function base_disk_exists {
+    local base_disk_path=$(get_base_disk_path)
+
+    test -f "$base_disk_path"
+}
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Creating, registering and unregistering disk images with VirtualBox
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
