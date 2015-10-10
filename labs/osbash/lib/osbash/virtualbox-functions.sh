@@ -288,6 +288,21 @@ function vm_attach_disk_multi {
         --medium "$disk"
 }
 
+function base_disk_delete {
+    local base_disk_path=$(get_base_disk_path)
+
+    if disk_registered "$base_disk_path"; then
+        # Remove users of base disk
+        echo >&2 "Unregistering and removing all disks attached to" \
+                    "base disk path."
+        disk_delete_child_vms "$base_disk_path"
+        echo >&2 "Unregistering old base disk."
+        disk_unregister "$base_disk_path"
+    fi
+    echo -e >&2 "${CStatus:-}Removing old base disk.${CReset:-}"
+    rm -f "$base_disk_path"
+}
+
 #-------------------------------------------------------------------------------
 # VM create and configure
 #-------------------------------------------------------------------------------
