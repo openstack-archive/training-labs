@@ -23,4 +23,4 @@ For people using windows, you might have to download the iso image for the
 required distro and version manually.
 
 - Ubuntu 14.04 ISO
-  - http://releases.ubuntu.com/14.04/ubuntu-14.04.2-server-amd64.iso
+  - http://releases.ubuntu.com/14.04/ubuntu-14.04.3-server-amd64.iso
