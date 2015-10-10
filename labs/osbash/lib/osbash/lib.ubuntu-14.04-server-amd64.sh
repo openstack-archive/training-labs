@@ -4,7 +4,7 @@
 : ${BASE_INSTALL_SCRIPTS:=scripts.ubuntu_base}
 
 #-------------------------------------------------------------------------------
-# Booting the operating system installer
+# Installation from ISO image
 #-------------------------------------------------------------------------------
 
 readonly ISO_URL_BASE=http://releases.ubuntu.com/14.04/
@@ -16,6 +16,7 @@ readonly _PS_ssh=http://git.openstack.org/cgit/openstack/training-labs/plain/lab
 readonly _PS_vbadd=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-vbadd.cfg
 readonly _PS_all=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-all-v2.cfg
 
+# Arguments for ISO image installer
 readonly _BOOT_ARGS="/install/vmlinuz
     noapic
     preseed/url=%s
@@ -49,6 +50,7 @@ function update_iso_variables {
     echo -e >&2 "${CStatus:-}New ISO_URL: ${CData:-}$ISO_URL${CReset:-}"
 }
 
+# Boot the ISO image operating system installer
 function vbox_distro_start_installer {
     local vm_name=$1
 
@@ -71,5 +73,27 @@ function vbox_distro_start_installer {
     echo "Initiating boot sequence"
     vbox_kbd_enter_key "$vm_name"
 }
+
+#-------------------------------------------------------------------------------
+# Installation from Internet server (if ISO image cannot be used, e.g. with KVM)
+#-------------------------------------------------------------------------------
+
+readonly DISTRO_URL=http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/
+
+# Extra arguments for virt-install
+readonly EXTRA_ARGS="locale=en_US.UTF-8
+    console-keymaps-at/keymap=us
+    console-setup/ask_detect=false
+    console-setup/layoutcode=us
+    keyboard-configuration/layout=USA
+    keyboard-configuration/variant=US
+    netcfg/get_hostname=osbash
+    netcfg/get_domainname=local
+    mirror/country=CH
+    mirror/http/directory=/ubuntu
+    mirror/http/mirror=ch.archive.ubuntu.com
+    mirror/protocol=http
+    mirror/http/proxy=
+    preseed/url=${_PS_ssh}"
 
 # vim: set ai ts=4 sw=4 et ft=sh:

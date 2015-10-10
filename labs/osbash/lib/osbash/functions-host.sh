@@ -69,6 +69,7 @@ function strip_top_dir {
 function vm_scp_to_vm {
     local ssh_port=$1
     shift
+    local ssh_ip=${SSH_IP:=127.0.0.1}
 
     check_osbash_private_key
 
@@ -83,7 +84,7 @@ function vm_scp_to_vm {
             -o "UserKnownHostsFile /dev/null" \
             -o "StrictHostKeyChecking no" \
             -P "$ssh_port" \
-            "$src_path" "$VM_SHELL_USER@localhost:$target_path"
+            "$src_path" "$VM_SHELL_USER@$ssh_ip:$target_path"
     done
 }
 
@@ -91,6 +92,7 @@ function vm_scp_to_vm {
 function vm_ssh {
     local ssh_port=$1
     shift
+    local ssh_ip=${SSH_IP:=127.0.0.1}
 
     check_osbash_private_key
 
@@ -102,13 +104,13 @@ function vm_ssh {
         -o "UserKnownHostsFile /dev/null" \
         -o "StrictHostKeyChecking no" \
         -p "$ssh_port" \
-        "$VM_SHELL_USER@localhost" "$@"
+        "$VM_SHELL_USER@$ssh_ip" "$@"
 }
 
 function wait_for_ssh {
     local ssh_port=$1
 
-    echo -e -n "${CStatus:-}Waiting for ssh server to respond on local port ${CData:-}$ssh_port.${CReset:-}"
+    echo -e -n "${CStatus:-}Waiting for ssh server to respond on ${CData:-}${SSH_IP:-127.0.0.1}:$ssh_port${CReset:-}."
     while [ : ]; do
         if vm_ssh "$ssh_port" exit ; then
             break
@@ -156,10 +158,14 @@ function ssh_process_autostart {
     # Run this function in sub-shell to protect our caller's environment
     # (which might be _our_ enviroment if we get called again)
     (
-
     source "$CONFIG_DIR/config.$vm_name"
 
-    local ssh_port=$VM_SSH_PORT
+    local ssh_port
+    if [ ${PROVIDER:-""} = virtualbox ]; then
+        ssh_port=$VM_SSH_PORT
+    else
+        ssh_port=22
+    fi
 
     wait_for_ssh "$ssh_port"
     vm_ssh "$ssh_port" "rm -rf lib config autostart"

@@ -82,6 +82,13 @@ elif [ -n "${TARGET_SNAPSHOT:-}" -a -n "${CURRENT:-""}" ]; then
     usage
 fi
 
+if [ "$PROVIDER" != virtualbox ]; then
+    if [ -n "$TARGET_SNAPSHOT" -o -n "$CURRENT" ]; then
+        echo >&2 "ERROR: snapshots currently not supported with $PROVIDER."
+        exit 1
+    fi
+fi
+
 # Find target_snapshot in scripts_cfg and set global *_SNAPSHOT variables
 # to the correct snapshot name for each node (to allow building from there)
 function set_snapshot_vars {
