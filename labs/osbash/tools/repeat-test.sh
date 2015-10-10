@@ -108,9 +108,9 @@ while [ : ]; do
     rc=0
     TEST_ONCE=$TOP_DIR/tools/test-once.sh
     if [ "${VERBOSE:-}" -eq 1 ]; then
-        "$TEST_ONCE" "$TEST_SCRIPT" 2>&1 | tee "$dir/$LOG_NAME" || rc=$?
+        "$TEST_ONCE" "$TEST_SCRIPT" 2>&1 | tee "$LOG_DIR/$LOG_NAME" || rc=$?
     else
-        "$TEST_ONCE" "$TEST_SCRIPT" > "$dir/$LOG_NAME" 2>&1 || rc=$?
+        "$TEST_ONCE" "$TEST_SCRIPT" > "$LOG_DIR/$LOG_NAME" 2>&1 || rc=$?
     fi
 
     if [ $rc -eq 0 ]; then
@@ -122,7 +122,14 @@ while [ : ]; do
     )
 
     echo "Copying osbash log files into $dir."
-    mv "$LOG_DIR/"*.auto "$LOG_DIR/"*.log "$dir"
+    # Check if there is at least one file that needs moving
+    if test -n $(shopt -s nullglob; echo *.auto *.log); then
+        (
+        # Remove glob args (e.g. *.auto) if no matching file exists
+        shopt -s nullglob
+        mv "$LOG_DIR/"*.auto "$LOG_DIR/"*.log "$dir"
+        )
+    fi
 
     echo "Copying upstart log files into $dir."
     "$TOP_DIR/tools/get_upstart_logs.sh" "$dir"
