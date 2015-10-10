@@ -16,8 +16,6 @@ var
 sdist
 develop-eggs
 .installed.cfg
-lib
-lib64
 
 # Installer logs
 pip-log.txt
@@ -60,9 +58,9 @@ tenvironment
 .ropeproject/
 
 # Labs artifacts
-labs/autostart
-labs/img
-labs/log
-labs/wbatch
-labs/lib/vagrant-ssh-keys
-labs/test_tmp/
+labs/osbash/autostart/
+labs/osbash/img/
+labs/osbash/log/
+labs/osbash/wbatch/
+labs/osbash/lib/vagrant-ssh-keys/
+labs/osbash/test_tmp/
