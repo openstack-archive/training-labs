@@ -100,7 +100,7 @@ function vm_install_base {
     autostart zero_empty.sh shutdown.sh
 
     # Boot VM into distribution installer
-    vbox_boot "$vm_name"
+    vm_boot "$vm_name"
 
     local delay=5
     echo >&2 "Waiting $delay seconds for VM \"$vm_name\" to come up"

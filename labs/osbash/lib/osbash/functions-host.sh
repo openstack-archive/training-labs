@@ -330,8 +330,8 @@ function command_from_config {
             # Boot with queued autostart files now, wait for end of scripts
             # processing
             get_cmd_options $args
-            echo >&2 "VM_UI=$vm_ui _vbox_boot_with_autostart $vm_name"
-            VM_UI=$vm_ui _vbox_boot_with_autostart "$vm_name"
+            echo >&2 "VM_UI=$vm_ui _vm_boot_with_autostart $vm_name"
+            VM_UI=$vm_ui _vm_boot_with_autostart "$vm_name"
             ;;
         snapshot)
             # Format: snapshot [-n <node_name>] <snapshot_name>
@@ -353,7 +353,7 @@ function command_from_config {
             local shot_name=$args
             echo >&2 snapshot_cycle "$vm_name" "$shot_name"
             _autostart_queue "osbash/shutdown.sh"
-            _vbox_boot_with_autostart "$vm_name"
+            _vm_boot_with_autostart "$vm_name"
             vm_wait_for_shutdown "$vm_name"
             vm_snapshot "$vm_name" "$shot_name"
             ;;
