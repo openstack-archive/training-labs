@@ -4,10 +4,7 @@ TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/deploy.osbash"
 source "$OSBASH_LIB_DIR/functions-host.sh"
-
-CONTROLLER_PORT=2230
-NETWORK_PORT=2231
-COMPUTE_PORT=2232
+source "$OSBASH_LIB_DIR/virtualbox-functions.sh"
 
 function usage {
     echo "Purpose: Get logs from cluster node VMs."
@@ -25,13 +22,19 @@ else
     fi
 fi
 
-for port in "$CONTROLLER_PORT" "$NETWORK_PORT" "$COMPUTE_PORT"; do
-    port_dir=$RESULTS_DIR/$port
-    mkdir "$port_dir"
-    vm_ssh "$port" "sudo tar cf - -C /var/log upstart" | tar xf - -C "$port_dir"
+for node in controller network compute; do
+    (
+    source "$CONFIG_DIR/config.$node"
+    node_dir=$RESULTS_DIR/$node
+    mkdir "$node_dir"
+
+    ssh_env_for_node $node
+    vm_ssh "$VM_SSH_PORT" "sudo tar cf - -C /var/log upstart" | tar xf - -C "$node_dir"
+    )
 done
 
-if vm_ssh "$CONTROLLER_PORT" 'ls log/test-*.*' >/dev/null 2>&1; then
-    vm_ssh "$CONTROLLER_PORT" 'cd log; tar cf - test-*.*' | tar xf - -C "$RESULTS_DIR"
-    vm_ssh "$CONTROLLER_PORT" 'rm log/test-*.*'
+ssh_env_for_node controller
+if vm_ssh "$VM_SSH_PORT" 'ls log/test-*.*' >/dev/null 2>&1; then
+    vm_ssh "$VM_SSH_PORT" 'cd log; tar cf - test-*.*' | tar xf - -C "$RESULTS_DIR/controller"
+    vm_ssh "$VM_SSH_PORT" 'rm log/test-*.*'
 fi
