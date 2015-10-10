@@ -198,16 +198,7 @@ function cleanup_base_disk {
         echo >&2 "Found existing base disk: $BASE_DISK"
 
         if ! yes_or_no "Keep this base disk?"; then
-            if disk_registered "$BASE_DISK"; then
-                # Remove users of base disk
-                echo >&2 "Unregistering and removing all disks attached to" \
-                            "base disk path."
-                disk_delete_child_vms "$BASE_DISK"
-                echo >&2 "Unregistering old base disk."
-                disk_unregister "$BASE_DISK"
-            fi
-            echo -e >&2 "${CStatus:-}Removing old base disk.${CReset:-}"
-            rm -f "$BASE_DISK"
+            base_disk_delete
         else
             echo -e >&2 "${CMissing:-}Nothing to do. Exiting.${CReset:-}"
             exit
