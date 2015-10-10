@@ -51,10 +51,11 @@ function usage {
 }
 
 function print_config {
+    local basedisk=$(get_base_disk_name)
     if [ "$CMD" = "basedisk" ]; then
-        echo -e "${CInfo:-}Target is base disk:${CData:-} $BASE_DISK${CReset:-}"
+        echo -e "${CInfo:-}Target is base disk:${CData:-} $basedisk${CReset:-}"
     else
-        echo -e "${CInfo:-}Base disk:${CData:-} $BASE_DISK${CReset:-}"
+        echo -e "${CInfo:-}Base disk:${CData:-} $basedisk${CReset:-}"
         echo -e "${CInfo:-}Distribution name: ${CData:-} $(get_distro_name "$DISTRO")${CReset:-}"
     fi
 
@@ -159,9 +160,6 @@ fi
 # Install over ssh by default
 : ${VM_ACCESS:=ssh}
 
-# Get base disk path if none is configured
-: ${BASE_DISK:=$(get_base_disk_path)}
-
 print_config
 
 if [ "${INFO_ONLY:-0}" -eq 1 ]; then
@@ -196,7 +194,7 @@ function cleanup_base_disk {
     if [ "$CMD" = basedisk ]; then
         if base_disk_exists; then
 
-            echo >&2 "Found existing base disk: $BASE_DISK"
+            echo >&2 "Found existing base disk: $(get_base_disk_name)"
 
             if ! yes_or_no "Keep this base disk?"; then
                 base_disk_delete
@@ -212,17 +210,17 @@ ${OSBASH:-:} cleanup_base_disk
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if ! base_disk_exists; then
-    vm_install_base "$BASE_DISK"
+    vm_install_base
 else
     # Leave base disk alone, but call the function if wbatch is active
-    OSBASH= ${WBATCH:-:} vm_install_base "$BASE_DISK"
+    OSBASH= ${WBATCH:-:} vm_install_base
 fi
 #-------------------------------------------------------------------------------
 if [ "$CMD" = basedisk ]; then
     exit
 fi
 
-echo "Using base disk $BASE_DISK"
+echo "Building nodes using base disk $(get_base_disk_name)"
 
 ${WBATCH:-:} wbatch_create_hostnet
 MGMT_NET_IF=$(create_network "MGMT_NET")

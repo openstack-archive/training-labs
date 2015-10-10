@@ -158,6 +158,10 @@ function create_network {
 # Disk functions
 #-------------------------------------------------------------------------------
 
+function get_base_disk_path {
+    echo "$DISK_DIR/$(get_base_disk_name).vdi"
+}
+
 function base_disk_exists {
     local base_disk_path=$(get_base_disk_path)
 
@@ -475,7 +479,7 @@ function vm_export_dir {
         # basedisk.
         local snapshot_path=$(vm_get_disk_path "$node-e")
         local hd_dir=${snapshot_path%Snapshots/*}
-        local hd_path=$hd_dir$(get_base_disk_name)
+        local hd_path=$hd_dir$(get_base_disk_name).vdi
         $VBM unregistervm "$node-e"
         if [ -n "$hd_path" ]; then
             disk_unregister "$hd_path"

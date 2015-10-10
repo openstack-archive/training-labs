@@ -204,7 +204,7 @@ function wbatch_begin_node {
     wbatch_find_vbm
     wbatch_mkdirs
 
-    local basedisk=$(basename "$BASE_DISK")
+    local basedisk=$(get_base_disk_name).vdi
 
     sed -e "
         s,%BASEDISK%,$basedisk,g;

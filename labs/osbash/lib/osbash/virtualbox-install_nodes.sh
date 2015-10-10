@@ -63,7 +63,7 @@ function vm_init_node {
     fi
 
     vm_add_share "$vm_name" "$SHARE_DIR" "$SHARE_NAME"
-    vm_attach_disk_multi "$vm_name" "$BASE_DISK"
+    vm_attach_disk_multi "$vm_name" "$(get_base_disk_path)"
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Rename to pass the node name to the script
     autostart_and_rename osbash init_xxx_node.sh "init_${vm_name}_node.sh"

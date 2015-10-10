@@ -31,11 +31,7 @@ function exec_cmd {
 
 #-------------------------------------------------------------------------------
 function get_base_disk_name {
-    echo "base-$VM_ACCESS-$DISTRO.vdi"
-}
-
-function get_base_disk_path {
-    echo "$DISK_DIR/$(get_base_disk_name)"
+    echo "base-$VM_ACCESS-$OPENSTACK_RELEASE-$DISTRO"
 }
 
 # From DISTRO string (e.g., ubuntu-14.04-server-amd64), get first component

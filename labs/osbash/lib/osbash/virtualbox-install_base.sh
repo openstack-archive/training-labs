@@ -24,7 +24,7 @@ function check_md5 {
 }
 
 function vm_install_base {
-    local base_disk=$1
+    local base_disk_path=$(get_base_disk_path)
     local base_build_disk=$DISK_DIR/tmp-disk.vdi
     local vm_name=base
 
@@ -135,9 +135,9 @@ function vm_install_base {
 
     echo -e >&2 "${CStatus:-}Base disk created${CReset:-}"
 
-    echo >&2 "Moving base disk to $base_disk"
-    ${OSBASH:-:} mv -vf "$base_build_disk" "$base_disk"
-    ${WBATCH:-:} wbatch_rename_disk "$base_build_disk" "$base_disk"
+    echo >&2 "Moving base disk to $base_disk_path"
+    ${OSBASH:-:} mv -vf "$base_build_disk" "$base_disk_path"
+    ${WBATCH:-:} wbatch_rename_disk "$base_build_disk" "$base_disk_path"
 
     ${WBATCH:-:} wbatch_end_file
 
