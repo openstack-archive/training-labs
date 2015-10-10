@@ -22,6 +22,9 @@ source "$CONFIG_DIR/admin-openstackrc.sh"
 nova_admin_user=$(service_to_user_name nova)
 nova_admin_password=$(service_to_user_password nova)
 
+# Wait for keystone to come up
+wait_for_keystone
+
 echo "Creating nova user and giving it admin role under service tenant."
 keystone user-create \
     --name "$nova_admin_user" \

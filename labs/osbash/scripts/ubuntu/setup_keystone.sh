@@ -85,9 +85,7 @@ export OS_SERVICE_TOKEN=$ADMIN_TOKEN
 export OS_SERVICE_ENDPOINT="http://controller-mgmt:35357/v2.0"
 
 # Wait for keystone to come up
-until keystone user-list >/dev/null 2>&1; do
-    sleep 1
-done
+wait_for_keystone
 
 echo "Adding admin tenant."
 keystone tenant-create --name "$ADMIN_TENANT_NAME" --description "Admin Tenant"

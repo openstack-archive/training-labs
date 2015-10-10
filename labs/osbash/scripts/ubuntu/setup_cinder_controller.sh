@@ -21,6 +21,9 @@ source "$CONFIG_DIR/admin-openstackrc.sh"
 cinder_admin_user=$(service_to_user_name cinder)
 cinder_admin_password=$(service_to_user_password cinder)
 
+# Wait for keystone to come up
+wait_for_keystone
+
 echo "Creating cinder user."
 keystone user-create \
     --name "$cinder_admin_user" \

@@ -230,6 +230,16 @@ function setup_database {
     mysql_exe "GRANT ALL ON ${service}.* TO '$db_user'@'localhost' IDENTIFIED BY '$db_password';"
 }
 
+# Wait for keystone to come up
+function wait_for_keystone {
+    echo -n "Waiting for keystone to come up."
+    until keystone user-list >/dev/null 2>&1; do
+        echo -n .
+        sleep 1
+    done
+    echo
+}
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Users for service-specific MySQL databases
 
