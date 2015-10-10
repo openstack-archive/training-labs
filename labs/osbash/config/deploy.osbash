@@ -1,8 +1,5 @@
 # Used by osbash.sh and guest scripts
 
-# Port used for ssh forwarding when building base disk
-: ${VM_BASE_SSH_PORT:=2229}
-
 : ${OSBASH_LIB_DIR:=$LIB_DIR/osbash}
 : ${OSBASH_SCRIPTS_DIR:=$SCRIPTS_DIR/osbash}
 

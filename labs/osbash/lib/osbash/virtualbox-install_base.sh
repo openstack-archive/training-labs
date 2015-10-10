@@ -28,9 +28,6 @@ function vm_install_base {
     local base_build_disk=$DISK_DIR/tmp-disk.vdi
     local vm_name=base
 
-    # Port used for ssh forwarding when building base disk
-    : ${VM_BASE_SSH_PORT:=2229}
-
     echo >&2 "$(date) osbash vm_install starts."
 
     ${WBATCH:-:} wbatch_begin_base
@@ -75,8 +72,13 @@ function vm_install_base {
     # Set up communication with base VM: ssh port forwarding by default,
     # VirtualBox shared folders for wbatch
 
+    (
+    # Get the VM_SSH_PORT for the base disk
+    source "$CONFIG_DIR/config.$vm_name"
+
     # wbatch runs cannot use ssh, so skip port forwarding in that case
-    ${WBATCH:+:} vm_port "$vm_name" ssh "$VM_BASE_SSH_PORT" 22
+    ${WBATCH:+:} vm_port "$vm_name" ssh "$VM_SSH_PORT" 22
+    )
 
     # Automounted on /media/sf_bootstrap for first boot
     ${WBATCH:-:} vm_add_share_automount "$vm_name" "$SHARE_DIR" bootstrap
@@ -112,7 +114,7 @@ function vm_install_base {
 
     # Wait for ssh connection and execute scripts in autostart directory
     # (for wbatch, osbashauto does the processing instead)
-    ${WBATCH:+:} ssh_process_autostart "$VM_BASE_SSH_PORT" &
+    ${WBATCH:+:} ssh_process_autostart "$vm_name" &
     # After reboot
     wait_for_autofiles
     echo -e >&2 "${CStatus:-}Installation done for VM ${CData:-}$vm_name${CReset:-}"
