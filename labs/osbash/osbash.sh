@@ -9,16 +9,17 @@ trap 'kill -- -$$' SIGINT
 TOP_DIR=$(cd "$(dirname "$0")" && pwd)
 
 : ${DISTRO:=ubuntu-14.04-server-amd64}
+: ${PROVIDER:=virtualbox}
 
 source "$TOP_DIR/config/localrc"
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/openstack"
 source "$CONFIG_DIR/deploy.osbash"
-source "$CONFIG_DIR/provider.virtualbox"
+source "$CONFIG_DIR/provider.$PROVIDER"
 source "$OSBASH_LIB_DIR/lib.$DISTRO"
 source "$OSBASH_LIB_DIR/functions-host.sh"
-source "$OSBASH_LIB_DIR/virtualbox-functions.sh"
-source "$OSBASH_LIB_DIR/virtualbox-install_base.sh"
+source "$OSBASH_LIB_DIR/$PROVIDER-functions.sh"
+source "$OSBASH_LIB_DIR/$PROVIDER-install_base.sh"
 source "$LIB_DIR/osbash/lib-color.sh"
 
 function usage {
@@ -227,7 +228,7 @@ MGMT_NET_IF=$(create_network "MGMT_NET")
 DATA_NET_IF=$(create_network "DATA_NET")
 API_NET_IF=$(create_network "API_NET")
 #-------------------------------------------------------------------------------
-source "$OSBASH_LIB_DIR/virtualbox-install_nodes.sh"
+source "$OSBASH_LIB_DIR/$PROVIDER-install_nodes.sh"
 vm_build_nodes "$CMD"
 #-------------------------------------------------------------------------------
 ENDTIME=$(date +%s)

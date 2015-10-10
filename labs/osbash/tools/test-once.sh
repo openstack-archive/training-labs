@@ -4,7 +4,7 @@ TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/deploy.osbash"
 source "$OSBASH_LIB_DIR/functions-host.sh"
-source "$OSBASH_LIB_DIR/virtualbox-functions.sh"
+source "$OSBASH_LIB_DIR/$PROVIDER-functions.sh"
 
 if [ $# -eq 0 ]; then
     echo "Purpose: Copy one script to target node and execute it via ssh."
