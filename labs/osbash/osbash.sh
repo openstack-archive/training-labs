@@ -133,7 +133,7 @@ while getopts :be:g:-:hnt:w opt; do
             JUMP_SNAPSHOT=$OPTARG
             ;;
         w)
-            source "$LIB_DIR/wbatch/batch_for_windows"
+            source "$LIB_DIR/wbatch/batch_for_windows.sh"
             ;;
         :)
             echo -e "${CError:-}Error: -$OPTARG needs argument${CReset:-}"
