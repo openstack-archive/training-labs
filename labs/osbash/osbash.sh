@@ -225,9 +225,9 @@ fi
 echo "Using base disk $BASE_DISK"
 
 ${WBATCH:-:} wbatch_create_hostnet
-MGMT_NET_IF=$(create_network "$MGMT_NET")
-DATA_NET_IF=$(create_network "$DATA_NET")
-API_NET_IF=$(create_network "$API_NET")
+MGMT_NET_IF=$(create_network "MGMT_NET")
+DATA_NET_IF=$(create_network "DATA_NET")
+API_NET_IF=$(create_network "API_NET")
 #-------------------------------------------------------------------------------
 source "$OSBASH_LIB_DIR/virtualbox-install_nodes.sh"
 vm_build_nodes "$CMD"

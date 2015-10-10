@@ -127,7 +127,8 @@ function create_hostonlyif {
 }
 
 function create_network {
-    local ip=$1
+    # From variable name (e.g. "API_NET"), get its content (content of $API_NET)
+    local ip=${!1}
 
     # If we are here only for wbatch, ignore actual network interfaces; just
     # return a unique identifier (so it can be replaced with the interface
