@@ -4,9 +4,7 @@ TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/deploy.osbash"
 source "$OSBASH_LIB_DIR/functions-host.sh"
-
-# Get remote ssh port of target node (VM_SSH_PORT)
-source "$CONFIG_DIR/config.controller"
+source "$OSBASH_LIB_DIR/virtualbox-functions.sh"
 
 if [ $# -eq 0 ]; then
     echo "Purpose: Copy one script to target node and execute it via ssh."
@@ -22,7 +20,8 @@ if [ ! -f "$SCRIPT_SRC" ]; then
 fi
 SCRIPT=$(basename "$SCRIPT_SRC")
 
-wait_for_ssh "$VM_SSH_PORT"
+# Set VM_SSH_PORT (and wait for node sshd to respond)
+ssh_env_for_node controller
 
 function get_remote_top_dir {
     if vm_ssh "$VM_SSH_PORT" "test -d /osbash"; then

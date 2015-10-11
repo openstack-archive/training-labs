@@ -94,6 +94,14 @@ function vm_snapshot {
 # Host-only network functions
 #-------------------------------------------------------------------------------
 
+# Get ssh port from node name and wait for node to respond
+function ssh_env_for_node {
+    local node=$1
+
+    VM_SSH_PORT=$(source "$CONFIG_DIR/config.$node"; echo "$VM_SSH_PORT")
+    wait_for_ssh "$VM_SSH_PORT"
+}
+
 function hostonlyif_in_use {
     local if_name=$1
     return $(WBATCH= $VBM list -l runningvms | \
