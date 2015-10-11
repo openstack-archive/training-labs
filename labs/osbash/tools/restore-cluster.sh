@@ -136,7 +136,7 @@ for vm_name in $VM_LIST; do
     if [ "${CURRENT:-""}" = "yes" ]; then
         restore_current_snapshot "$vm_name"
         if [ "${START:-""}" = "yes" ]; then
-            vbox_boot "$vm_name"
+            vm_boot "$vm_name"
         fi
     else
         # Global variable name (e.g. CONTROLLER_SNAPSHOT)
@@ -147,7 +147,7 @@ for vm_name in $VM_LIST; do
         else
             restore_named_snapshot "$vm_name" "${!var_name}"
             if [ "${START:-""}" = "yes" ]; then
-                vbox_boot "$vm_name"
+                vm_boot "$vm_name"
             fi
         fi
     fi

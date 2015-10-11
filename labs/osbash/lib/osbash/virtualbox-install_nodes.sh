@@ -22,10 +22,10 @@ function _vbox_configure_ifs {
 }
 
 # Boot node VM; wait until autostart files are processed and VM is shut down
-function _vbox_boot_with_autostart {
+function _vm_boot_with_autostart {
     local vm_name=$1
 
-    vbox_boot "$vm_name"
+    vm_boot "$vm_name"
 
     # Wait for ssh connection and execute scripts in autostart directory
     # (for wbatch, osbashauto does the processing instead)

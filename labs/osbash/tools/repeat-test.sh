@@ -88,7 +88,7 @@ while [ : ]; do
             # Start VMs as requested by user
             for vm_name in $START_VMS; do
                 echo >&2 "$0: booting node $vm_name."
-                vbox_boot "$vm_name"
+                vm_boot "$vm_name"
                 # Sleeping for 10 s fixes some problems, but it might be
                 # better to fix client scripts to wait for the services they
                 # need instead of just failing.

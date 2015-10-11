@@ -744,7 +744,7 @@ function vbox_kbd_string_input {
     done <<< "$str"
 }
 
-function vbox_boot {
+function vm_boot {
     local vm_name=$1
 
     echo -e >&2 "${CStatus:-}Starting VM ${CData:-}\"$vm_name\"${CReset:-}"
