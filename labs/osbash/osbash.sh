@@ -191,7 +191,7 @@ echo -e >&2 "${CStatus:-} $(date) osbash starting ${CReset:-}"
 
 clean_dir "$LOG_DIR"
 
-function cleanup_base_disk {
+function check_existing_base_disk {
     if [ "$CMD" = basedisk ]; then
         if base_disk_exists; then
 
@@ -207,12 +207,14 @@ function cleanup_base_disk {
     fi
 }
 
-${OSBASH:-:} cleanup_base_disk
+${OSBASH:-:} check_existing_base_disk
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if ! base_disk_exists; then
+    echo -e >&2 "${CStatus:-}Creating basedisk.${CReset:-}"
     vm_install_base
 else
+    echo -e >&2 "${CStatus:-}basedisk already exists.${CReset:-}"
     # Leave base disk alone, but call the function if wbatch is active
     OSBASH= ${WBATCH:-:} vm_install_base
 fi
