@@ -155,6 +155,8 @@ function ssh_exec_script {
 
 # Wait for sshd, prepare autostart dirs, and execute autostart scripts on VM
 function ssh_process_autostart {
+    local vm_name=$1
+
     # Run this function in sub-shell to protect our caller's environment
     # (which might be _our_ enviroment if we get called again)
     (
