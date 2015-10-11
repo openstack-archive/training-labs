@@ -43,7 +43,8 @@ function usage {
     echo "TARGET     basedisk: build configured basedisk"
     echo "           cluster : build OpenStack cluster [all nodes]"
     echo "                     (and basedisk if necessary)"
-    echo "GUI        gui, sdl, or headless (GUI type for VirtualBox)"
+    echo "GUI        console type: gui, sdl (VirtualBox only), vnc (KVM only),"
+    echo "           or headless"
 
     # Don't use -t SNAP directly, have tools/repeat-test.sh call it
     #echo "SNAP       Name of snapshot from which build continues"
@@ -108,10 +109,10 @@ while getopts :be:g:-:hnt:w opt; do
             OSBASH=exec_cmd
             ;;
         g)
-            if [[ "$OPTARG" =~ (headless|gui|sdl) ]]; then
+            if [[ "$OPTARG" =~ (headless|gui|sdl|vnc) ]]; then
                 VM_UI=$OPTARG
             else
-                echo -e "${CError:-}Error: -g argument must be gui, sdl, or headless${CReset:-}"
+                echo -e "${CError:-}Error: -g argument must be gui, sdl, vnc, or headless${CReset:-}"
                 exit
             fi
             ;;

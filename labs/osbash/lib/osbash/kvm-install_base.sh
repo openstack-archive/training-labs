@@ -26,11 +26,14 @@ function vm_install_base {
 
     disk_create "$base_disk_name" "${BASE_DISK_SIZE:=10000}"
 
-    local headless
+    local console_type
     if [ "$VM_UI" = "headless" ]; then
-        headless="--noautoconsole --wait=-1"
+        console_type="--noautoconsole --wait=-1"
+    elif [ "$VM_UI" = "vnc" ]; then
+        console_type="--graphics vnc,listen=0.0.0.0"
     else
-        headless=""
+        # gui option: should open a console viewer
+        console_type=""
     fi
 
     # Boot VM into distribution installer
@@ -43,7 +46,7 @@ function vm_install_base {
         --ram "${VM_BASE_MEM:=512}" \
         --vcpus 1 \
         --virt-type kvm \
-        $headless \
+        $console_type \
         &
 
     echo -e >&2 "${CStatus:-}Installing operating system; waiting for reboot.${CReset:-}"

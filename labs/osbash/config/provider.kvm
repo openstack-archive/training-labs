@@ -5,7 +5,7 @@
 : ${VIRSH_CALL:=sudo virsh --connect=$LIBVIRT_CONNECT_URI}
 : ${VIRT_INSTALL_CALL:=sudo virt-install --connect=$LIBVIRT_CONNECT_URI}
 
-# VM GUI type (one of headless or gui)
-: ${VM_UI:=headless}
+# VM GUI type (one of headless, gui, vnc)
+: ${VM_UI:=vnc}
 
 # vim: set ai ts=4 sw=4 et ft=sh:

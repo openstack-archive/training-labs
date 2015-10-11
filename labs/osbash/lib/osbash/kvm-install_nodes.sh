@@ -57,11 +57,14 @@ function vm_init_node {
 
     $VIRSH vol-clone --pool "$KVM_VOL_POOL" "$base_disk_name" "$vm_name"
 
-    local headless
+    local console_type
     if [ "$VM_UI" = "headless" ]; then
-        headless="--noautoconsole"
+        console_type="--noautoconsole"
+    elif [ "$VM_UI" = "vnc" ]; then
+        console_type="--graphics vnc,listen=0.0.0.0"
     else
-        headless=""
+        # gui option: should open a console viewer
+        console_type=""
     fi
 
     $VIRT_INSTALL \
@@ -72,7 +75,7 @@ function vm_init_node {
         --disk vol="$KVM_VOL_POOL/${vm_name},cache=none" \
         $network_string \
         --import \
-        $headless \
+        $console_type \
         &
     )
 
