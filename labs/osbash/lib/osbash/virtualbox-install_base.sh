@@ -17,15 +17,15 @@ function vm_install_base {
     vm_mem "$vm_name" "${VM_BASE_MEM:=512}"
 
     if [ -z "${INSTALL_ISO-}" ]; then
-        local iso_name=$(get_iso_name)
 
-        if [  -z "$iso_name" ]; then
+        if [  -z "$ISO_URL" ]; then
             echo -e >&2 "${CMissing:-}Either ISO URL or name needed (ISO_URL, INSTALL_ISO).${CReset:-}"
             exit 1
         fi
-        INSTALL_ISO=$ISO_DIR/$iso_name
         # Don't look for ISO image if we are only doing wbatch
-        ${OSBASH:-:} find_install-iso "$iso_name"
+        ${OSBASH:-:} find_install-iso
+
+        INSTALL_ISO=$ISO_DIR/$(get_iso_name)
     fi
 
     echo >&2 -e "${CInfo:-}Install ISO:\n\t${CData:-}$INSTALL_ISO${CReset:-}"

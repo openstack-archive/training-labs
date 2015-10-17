@@ -438,8 +438,8 @@ function download {
         fi
     fi
     if [ $rc -ne 0 ]; then
-        echo -e >&2 "${CError:-}Unable to download ${CData:-}$url${CError:-}, quitting.${CReset:-}"
-        exit 1
+        echo -e >&2 "${CError:-}Unable to download ${CData:-}$url${CError:-}.${CReset:-}"
+        return 1
     fi
 }
 
@@ -447,11 +447,34 @@ function get_iso_name {
     basename "${ISO_URL:-}"
 }
 
-function find_install-iso {
-    local iso_name=$1
+# If ISO image is missing from IMG_DIR, try downloading it.
+function download_iso_if_necessary {
+    local iso_name=$(get_iso_name)
     if [ ! -f "$ISO_DIR/$iso_name" ]; then
-        echo >&2 "$iso_name not in $ISO_DIR; downloading"
-        download "$ISO_URL" "$ISO_DIR" "$iso_name"
+        echo >&2 "$iso_name not in $ISO_DIR; downloading."
+        if ! download "$ISO_URL" "$ISO_DIR" "$iso_name"; then
+            echo -e >&2 "${CError:-}Download failed.${CReset:-}"
+            # Remove empty file
+            rm "$ISO_DIR/$iso_name"
+            return 1
+        fi
+    else
+        echo >&2 "$iso_name already in $ISO_DIR."
+    fi
+}
+
+# Get ISO image for installation. If the download fails, get an alternative URL
+# and try again.
+function find_install-iso {
+    if ! download_iso_if_necessary; then
+        # No local ISO file and download failed
+        echo -e >&2 "${CStatus:-}Trying to find alternative.${CReset:-}"
+        update_iso_variables
+
+        if ! download_iso_if_necessary; then
+            echo -e >&2 "${CError:-}Exiting.${CReset:-}"
+            exit 1
+        fi
     fi
 }
 

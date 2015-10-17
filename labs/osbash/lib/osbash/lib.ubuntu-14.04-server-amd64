@@ -7,8 +7,10 @@
 # Booting the operating system installer
 #-------------------------------------------------------------------------------
 
-readonly ISO_URL=http://releases.ubuntu.com/14.04/ubuntu-14.04.3-server-amd64.iso
-readonly ISO_MD5=9e5fecc94b3925bededed0fdca1bd417
+readonly ISO_URL_BASE=http://releases.ubuntu.com/14.04/
+
+ISO_URL=$ISO_URL_BASE/ubuntu-14.04.3-server-amd64.iso
+ISO_MD5=9e5fecc94b3925bededed0fdca1bd417
 
 readonly _PS_ssh=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-ssh-v2.cfg
 readonly _PS_vbadd=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-vbadd.cfg
@@ -26,6 +28,26 @@ readonly _BOOT_ARGS="/install/vmlinuz
     keyboard-configuration/modelcode=SKIP
     initrd=/install/initrd.gz
     console-setup/ask_detect=false"
+
+# Fallback function to find current ISO image in case the file in ISO_URL is
+# neither on the disk nor at the configured URL.
+# This mechanism was added because old Ubuntu ISOs are removed from the server
+# as soon as a new ISO appears.
+function update_iso_variables {
+    # Get matching line from distro repo's MD5SUMS file, e.g.
+    # "9e5fecc94b3925bededed0fdca1bd417 *ubuntu-14.04.3-server-amd64.iso"
+    local distro_info=$(wget -O - $ISO_URL_BASE/MD5SUMS|grep server-amd64)
+
+    # First part (removing everything after first space) is the md5sum
+    ISO_MD5=${distro_info%% *}
+
+    # Second part (keeping everything after ' *') is the ISO file name
+    local iso_file=${distro_info#* \*}
+
+    ISO_URL=$ISO_URL_BASE/$iso_file
+
+    echo -e >&2 "${CStatus:-}New ISO_URL: ${CData:-}$ISO_URL${CReset:-}"
+}
 
 function vbox_distro_start_installer {
     local vm_name=$1
