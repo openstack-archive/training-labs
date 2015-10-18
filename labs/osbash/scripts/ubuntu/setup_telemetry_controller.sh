@@ -12,7 +12,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the Telemetry service
-# http://docs.openstack.org/juno/install-guide/install/apt/content/ceilometer-controller-install.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-controller-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for telemetry."
@@ -28,7 +28,7 @@ iniset_sudo_no_section $conf smallfiles true
 echo "Restarting mongodb."
 sudo service mongodb restart
 
-echo "Waiting for mongodb to start."
+echo -n "Waiting for mongodb to start."
 while sudo service mongodb status 2>/dev/null | grep "stop"; do
     sleep 5
     echo -n .
@@ -51,28 +51,27 @@ echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
 echo "Creating ceilometer user and giving it admin role under service tenant."
-keystone user-create \
-    --name "$ceilometer_admin_user" \
-    --pass "$ceilometer_admin_password" \
+openstack user create \
+    --password "$ceilometer_admin_password" \
+    "$ceilometer_admin_user"
 
-keystone user-role-add \
+openstack role add \
+    --project "$SERVICE_PROJECT_NAME" \
     --user "$ceilometer_admin_user" \
-    --tenant "$SERVICE_TENANT_NAME" \
-    --role "$ADMIN_ROLE_NAME"
+    "$ADMIN_ROLE_NAME"
 
 echo "Registering ceilometer with keystone so that other services can locate it."
-keystone service-create \
+openstack service create \
     --name ceilometer \
-    --type metering \
-    --description "Telemetry"
+    --description "Telemetry" \
+    metering
 
-ceilometer_service_id=$(keystone service-list | awk '/ metering / {print $2}')
-keystone endpoint-create \
-    --service-id "$ceilometer_service_id" \
-    --publicurl "http://controller-api:8777" \
-    --internalurl "http://controller-mgmt:8777" \
-    --adminurl "http://controller-mgmt:8777" \
-    --region "$REGION"
+openstack endpoint create \
+    --publicurl http://controller-api:8777 \
+    --internalurl http://controller-mgmt:8777 \
+    --adminurl http://controller-mgmt:8777 \
+    --region "$REGION" \
+    metering
 
 echo "Installing ceilometer."
 sudo apt-get install -y ceilometer-api ceilometer-collector \
@@ -83,11 +82,9 @@ sudo apt-get install -y ceilometer-api ceilometer-collector \
                         python-ceilometerclient
 
 function get_database_url {
-    local db_user=$(service_to_db_user ceilometer)
-    local db_password=$(service_to_db_password ceilometer)
     local database_host=controller-mgmt
 
-    echo "mongodb://$db_user:$db_password@$database_host:27017/ceilometer"
+    echo "mongodb://$mongodb_user:$mongodb_password@$database_host:27017/ceilometer"
 }
 
 database_url=$(get_database_url)
@@ -99,27 +96,30 @@ iniset_sudo $conf database connection "$database_url"
 
 # Configure RabbitMQ variables
 iniset_sudo $conf DEFAULT rpc_backend rabbit
-iniset_sudo $conf DEFAULT rabbit_host controller-mgmt
-iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
+
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller-mgmt
+iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
 
 # Configure the [DEFAULT] section
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
-iniset_sudo $conf keystone_authtoken auth_uri "http://controller-mgmt:5000/v2.0"
-iniset_sudo $conf keystone_authtoken identity_uri "http://controller-mgmt:35357"
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_TENANT_NAME"
+iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000/v2.0
+iniset_sudo $conf keystone_authtoken identity_uri http://controller-mgmt:35357
+iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken admin_user "$ceilometer_admin_user"
 iniset_sudo $conf keystone_authtoken admin_password "$ceilometer_admin_password"
 
-iniset_sudo $conf service_credentials os_auth_url "http://controller-mgmt:5000/v2.0"
+iniset_sudo $conf service_credentials os_auth_url http://controller-mgmt:5000/v2.0
 iniset_sudo $conf service_credentials os_username "$ceilometer_admin_user"
-iniset_sudo $conf service_credentials os_tenant_name "$SERVICE_TENANT_NAME"
+iniset_sudo $conf service_credentials os_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf service_credentials os_password "$ceilometer_admin_password"
+iniset_sudo $conf service_credentials os_endpoint_type internalURL
+iniset_sudo $conf service_credentials os_region_name "$REGION"
 
-iniset_sudo $conf publisher metering_secret "$METERING_SECRET"
+iniset_sudo $conf publisher telemetry_secret "$TELEMETRY_SECRET"
 
 iniset_sudo $conf DEFAULT verbose True
-
 
 echo "Restarting telemetry service."
 sudo service ceilometer-agent-central restart
@@ -131,7 +131,7 @@ sudo service ceilometer-alarm-notifier restart
 
 #------------------------------------------------------------------------------
 # Configure the Image service
-# http://docs.openstack.org/juno/install-guide/install/apt/content/ceilometer-glance.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-glance.html
 #------------------------------------------------------------------------------
 
 # Configure the Image Service to send notifications to the message bus
@@ -142,6 +142,7 @@ conf=/etc/glance/glance-api.conf
 iniset_sudo $conf DEFAULT notification_driver messagingv2
 iniset_sudo $conf DEFAULT rpc_backend rabbit
 iniset_sudo $conf DEFAULT rabbit_host controller-mgmt
+iniset_sudo $conf DEFAULT rabbit_userid openstack
 iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
 
 echo "Configuring glance-registry.conf."
@@ -150,6 +151,7 @@ conf=/etc/glance/glance-registry.conf
 iniset_sudo $conf DEFAULT notification_driver messagingv2
 iniset_sudo $conf DEFAULT rpc_backend rabbit
 iniset_sudo $conf DEFAULT rabbit_host controller-mgmt
+iniset_sudo $conf DEFAULT rabbit_userid openstack
 iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
 
 sudo service glance-registry restart
@@ -157,7 +159,7 @@ sudo service glance-api restart
 
 #------------------------------------------------------------------------------
 # Configure the Block Storage service
-# http://docs.openstack.org/juno/install-guide/install/apt/content/ceilometer-cinder.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-cinder.html
 #------------------------------------------------------------------------------
 
 # Configure the Block Storage Service to send notifications to the message bus

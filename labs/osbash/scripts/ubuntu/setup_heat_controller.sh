@@ -11,7 +11,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the Orchestration Service (heat).
-# http://docs.openstack.org/juno/install-guide/install/apt/content/heat-install-controller-node.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/heat-install-controller-node.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for heat."
@@ -27,58 +27,53 @@ heat_admin_password=$(service_to_user_password heat)
 wait_for_keystone
 
 echo "Creating heat user and giving it admin role under service tenant."
-keystone user-create \
-    --name "$heat_admin_user" \
-    --pass "$heat_admin_password" \
+openstack user create \
+    --password "$heat_admin_password" \
+    "$heat_admin_user"
 
-keystone user-role-add \
+openstack role add \
+    --project "$SERVICE_PROJECT_NAME" \
     --user "$heat_admin_user" \
-    --tenant "$SERVICE_TENANT_NAME" \
-    --role "$ADMIN_ROLE_NAME"
+    "$ADMIN_ROLE_NAME"
 
 echo "Creating the heat stack owner role."
-keystone role-create --name "heat_stack_owner"
+openstack role create "heat_stack_owner"
 
-keystone user-role-add \
+openstack role add \
+    --project "$DEMO_PROJECT_NAME" \
     --user "$DEMO_USER_NAME" \
-    --tenant "$DEMO_TENANT_NAME" \
-    --role heat_stack_owner
+    "heat_stack_owner"
 
 echo "Creating the heat stack user role."
-keystone role-create --name "heat_stack_user"
+openstack role create "heat_stack_user"
 
-echo "Registering heat with keystone so that other services can locate it."
-keystone service-create \
+echo "Creating the heat and heat-cfn service entities."
+openstack service create \
     --name heat \
-    --type orchestration \
-    --description "Orchestration"
+    --description "Orchestration" \
+    orchestration
 
-keystone service-create \
+openstack service create \
     --name heat-cfn \
-    --type cloudformation \
-    --description "Orchestration"
+    --description "Orchestration" \
+    cloudformation
 
-
-heat_service_id=$(keystone service-list | awk '/ orchestration / {print $2}')
-keystone endpoint-create \
-    --service-id "$heat_service_id" \
+openstack endpoint create \
     --publicurl "http://controller-api:8004/v1/%(tenant_id)s" \
     --internalurl "http://controller-mgmt:8004/v1/%(tenant_id)s" \
     --adminurl "http://controller-mgmt:8004/v1/%(tenant_id)s" \
-    --region "$REGION"
+    --region "$REGION" \
+    orchestration
 
-heatcfn_service_id=$(keystone service-list | awk '/ cloudformation / {print $2}')
-keystone endpoint-create \
-    --service-id "$heatcfn_service_id" \
+openstack endpoint create \
     --publicurl "http://controller-api:8000/v1" \
     --internalurl "http://controller-mgmt:8000/v1" \
     --adminurl "http://controller-mgmt:8000/v1" \
-    --region "$REGION"
-
+    --region "$REGION" \
+    cloudformation
 
 echo "Installing heat."
-sudo apt-get install -y heat-api heat-api-cfn heat-engine \
-    python-heatclient
+sudo apt-get install -y heat-api heat-api-cfn heat-engine python-heatclient
 
 function get_database_url {
     local db_user=$(service_to_db_user heat)
@@ -99,19 +94,30 @@ echo "Configuring [DEFAULT] section in /etc/heat/heat.conf."
 
 iniset_sudo $conf DEFAULT rpc_backend rabbit
 iniset_sudo $conf DEFAULT rabbit_host controller-mgmt
+iniset_sudo $conf DEFAULT rabbit_userid openstack
 iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
 
-
-iniset_sudo $conf keystone_authtoken auth_uri "http://controller-mgmt:5000/v2.0"
-iniset_sudo $conf keystone_authtoken identity_uri "http://controller-mgmt:35357"
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_TENANT_NAME"
+iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000/v2.0
+iniset_sudo $conf keystone_authtoken identity_uri http://controller-mgmt:35357
+iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken admin_user "$heat_admin_user"
 iniset_sudo $conf keystone_authtoken admin_password "$heat_admin_password"
-iniset_sudo $conf ec2authtoken auth_uri "http://controller-mgmt:5000/v2.0"
-iniset_sudo $conf DEFAULT heat_metadata_server_url "http://controller-mgmt:8000"
-iniset_sudo $conf DEFAULT heat_waitcondition_server_url "http://controller-mgmt:8000/v1/waitcondition"
+
+iniset_sudo $conf ec2authtoken auth_uri http://controller-mgmt:5000/v2.0
+
+iniset_sudo $conf DEFAULT heat_metadata_server_url http://controller-mgmt:8000
+iniset_sudo $conf DEFAULT heat_waitcondition_server_url http://controller-mgmt:8000/v1/waitcondition
+
+iniset_sudo $conf DEFAULT stack_domain_admin heat_domain_admin
+iniset_sudo $conf DEFAULT stack_domain_admin_password "$HEAT_DOMAIN_PASS"
+iniset_sudo $conf DEFAULT stack_user_domain_name heat_user_domain
+
 iniset_sudo $conf DEFAULT verbose True
 
+heat-keystone-setup-domain \
+    --stack-user-domain-name heat_user_domain \
+    --stack-domain-admin heat_domain_admin \
+    --stack-domain-admin-password "$HEAT_DOMAIN_PASS"
 
 echo "Creating the database tables for heat."
 sudo heat-manage db_sync
@@ -120,6 +126,11 @@ echo "Restarting heat service."
 sudo service heat-api restart
 sudo service heat-api-cfn restart
 sudo service heat-engine restart
+
+echo "Waiting for heat stack-list."
+until heat stack-list; do
+    sleep 1
+done
 
 echo "Removing default SQLite database."
 sudo rm -f /var/lib/heat/heat.sqlite

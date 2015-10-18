@@ -13,20 +13,25 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up keystone for controller node
-# http://docs.openstack.org/juno/install-guide/install/apt/content/keystone-install.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for keystone."
 setup_database keystone
 
-# Create a "shared secret" used as OS_SERVICE_TOKEN, together with
-# OS_SERVICE_ENDPOINT, before keystone can be used for authentication
+# Create a "shared secret" used as OS_TOKEN, together with OS_URL, before
+# keystone can be used for authentication
 echo -n "Using openssl to generate a random admin token: "
 ADMIN_TOKEN=$(openssl rand -hex 10)
 echo "$ADMIN_TOKEN"
 
+
+echo "Disabling the keystone service from starting automatically after installation."
+echo "manual" | sudo tee /etc/init/keystone.override
+
 echo "Installing keystone."
-sudo apt-get install -y keystone python-keystoneclient
+sudo apt-get install -y keystone python-openstackclient apache2 \
+    libapache2-mod-wsgi memcached python-memcache
 
 conf=/etc/keystone/keystone.conf
 echo "Configuring [DEFAULT] section in $conf."
@@ -49,9 +54,16 @@ echo "Configuring [database] section in /etc/keystone/keystone.conf."
 echo "Setting database connection: $database_url."
 iniset_sudo $conf database connection "$database_url"
 
+
+echo "Configuring the Memcache service."
+iniset_sudo $conf memcache servers localhost:11211
+
 echo "Configuring the UUID token provider and SQL driver."
 iniset_sudo $conf token provider keystone.token.providers.uuid.Provider
-iniset_sudo $conf token driver keystone.token.persistence.backends.sql.Token
+iniset_sudo $conf token driver keystone.token.persistence.backends.memcache.Token
+
+echo "Configuring the SQL revocation driver."
+iniset_sudo $conf revoke driver keystone.contrib.revoke.backends.sql.Revoke
 
 echo "Enabling verbose logging."
 iniset_sudo $conf DEFAULT verbose True
@@ -59,110 +71,235 @@ iniset_sudo $conf DEFAULT verbose True
 echo "Creating the database tables for keystone."
 sudo keystone-manage db_sync
 
-echo "Restarting keystone."
-sudo service keystone restart
+# Configure Apache HTTP server.
+
+echo "Configuring ServerName option in /etc/apache2/apache2.conf to reference controller node."
+echo "ServerName controller-mgmt" | sudo tee -a /etc/apache2/apache2.conf
+
+echo "Creating /etc/apache2/sites-available/wsgi-keystone.conf."
+cat << WSGI | sudo tee -a /etc/apache2/sites-available/wsgi-keystone.conf
+Listen 5000
+Listen 35357
+
+<VirtualHost *:5000>
+    WSGIDaemonProcess keystone-public processes=5 threads=1 user=keystone display-name=%{GROUP}
+    WSGIProcessGroup keystone-public
+    WSGIScriptAlias / /var/www/cgi-bin/keystone/main
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
+    <IfVersion >= 2.4>
+      ErrorLogFormat "%{cu}t %M"
+    </IfVersion>
+    LogLevel info
+    ErrorLog /var/log/apache2/keystone-error.log
+    CustomLog /var/log/apache2/keystone-access.log combined
+</VirtualHost>
+
+<VirtualHost *:35357>
+    WSGIDaemonProcess keystone-admin processes=5 threads=1 user=keystone display-name=%{GROUP}
+    WSGIProcessGroup keystone-admin
+    WSGIScriptAlias / /var/www/cgi-bin/keystone/admin
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
+    <IfVersion >= 2.4>
+      ErrorLogFormat "%{cu}t %M"
+    </IfVersion>
+    LogLevel info
+    ErrorLog /var/log/apache2/keystone-error.log
+    CustomLog /var/log/apache2/keystone-access.log combined
+</VirtualHost>
+WSGI
+
+echo "Enabling the identity service virtual hosts."
+sudo ln -s /etc/apache2/sites-available/wsgi-keystone.conf /etc/apache2/sites-enabled
+
+echo "Creating the directory structure for WSGI components."
+sudo mkdir -p /var/www/cgi-bin/keystone
+
+echo "Copying WSGI component from upstream repository."
+# Note: Since we have offline installation, use pre-cached files.
+cat "$HOME/keystone.py" | sudo tee /var/www/cgi-bin/keystone/main /var/www/cgi-bin/keystone/admin
+
+echo "Adjusting ownership and permissions."
+sudo chown -R keystone:keystone /var/www/cgi-bin/keystone
+sudo chmod 755 /var/www/cgi-bin/keystone/*
+
+echo "Restarting apache."
+sudo service apache2 restart
 
 echo "Removing default SQLite database."
 sudo rm -f /var/lib/keystone/keystone.db
 
-if ! sudo crontab -l -u keystone 2>&1 | grep token_flush; then
-    # No existing crontab entry for token_flush -- add one now.
-    echo "Adding crontab entry to purge expired tokens:"
-    cat << CRON | sudo tee -a /var/spool/cron/crontabs/keystone
-# Purges expired tokens every hour and logs the output
-@hourly /usr/bin/keystone-manage token_flush >/var/log/keystone/keystone-tokenflush.log 2>&1
-CRON
-    echo "---------------------------------------------"
-fi
+sudo rm "$HOME/keystone.py"
+
+#------------------------------------------------------------------------------
+# Configure keystone services and API endpoints
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-services.html
+#------------------------------------------------------------------------------
+
+echo "Using OS_TOKEN, OS_URL for authentication."
+export OS_TOKEN=$ADMIN_TOKEN
+export OS_URL=http://controller-mgmt:35357/v2.0
+
+echo "Creating keystone service."
+openstack service create \
+    --name keystone \
+    --description "OpenStack Identity" \
+    identity
+
+echo "Creating endpoints for keystone."
+openstack endpoint create \
+    --publicurl http://controller-mgmt:5000/v2.0 \
+    --internalurl http://controller-mgmt:5000/v2.0 \
+    --adminurl http://controller-mgmt:35357/v2.0 \
+    --region "$REGION" \
+    identity
 
 #------------------------------------------------------------------------------
 # Configure keystone users, tenants and roles
-# http://docs.openstack.org/juno/install-guide/install/apt/content/keystone-users.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-users.html
 #------------------------------------------------------------------------------
-
-echo "Using OS_SERVICE_TOKEN, OS_SERVICE_ENDPOINT for authentication."
-export OS_SERVICE_TOKEN=$ADMIN_TOKEN
-export OS_SERVICE_ENDPOINT="http://controller-mgmt:35357/v2.0"
 
 # Wait for keystone to come up
 wait_for_keystone
 
-echo "Adding admin tenant."
-keystone tenant-create --name "$ADMIN_TENANT_NAME" --description "Admin Tenant"
+echo "Creating admin project."
+openstack project create \
+    --description "Admin Project" \
+    "$ADMIN_PROJECT_NAME"
 
 echo "Creating admin user."
-keystone user-create \
-    --name "$ADMIN_USER_NAME" \
-    --pass "$ADMIN_PASSWORD" \
-    --email "admin@$MAIL_DOMAIN"
+openstack user create \
+    --password "$ADMIN_PASSWORD" \
+    "$ADMIN_USER_NAME"
 
 echo "Creating admin role."
-keystone role-create --name "$ADMIN_ROLE_NAME"
+openstack role create "$ADMIN_ROLE_NAME"
 
-echo "Linking admin user, admin role and admin tenant."
-keystone user-role-add \
+echo "Adding admin role to admin project."
+openstack role add \
+    --project "$ADMIN_PROJECT_NAME" \
     --user "$ADMIN_USER_NAME" \
-    --tenant "$ADMIN_TENANT_NAME" \
-    --role "$ADMIN_ROLE_NAME"
+    "$ADMIN_ROLE_NAME"
 
-echo "Creating demo tenant."
-keystone tenant-create --name "$DEMO_TENANT_NAME" --description "Demo Tenant"
+echo "Creating service project."
+openstack project create \
+    --description "Service Project" \
+    "$SERVICE_PROJECT_NAME"
+
+echo "Creating demo project."
+openstack project create \
+    --description "Demo Project" \
+    "$DEMO_PROJECT_NAME"
 
 echo "Creating demo user."
-# Using the --tenant option automatically assigns the _member_ role to a user.
-# This option will also create the _member_ role if it does not exist.
-keystone user-create \
-    --name "$DEMO_USER_NAME" \
-    --tenant "$DEMO_TENANT_NAME" \
-    --pass "$DEMO_PASSWORD" \
-    --email "demo@$MAIL_DOMAIN"
+openstack user create \
+    --password "$DEMO_PASSWORD" \
+    "$DEMO_USER_NAME"
 
-echo "Adding service tenant."
-keystone tenant-create \
-    --name "$SERVICE_TENANT_NAME" \
-    --description "Service Tenant"
+echo "Creating the user role."
+openstack role create \
+    "$USER_ROLE_NAME"
 
-#------------------------------------------------------------------------------
-# Configure keystone services and API endpoints
-# http://docs.openstack.org/juno/install-guide/install/apt/content/keystone-services.html
-#------------------------------------------------------------------------------
-
-echo "Creating keystone service."
-keystone service-create \
-    --name keystone \
-    --type identity \
-    --description 'OpenStack Identity'
-
-echo "Creating endpoints for keystone."
-keystone_service_id=$(keystone service-list | awk '/ keystone / {print $2}')
-keystone endpoint-create \
-    --service-id "$keystone_service_id" \
-    --publicurl "http://controller-api:5000/v2.0" \
-    --internalurl "http://controller-mgmt:5000/v2.0" \
-    --adminurl "http://controller-mgmt:35357/v2.0" \
-    --region "$REGION"
+echo "Linking user role to demo project and user."
+openstack role add \
+    --project "$DEMO_PROJECT_NAME" \
+    --user "$DEMO_USER_NAME" \
+    "$USER_ROLE_NAME"
 
 #------------------------------------------------------------------------------
 # Verify the Identity Service installation
-# http://docs.openstack.org/icehouse/install-guide/install/apt/content/keystone-verify.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying keystone installation."
 
+# Disable temporary authentication token mechanism
+conf=/etc/keystone/keystone-paste.ini
+
+for section in pipeline:public_api pipeline:admin_api pipeline:api_v3; do
+    if ini_has_option_sudo $conf $section admin_token_auth; then
+        echo "Disabling admin_token_auth in section $section."
+        inicomment_sudo $conf $section admin_token_auth
+    fi
+done
+
 # From this point on, we are going to use keystone for authentication
-unset OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
+unset OS_TOKEN OS_URL
 
-# Load keystone credentials
-source "$CONFIG_DIR/admin-openstackrc.sh"
+echo "Requesting an authentication token."
+openstack \
+    --os-auth-url http://controller:35357 \
+    --os-project-name "$ADMIN_PROJECT_NAME" \
+    --os-username "$ADMIN_USER_NAME" \
+    --os-auth-type password \
+    --os-password "$ADMIN_PASSWORD" \
+    token issue
 
-# The output of the following commands can be used to verify or debug the
-# service.
+echo "Requesting an authentication token using the version 3 API."
+openstack \
+    --os-auth-url http://controller:35357 \
+    --os-project-domain-id default \
+    --os-user-domain-id default \
+    --os-project-name "$ADMIN_PROJECT_NAME" \
+    --os-username "$ADMIN_USER_NAME" \
+    --os-auth-type password \
+    --os-password "$ADMIN_PASSWORD" \
+      token issue
 
-echo "keystone token-get"
-keystone token-get
+echo "Requesting project list."
+openstack \
+    --os-auth-url http://controller:35357 \
+    --os-project-name "$ADMIN_PROJECT_NAME" \
+    --os-username "$ADMIN_USER_NAME" \
+    --os-auth-type password \
+    --os-password "$ADMIN_PASSWORD" \
+    project list
 
-echo "keystone user-list"
-keystone user-list
+echo "Requesting user list."
+openstack \
+    --os-auth-url http://controller:35357 \
+    --os-project-name "$ADMIN_PROJECT_NAME" \
+    --os-username "$ADMIN_USER_NAME" \
+    --os-auth-type password \
+    --os-password "$ADMIN_PASSWORD" \
+    user list
 
-echo "keystone user-role-list --user $ADMIN_USER_NAME --tenant $ADMIN_TENANT_NAME"
-keystone user-role-list --user "$ADMIN_USER_NAME" --tenant "$ADMIN_TENANT_NAME"
+echo "Requesting role list."
+openstack \
+    --os-auth-url http://controller:35357 \
+    --os-project-name "$ADMIN_PROJECT_NAME" \
+    --os-username "$ADMIN_USER_NAME" \
+    --os-auth-type password \
+    --os-password "$ADMIN_PASSWORD" \
+    role list
+
+echo "Requesting an authentication token for the demo user."
+openstack \
+    --os-auth-url http://controller:5000 \
+    --os-project-domain-id default \
+    --os-user-domain-id default \
+    --os-project-name "$DEMO_PROJECT_NAME" \
+    --os-username "$DEMO_USER_NAME" \
+    --os-auth-type password \
+    --os-password "$DEMO_PASSWORD" \
+    token issue
+
+echo "Verifying that an admin-only request by the demo user is denied."
+openstack \
+    --os-auth-url http://controller:5000 \
+    --os-project-domain-id default \
+    --os-user-domain-id default \
+    --os-project-name "$DEMO_PROJECT_NAME" \
+    --os-username "$DEMO_USER_NAME" \
+    --os-auth-type password \
+    --os-password "$DEMO_PASSWORD" \
+    user list || rc=$?
+
+echo rc=$rc
+if [ $rc -eq 0 ]; then
+    echo "The request was not denied. This is an error. Exiting."
+    exit 1
+else
+    echo "The request was correctly denied."
+fi

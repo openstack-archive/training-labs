@@ -32,8 +32,10 @@ cmd queue config_external_network.sh
 cmd queue config_tenant_network.sh
 cmd snapshot_cycle -n controller openstack_networks_configured
 
-cmd queue ubuntu/setup_lbaas_controller.sh
-cmd snapshot_cycle -n controller lbaas-controller_installed
+# FIXME Our LBaaS support for kilo is broken; the configuration edits
+#       in setup_lbaas_controller.sh break neutron
+#cmd queue ubuntu/setup_lbaas_controller.sh
+#cmd snapshot_cycle -n controller lbaas-controller_installed
 
 # Telemetry service is disabled for the time being as it overloads
 # the cluster. For enabling the same, please uncomment the following.
@@ -87,8 +89,9 @@ cmd snapshot_cycle -n network network_node_init
 cmd queue ubuntu/setup_neutron_network.sh
 cmd snapshot_cycle -n network neutron_configured
 
-cmd queue ubuntu/setup_lbaas_network.sh
-cmd snapshot_cycle -n network lbaas-network_installed
+# FIXME Our LBaaS support for kilo is broken
+#cmd queue ubuntu/setup_lbaas_network.sh
+#cmd snapshot_cycle -n network lbaas-network_installed
 
 cmd queue ubuntu/setup_heat_network.sh
 cmd snapshot_cycle -n network heat_network_installed

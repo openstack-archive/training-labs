@@ -9,12 +9,11 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Dashboard (horizon)
-# http://docs.openstack.org/juno/install-guide/install/apt/content/install_dashboard.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/install_dashboard.html
 #------------------------------------------------------------------------------
 
 echo "Installing horizon."
-sudo apt-get install -y openstack-dashboard apache2 libapache2-mod-wsgi \
-    memcached python-memcache
+sudo apt-get install -y openstack-dashboard
 
 echo "Purging Ubuntu theme."
 sudo dpkg --purge openstack-dashboard-ubuntu-theme
@@ -71,4 +70,4 @@ function check_apache_service {
 echo "Reloading apache and memcached service."
 sudo service apache2 stop
 check_apache_service
-sudo service memcached restart
+sudo service apache2 start

@@ -11,7 +11,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Compute (nova) for compute node.
-# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html#nova-compute-install
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_nova.html#nova-compute-install
 #------------------------------------------------------------------------------
 
 echo "Installing nova for compute node."
@@ -23,10 +23,13 @@ echo "Configuring nova for compute node."
 conf=/etc/nova/nova.conf
 echo "Configuring $conf."
 
-# Configure RabbitMQ variables
+# Configure Default section
 iniset_sudo $conf DEFAULT rpc_backend rabbit
-iniset_sudo $conf DEFAULT rabbit_host controller-mgmt
-iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
+
+# Configure oslo_messaging_rabbit
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller-mgmt
+iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
 
 # Configuring [DEFAULT] section
 iniset_sudo $conf DEFAULT auth_strategy keystone
@@ -35,11 +38,14 @@ nova_admin_user=$(service_to_user_name nova)
 nova_admin_password=$(service_to_user_password nova)
 
 # Configure [keystone_authtoken] section
-iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000/v2.0
-iniset_sudo $conf keystone_authtoken identity_uri http://controller-mgmt:35357
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_TENANT_NAME"
-iniset_sudo $conf keystone_authtoken admin_user "$nova_admin_user"
-iniset_sudo $conf keystone_authtoken admin_password "$nova_admin_password"
+iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000
+iniset_sudo $conf keystone_authtoken auth_url http://controller-mgmt:35357
+iniset_sudo $conf keystone_authtoken auth_plugin password
+iniset_sudo $conf keystone_authtoken project_domain_id default
+iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf keystone_authtoken username "$nova_admin_user"
+iniset_sudo $conf keystone_authtoken password "$nova_admin_password"
 
 iniset_sudo $conf DEFAULT my_ip "$(hostname_to_ip compute-mgmt)"
 
@@ -50,6 +56,8 @@ iniset_sudo $conf DEFAULT novncproxy_base_url http://"$(hostname_to_ip controlle
 
 iniset_sudo $conf glance host controller-mgmt
 
+iniset_sudo $conf glance oslo_concurrency /var/lib/nova/tmp
+
 iniset_sudo $conf DEFAULT verbose True
 
 # Configure nova-compute.conf
@@ -57,6 +65,7 @@ conf=/etc/nova/nova-compute.conf
 echo -n "Hardware acceleration for virtualization: "
 if sudo egrep -q '(vmx|svm)' /proc/cpuinfo; then
     echo "available."
+    iniset_sudo $conf libvirt virt_type kvm
 else
     echo "not available."
     iniset_sudo $conf libvirt virt_type qemu

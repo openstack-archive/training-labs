@@ -9,7 +9,16 @@ CONFIG_DIR=$(dirname "$BASH_SOURCE")
 source "$CONFIG_DIR/openstack"
 source "$CONFIG_DIR/credentials"
 
+#------------------------------------------------------------------------------
+# OpenStack client environment scripts
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-client-environment-scripts.html
+#------------------------------------------------------------------------------
+
+export OS_PROJECT_DOMAIN_ID=default
+export OS_USER_DOMAIN_ID=default
+export OS_PROJECT_NAME=$DEMO_PROJECT_NAME
+export OS_TENANT_NAME=$DEMO_PROJECT_NAME
 export OS_USERNAME=$DEMO_USER_NAME
 export OS_PASSWORD=$DEMO_PASSWORD
-export OS_TENANT_NAME=$DEMO_TENANT_NAME
-export OS_AUTH_URL="http://controller-mgmt:5000/v2.0"
+export OS_AUTH_URL=http://controller-mgmt:5000/v3
+export OS_REGION_NAME=$REGION
