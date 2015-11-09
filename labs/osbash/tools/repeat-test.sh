@@ -23,12 +23,13 @@ function usage {
     echo "-h        Help"
     echo "-c        Restore node VMs to current snapshot for each test"
     echo "-t SNAP   Restore cluster to target snapshot for each test"
+    echo "-r REP    Number of repetitions (default: endless loop)"
     echo "-s NODES  Start each named node VM after restoring the cluster"
     echo "-b        Rebuild cluster for each test, from scratch or snapshot"
     echo "          (osbash.sh -b cluster [...])"
 }
 
-while getopts :bchs:t: opt; do
+while getopts :bchr:s:t: opt; do
     case $opt in
         b)
             REBUILD=yes
@@ -39,6 +40,9 @@ while getopts :bchs:t: opt; do
         h)
             usage
             exit 0
+            ;;
+        r)
+            REP=$OPTARG
             ;;
         s)
             START_VMS=$OPTARG
@@ -73,7 +77,13 @@ shift $(( OPTIND - 1 ));
 
 mkdir -p "$RESULTS_ROOT"
 
-while [ : ]; do
+# Default to repeating forever
+: ${REP:=-1}
+
+cnt=0
+until [ $cnt -eq $REP ]; do
+    cnt=$((cnt + 1))
+
     dir_name=$(get_next_prefix "$RESULTS_ROOT" "")
     echo "Starting test $dir_name."
     dir=$RESULTS_ROOT/$dir_name
