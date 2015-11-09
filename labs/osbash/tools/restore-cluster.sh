@@ -70,7 +70,7 @@ elif [ -z "${TARGET_SNAPSHOT:-}" -a -z "${CURRENT:-""}" ]; then
     echo "Error: no target snapshot given."
     echo
     usage
-elif [ -n "{$TARGET_SNAPSHOT:-}" -a -n "${CURRENT:-""}" ]; then
+elif [ -n "${TARGET_SNAPSHOT:-}" -a -n "${CURRENT:-""}" ]; then
     echo
     echo "Error: conflicting options: target snapshot name and -c."
     echo
@@ -125,7 +125,7 @@ function restore_named_snapshot {
     vboxmanage snapshot "$vm_name" restore "$snapshot"
 }
 
-if [ -n "$TARGET_SNAPSHOT" ]; then
+if [ -n "${TARGET_SNAPSHOT:-}" ]; then
     set_snapshot_vars "$TARGET_SNAPSHOT"
 fi
 
