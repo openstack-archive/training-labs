@@ -60,8 +60,8 @@ function check_apache_service {
     until service apache2 status | grep 'not running'; do
         sudo service apache2 stop
         sleep 10
-        i ++
-        if [ $i -gt 3]
+        i=$((i + 1))
+        if [ $i -gt 3 ]
         then
             break
         fi
