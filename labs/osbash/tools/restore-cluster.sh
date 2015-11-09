@@ -25,6 +25,11 @@ function usage {
 
 function list_snapshots {
     for vm_name in $VM_LIST; do
+        if ! vm_exists "$vm_name"; then
+            echo "VM $vm_name does not exist. Skipping..."
+            continue
+        fi
+
         echo -e "Snapshot list for $vm_name node:"
         vboxmanage snapshot "$vm_name" list
         echo
@@ -130,6 +135,11 @@ if [ -n "${TARGET_SNAPSHOT:-}" ]; then
 fi
 
 for vm_name in $VM_LIST; do
+    if ! vm_exists "$vm_name"; then
+        echo "VM $vm_name does not exist. Skipping..."
+        continue
+    fi
+
     vm_power_off "$vm_name"
     vm_wait_for_shutdown "$vm_name"
 
