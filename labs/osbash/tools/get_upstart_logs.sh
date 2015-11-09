@@ -28,11 +28,13 @@ for node in controller network compute; do
     node_dir=$RESULTS_DIR/$node
     mkdir "$node_dir"
 
+    echo "Getting upstart log files from $node node."
     ssh_env_for_node $node
     vm_ssh "$VM_SSH_PORT" "sudo tar cf - -C /var/log upstart" | tar xf - -C "$node_dir"
     )
 done
 
+echo "Getting test log files from controller node."
 ssh_env_for_node controller
 if vm_ssh "$VM_SSH_PORT" 'ls log/test-*.*' >/dev/null 2>&1; then
     vm_ssh "$VM_SSH_PORT" 'cd log; tar cf - test-*.*' | tar xf - -C "$RESULTS_DIR/controller"
