@@ -694,8 +694,8 @@ function patient_ping {
 
         # Ping the instance VM every ten seconds
         if [[ $((cnt % 10)) -eq 0 ]]; then
-            if ping -c1 "$floating_ip" > /dev/null ; then
-                ping -c1 "$floating_ip"
+            if ping -c1 "$ip" > /dev/null ; then
+                ping -c1 "$ip"
                 echo "SUM ping instance VM after $cnt seconds."
                 break
             fi
