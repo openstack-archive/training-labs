@@ -25,7 +25,7 @@ mkdir -p $STATUS_DIR
 TOP_DIR=/$SHARE_NAME
 
 source "$TOP_DIR/config/paths"
-source "$LIB_DIR/functions.guest"
+source "$LIB_DIR/functions.guest.sh"
 
 exec_logpath "$LOG_DIR/%RCAUTOSTART%.log"
 
