@@ -85,6 +85,7 @@ until [ $cnt -eq $REP ]; do
     cnt=$((cnt + 1))
 
     dir_name=$(get_next_prefix "$RESULTS_ROOT" "")
+    echo "####################################################################"
     echo "Starting test $dir_name."
     dir=$RESULTS_ROOT/$dir_name
     mkdir -p "$dir"
@@ -106,34 +107,39 @@ until [ $cnt -eq $REP ]; do
         fi
     fi
 
+    rc=0
     if [ -n "${REBUILD:-}" ]; then
         if [ -n "${TARGET_SNAPSHOT:-}" ]; then
-            "$TOP_DIR/osbash.sh" -t "$TARGET_SNAPSHOT" -b cluster
+            "$TOP_DIR/osbash.sh" -t "$TARGET_SNAPSHOT" -b cluster || rc=$?
         else
-            "$TOP_DIR/osbash.sh" -b cluster
+            "$TOP_DIR/osbash.sh" -b cluster || rc=$?
         fi
     fi
+    echo "####################################################################"
 
-    echo "Running test. Log file: $dir/$LOG_NAME"
-    rc=0
-    TEST_ONCE=$TOP_DIR/tools/test-once.sh
-    if [ "${VERBOSE:-}" -eq 1 ]; then
-        "$TEST_ONCE" "$TEST_SCRIPT" 2>&1 | tee "$LOG_DIR/$LOG_NAME" || rc=$?
+    if [ $rc -ne 0 ]; then
+        echo "ERROR: Cluster build failed. Skipping test."
     else
-        "$TEST_ONCE" "$TEST_SCRIPT" > "$LOG_DIR/$LOG_NAME" 2>&1 || rc=$?
-    fi
+        echo "Running test. Log file: $LOG_DIR/$LOG_NAME"
+        TEST_ONCE=$TOP_DIR/tools/test-once.sh
+        if [ "${VERBOSE:-}" -eq 1 ]; then
+            "$TEST_ONCE" "$TEST_SCRIPT" 2>&1 | tee "$LOG_DIR/$LOG_NAME" || rc=$?
+        else
+            "$TEST_ONCE" "$TEST_SCRIPT" > "$LOG_DIR/$LOG_NAME" 2>&1 || rc=$?
+        fi
 
-    if [ $rc -eq 0 ]; then
-        echo "Test done."
-    else
-        echo "Failed to run test. Aborting."
-        exit 1
+        echo "################################################################"
+        if [ $rc -eq 0 ]; then
+            echo "Test passed."
+        else
+            echo "ERROR: Test failed."
+        fi
     fi
     )
 
-    echo "Copying osbash log files into $dir."
+    echo "Moving osbash and test log files into $dir."
     # Check if there is at least one file that needs moving
-    if test -n $(shopt -s nullglob; echo *.auto *.log); then
+    if test -n "$(shopt -s nullglob; echo *.auto *.log)"; then
         (
         # Remove glob args (e.g. *.auto) if no matching file exists
         shopt -s nullglob

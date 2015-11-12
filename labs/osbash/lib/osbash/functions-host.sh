@@ -142,8 +142,8 @@ function ssh_exec_script {
         echo >&2
         echo -e "${CError:-}ERROR: ssh returned status ${CData:-}$rc${CError:-} for${CData:-} $remote_path${CReset:-}" |
             tee >&2 -a "$LOG_DIR/error.log"
-        # kill osbash host scripts
-        kill -- -$$
+        touch "$STATUS_DIR/error"
+        return $rc
     fi
 
     echo -en "\n$(date)  done"
@@ -218,7 +218,7 @@ function wait_for_autofiles {
         rm "$STATUS_DIR/done"
     else
         echo -e >&2 "${CError:-}\nERROR occured. Exiting.${CReset:-}"
-        kill -- -$$
+        exit 1
     fi
     echo
 }
