@@ -225,6 +225,14 @@ function setup_database {
     local service=$1
     local db_user=$(service_to_db_user $service)
     local db_password=$(service_to_db_password $service)
+
+    echo -n "Waiting for database server to come up."
+    until mysql_exe quit >/dev/null 2>&1; do
+        sleep 1
+        echo -n .
+    done
+    echo
+
     mysql_exe "CREATE DATABASE $service"
     mysql_exe "GRANT ALL ON ${service}.* TO '$db_user'@'%' IDENTIFIED BY '$db_password';"
     mysql_exe "GRANT ALL ON ${service}.* TO '$db_user'@'localhost' IDENTIFIED BY '$db_password';"
