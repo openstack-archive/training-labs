@@ -515,7 +515,7 @@ function instance_status_is {
 }
 
 while [ : ]; do
-    echo "Launching an instance VM."
+    echo "Launching an instance VM ($VM_LAUNCHES)."
     request_instance > /dev/null
 
     if console_status_409; then
@@ -590,6 +590,11 @@ while [ : ]; do
     elif instance_status_is ACTIVE; then
         echo "Instance VM status: ACTIVE."
         break
+    fi
+
+    if [ $VM_LAUNCHES -eq 10 ]; then
+        echo "SUM ABORT $VM_LAUNCHES launch attempts failed. Giving up."
+        exit 1
     fi
 done
 
