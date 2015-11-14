@@ -343,7 +343,7 @@ nova image-list
 echo -n "Waiting for neutron to start."
 until neutron net-list >/dev/null 2>&1; do
     sleep 1
-    echo .
+    echo -n .
 done
 echo
 
@@ -515,6 +515,7 @@ function instance_status_is {
 }
 
 while [ : ]; do
+    echo "###################################################################"
     echo "Launching an instance VM ($VM_LAUNCHES)."
     request_instance > /dev/null
 
