@@ -99,7 +99,6 @@ function ssh_env_for_node {
     local node=$1
 
     VM_SSH_PORT=$(source "$CONFIG_DIR/config.$node"; echo "$VM_SSH_PORT")
-    wait_for_ssh "$VM_SSH_PORT"
 }
 
 function hostonlyif_in_use {

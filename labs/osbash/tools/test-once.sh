@@ -22,6 +22,7 @@ SCRIPT=$(basename "$SCRIPT_SRC")
 
 # Set VM_SSH_PORT (and wait for node sshd to respond)
 ssh_env_for_node controller
+wait_for_ssh "$VM_SSH_PORT"
 
 function get_remote_top_dir {
     if vm_ssh "$VM_SSH_PORT" "test -d /osbash"; then
