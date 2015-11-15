@@ -779,13 +779,11 @@ function test_internet {
             sleep 1
             ext_ping=$((ext_ping + 1))
         done
+        echo "SUM ping Internet: $ext_ping"
 
         echo
         echo "Testing DNS name resolution within instance VM."
         ssh_no_chk "cirros@$floating_ip" ping -c1 openstack.org
-    fi
-    if [ ${ext_ping:-0} -ne 0 ]; then
-        echo "SUM ERROR ping Internet: ${ext_ping:-0}"
     fi
 }
 
