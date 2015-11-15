@@ -586,6 +586,17 @@ while [ : ]; do
 
     if instance_status_is ERROR; then
         echo "Instance VM status: ERROR"
+
+        if sudo comm -13 /tmp/nova-scheduler.log $NOVA_SCHED_LOG |
+                grep "Filter RetryFilter returned 0 hosts"; then
+            echo "SUM ERROR RetryFilter returned 0 hosts"
+            show_compute_resource_usage
+            echo "Restarting nova-compute on compute node."
+            ssh_no_chk_node compute-mgmt \
+                sudo service nova-compute restart
+            NOVA_COMPUTE_RESTART=$((${NOVA_COMPUTE_RESTART:-0} + 1))
+        fi
+
         echo "Deleting failed instance VM."
         nova delete "$DEMO_INSTANCE_NAME"
     elif instance_status_is ACTIVE; then
