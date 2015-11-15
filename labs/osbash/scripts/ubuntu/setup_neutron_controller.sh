@@ -124,7 +124,7 @@ echo "Configure Compute to use Networking"
 conf=/etc/nova/nova.conf
 iniset_sudo $conf DEFAULT network_api_class nova.network.neutronv2.api.API
 iniset_sudo $conf DEFAULT security_group_api neutron
-iniset_sudo $conf DEFAULT linuxnet_interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
+iniset_sudo $conf DEFAULT linuxnet_interface_driver nova.network.linux_net.LinuxOVSInterfaceDriver
 iniset_sudo $conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 
 iniset_sudo $conf neutron url http://controller-mgmt:9696
