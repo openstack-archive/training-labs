@@ -712,6 +712,7 @@ function patient_ping {
         # Ping the instance VM every ten seconds
         if [[ $((cnt % 10)) -eq 0 ]]; then
             if ping -c1 "$ip" > /dev/null ; then
+                echo
                 ping -c1 "$ip"
                 echo "SUM ping instance VM after $cnt seconds."
                 break
@@ -720,6 +721,7 @@ function patient_ping {
 
         # Abort if it takes too long
         if [[ $cnt -gt 600 ]]; then
+            echo
             echo "SUM ERROR no ping for instance VM in $cnt seconds. Aborting."
             exit 1
         fi
