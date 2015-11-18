@@ -4,7 +4,7 @@
 VM_SSH_PORT=2232
 
 # Last octet of IP addresses
-FOURTH_OCTET=53
+FOURTH_OCTET=31
 
 # Assign network interfaces to networks
 NET_IF_0=nat

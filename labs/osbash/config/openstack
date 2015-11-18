@@ -1,5 +1,7 @@
 # This file contains OpenStack configuration data. It is used by both
 # host (osbash, Windows batch) and VM guest scripts.
+# Follow install guides for more information on the network configuration:
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_basic_environment.html#basics-networking
 
 # one of: icehouse, juno, kilo
 : ${OPENSTACK_RELEASE:=kilo}
@@ -8,22 +10,22 @@
 CIRROS_URL="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 
 # Networks used by OpenStack training-labs setup
-: ${MGMT_NET:=10.10.10.1}
-: ${DATA_NET:=10.20.20.1}
-: ${API_NET:=192.168.100.1}
+: ${MGMT_NET:=10.0.0.1}
+: ${DATA_NET:=10.0.1.1}
+: ${API_NET:=203.0.113.1}
 # FIXME API_NET and EXT_NET should be different networks as soon as our
 #       setup allows it.
-: ${EXT_NET:=192.168.100.1}
+: ${EXT_NET:=203.0.113.1}
 
 # EXT_NET
-: ${FLOATING_IP_START:=192.168.100.101}
-: ${FLOATING_IP_END:=192.168.100.200}
-: ${EXTERNAL_NETWORK_GATEWAY:=192.168.100.1}
-: ${EXTERNAL_NETWORK_CIDR:=192.168.100.0/24}
+: ${FLOATING_IP_START:=203.0.113.101}
+: ${FLOATING_IP_END:=203.0.113.200}
+: ${EXTERNAL_NETWORK_GATEWAY:=203.0.113.1}
+: ${EXTERNAL_NETWORK_CIDR:=203.0.113.0/24}
 
 # DEMO_NET
-: ${TENANT_NETWORK_GATEWAY:=172.16.0.1}
-: ${TENANT_NETWORK_CIDR:=172.16.0.0/24}
+: ${TENANT_NETWORK_GATEWAY:=192.168.1.1}
+: ${TENANT_NETWORK_CIDR:=192.168.1.0/24}
 # Comma-separated list of DNS name servers used by dnsmasq to serve instance
 # VMs in neutron subnets with dns_nameservers unset.
 # Default is Google Public DNS (8.8.8.8); to disable, set to "".
