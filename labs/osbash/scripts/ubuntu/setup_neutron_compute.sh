@@ -11,7 +11,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for compute node.
-# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-compute-node.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-compute-node.html
 #------------------------------------------------------------------------------
 
 echo "Editing /etc/sysctl.conf: disable Reverse Path Forwarding filter."
@@ -19,6 +19,12 @@ cat << SYSCTL | sudo tee -a /etc/sysctl.conf
 # Disable Reverse Path Forwarding filter (RFC 3704)
 net.ipv4.conf.all.rp_filter=0
 net.ipv4.conf.default.rp_filter=0
+
+# XXX NOTE This was added to the install-guide because CentOS needs it. On
+#          Ubuntu it results in an error because the bridge kernel modules
+#          are not loaded at this point.
+#net.bridge.bridge-nf-call-iptables=1
+#net.bridge.bridge-nf-call-ip6tables=1
 SYSCTL
 
 # Reload changed file
@@ -38,18 +44,23 @@ echo "Configuring $conf."
 
 # Configure AMQP parameters
 iniset_sudo $conf DEFAULT rpc_backend rabbit
-iniset_sudo $conf DEFAULT rabbit_host controller-mgmt
-iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
+
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller-mgmt
+iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
 
 # Configuring [DEFAULT] section
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
 # Configuring [keystone_authtoken] section
-iniset_sudo $conf keystone_authtoken auth_uri "http://controller-mgmt:5000/v2.0"
-iniset_sudo $conf keystone_authtoken identity_uri http://controller-mgmt:35357
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_TENANT_NAME"
-iniset_sudo $conf keystone_authtoken admin_user "$neutron_admin_user"
-iniset_sudo $conf keystone_authtoken admin_password "$neutron_admin_password"
+iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000
+iniset_sudo $conf keystone_authtoken auth_url http://controller-mgmt:35357
+iniset_sudo $conf keystone_authtoken auth_plugin password
+iniset_sudo $conf keystone_authtoken project_domain_id default
+iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf keystone_authtoken username "$neutron_admin_user"
+iniset_sudo $conf keystone_authtoken password "$neutron_admin_password"
 
 # Configure network plugin parameters
 iniset_sudo $conf DEFAULT core_plugin ml2
@@ -62,7 +73,7 @@ echo "Configuring the OVS plug-in to use GRE tunneling."
 conf=/etc/neutron/plugins/ml2/ml2_conf.ini
 
 # Under the ml2 section
-iniset_sudo $conf ml2 type_drivers flat,gre
+iniset_sudo $conf ml2 type_drivers flat,vlan,gre,vxlan
 iniset_sudo $conf ml2 tenant_network_types gre
 iniset_sudo $conf ml2 mechanism_drivers openvswitch
 
@@ -94,7 +105,7 @@ iniset_sudo $conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 iniset_sudo $conf neutron url http://controller-mgmt:9696
 iniset_sudo $conf neutron auth_strategy keystone
 iniset_sudo $conf neutron admin_auth_url http://controller-mgmt:35357/v2.0
-iniset_sudo $conf neutron admin_tenant_name "$SERVICE_TENANT_NAME"
+iniset_sudo $conf neutron admin_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf neutron admin_username "$neutron_admin_user"
 iniset_sudo $conf neutron admin_password "$neutron_admin_password"
 

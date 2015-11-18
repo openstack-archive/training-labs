@@ -12,7 +12,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Verify the Orchestration Service installation
-# http://docs.openstack.org/juno/install-guide/install/apt/content/heat-verify.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/heat-verify.html
 #------------------------------------------------------------------------------
 echo "Verifying heat installation."
 

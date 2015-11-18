@@ -10,7 +10,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Create tenant network
-# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron_initial-tenant-network.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron_initial-tenant-network.html
 #------------------------------------------------------------------------------
 
 echo "Sourcing the demo credentials."
@@ -26,9 +26,9 @@ neutron net-create demo-net
 
 echo "Creating a subnet on the tenant network."
 neutron subnet-create demo-net \
+    "$TENANT_NETWORK_CIDR" \
     --name demo-subnet \
-    --gateway "$TENANT_NETWORK_GATEWAY" \
-    "$TENANT_NETWORK_CIDR"
+    --gateway "$TENANT_NETWORK_GATEWAY"
 
 echo "Creating a router on the tenant network."
 neutron router-create demo-router

@@ -10,7 +10,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install Compute controller services
-# http://docs.openstack.org/juno/install-guide/install/apt/content/ch_nova.html#nova-controller-install
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_nova.html#nova-controller-install
 #------------------------------------------------------------------------------
 
 echo "Setting up database for nova."
@@ -25,33 +25,33 @@ nova_admin_password=$(service_to_user_password nova)
 # Wait for keystone to come up
 wait_for_keystone
 
-echo "Creating nova user and giving it admin role under service tenant."
-keystone user-create \
-    --name "$nova_admin_user" \
-    --pass "$nova_admin_password"
+echo "Creating nova user and giving it the admin role."
+openstack user create \
+    --password "$nova_admin_password" \
+    "$nova_admin_user"
 
-keystone user-role-add \
+openstack role add \
+    --project "$SERVICE_PROJECT_NAME" \
     --user "$nova_admin_user" \
-    --tenant "$SERVICE_TENANT_NAME" \
-    --role "$ADMIN_ROLE_NAME"
+    "$ADMIN_ROLE_NAME"
 
-echo "Registering nova with keystone so that other services can locate it."
-keystone service-create \
+echo "Creating the nova service entity."
+openstack service create \
     --name nova \
-    --type compute \
-    --description "OpenStack Compute"
+    --description "OpenStack Compute" \
+    compute
 
-nova_service_id=$(keystone service-list | awk '/ compute / {print $2}')
-keystone endpoint-create \
-    --service-id "$nova_service_id" \
+openstack endpoint create \
     --publicurl 'http://controller-api:8774/v2/%(tenant_id)s' \
     --internalurl 'http://controller-mgmt:8774/v2/%(tenant_id)s' \
     --adminurl 'http://controller-mgmt:8774/v2/%(tenant_id)s' \
-    --region "$REGION"
+    --region "$REGION" \
+    compute
 
 echo "Installing nova for controller node."
-sudo apt-get install -y nova-api nova-cert nova-conductor nova-consoleauth \
-                        nova-novncproxy nova-scheduler python-novaclient
+sudo apt-get install -y \
+    nova-api nova-cert nova-conductor nova-consoleauth \
+    nova-novncproxy nova-scheduler python-novaclient
 
 function get_database_url {
     local db_user=$(service_to_db_user nova)
@@ -68,36 +68,53 @@ conf=/etc/nova/nova.conf
 echo "Setting database connection: $database_url."
 iniset_sudo $conf database connection "$database_url"
 
-echo "Configuring [DEFAULT] section in /etc/nova/nova.conf for controller node."
+echo "Configuring nova services."
 
+# Default Section.
 iniset_sudo $conf DEFAULT rpc_backend rabbit
-iniset_sudo $conf DEFAULT rabbit_host controller-mgmt
-iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
+
+# oslo_messaging_rabbit section.
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller-mgmt
+iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
+
 
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
+# Configure keystone_authtoken section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000
-iniset_sudo $conf keystone_authtoken identity_uri http://controller-mgmt:35357
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_TENANT_NAME"
-iniset_sudo $conf keystone_authtoken admin_user "$nova_admin_user"
-iniset_sudo $conf keystone_authtoken admin_password "$nova_admin_password"
+iniset_sudo $conf keystone_authtoken auth_url http://controller-mgmt:35357
+iniset_sudo $conf keystone_authtoken auth_plugin password
+iniset_sudo $conf keystone_authtoken project_domain_id default
+iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf keystone_authtoken username "$nova_admin_user"
+iniset_sudo $conf keystone_authtoken password "$nova_admin_password"
 
+# Default section
 iniset_sudo $conf DEFAULT my_ip "$(hostname_to_ip controller-mgmt)"
 iniset_sudo $conf DEFAULT vncserver_listen controller-mgmt
 iniset_sudo $conf DEFAULT vncserver_proxyclient_address controller-mgmt
 
+# Glance section
 iniset_sudo $conf glance host controller-mgmt
+
+# oslo_concurrency section
+iniset_sudo $conf oslo_concurrency lock_path /var/lib/nova/tmp
+
+# default section
 iniset_sudo $conf DEFAULT verbose True
 
 echo "Creating the database tables for nova."
 sudo nova-manage db sync
 
 echo "Restarting nova services."
-declare -a components=(nova-api nova-cert nova-consoleauth nova-scheduler
-                        nova-conductor nova-novncproxy)
-for component in "${components[@]}"; do
-    echo "Restarting $component"
-    sudo service "$component" restart
+declare -a nova_services=(nova-api nova-cert nova-consoleauth \
+    nova-scheduler nova-conductor nova-novncproxy)
+
+for nova_service in "${nova_services[@]}"; do
+    echo "Restarting $nova_service"
+    sudo service "$nova_service" restart
 done
 
 # Remove SQLite database created by Ubuntu package for nova.
@@ -111,6 +128,12 @@ echo "Verify nova service status."
 # This call needs root privileges for read access to /etc/nova/nova.conf.
 echo "sudo nova-manage service list"
 sudo nova-manage service list
+
+echo "nova service-list"
+nova service-list
+
+echo "nova endpoints"
+nova endpoints
 
 echo "nova image-list"
 nova image-list

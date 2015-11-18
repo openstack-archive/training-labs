@@ -18,6 +18,7 @@ echo "Configuring neutron lbaas for controller node."
 conf=/etc/neutron/neutron.conf
 
 # Configure network plugin parameters
+# FIXME The following line breaks neutron
 iniset_sudo $conf DEFAULT service_plugins "router,lbaas"
 
 echo "Restarting neutron service."

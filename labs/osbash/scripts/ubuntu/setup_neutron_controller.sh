@@ -10,7 +10,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for controller node.
-# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-controller-node.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-controller-node.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for neutron."
@@ -25,31 +25,31 @@ neutron_admin_password=$(service_to_user_password neutron)
 wait_for_keystone
 
 echo "Creating neutron user and giving it admin role under service tenant."
-keystone user-create \
-    --name "$neutron_admin_user" \
-    --pass "$neutron_admin_password"
+openstack user create \
+    --password "$neutron_admin_password" \
+    "$neutron_admin_user"
 
-keystone user-role-add \
+openstack role add \
+    --project "$SERVICE_PROJECT_NAME" \
     --user "$neutron_admin_user" \
-    --tenant "$SERVICE_TENANT_NAME" \
-    --role "$ADMIN_ROLE_NAME"
+    "$ADMIN_ROLE_NAME"
 
 echo "Registering neutron with keystone so that other services can locate it."
-keystone service-create \
+openstack service create \
     --name neutron \
-    --type network \
-    --description "OpenStack Networking"
+    --description "OpenStack Networking" \
+    network
 
-neutron_service_id=$(keystone service-list | awk '/ network / {print $2}')
-keystone endpoint-create \
-    --service-id "$neutron_service_id" \
-    --publicurl "http://controller-mgmt:9696" \
-    --adminurl "http://controller-mgmt:9696" \
-    --internalurl "http://controller-mgmt:9696" \
-    --region "$REGION"
+openstack endpoint create \
+    --publicurl http://controller-api:9696 \
+    --adminurl http://controller-mgmt:9696 \
+    --internalurl http://controller-mgmt:9696 \
+    --region "$REGION" \
+    network
 
 echo "Installing neutron for controller node."
-sudo apt-get install -y neutron-server neutron-plugin-ml2 python-neutronclient
+sudo apt-get install -y \
+    neutron-server neutron-plugin-ml2 python-neutronclient
 
 echo "Configuring neutron for controller node."
 
@@ -69,16 +69,24 @@ iniset_sudo $conf database connection "$database_url"
 
 # Configure AMQP parameters
 iniset_sudo $conf DEFAULT rpc_backend rabbit
-iniset_sudo $conf DEFAULT rabbit_host controller-mgmt
-iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
+
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller-mgmt
+iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
 
 # Configuring [DEFAULT] section
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
 # Configuring [keystone_authtoken] section
-iniset_sudo $conf keystone_authtoken auth_uri "http://controller-mgmt:5000/v2.0"
-iniset_sudo $conf keystone_authtoken identity_uri "http://controller-mgmt:35357"
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_TENANT_NAME"
+iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000
+iniset_sudo $conf keystone_authtoken auth_url http://controller-mgmt:35357
+iniset_sudo $conf keystone_authtoken auth_plugin password
+iniset_sudo $conf keystone_authtoken project_domain_id default
+iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf keystone_authtoken username "$neutron_admin_user"
+iniset_sudo $conf keystone_authtoken password "$neutron_admin_password"
+iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken admin_user "$neutron_admin_user"
 iniset_sudo $conf keystone_authtoken admin_password "$neutron_admin_password"
 
@@ -90,25 +98,26 @@ iniset_sudo $conf DEFAULT allow_overlapping_ips True
 nova_admin_user=$(service_to_user_name nova)
 nova_admin_password=$(service_to_user_password nova)
 
-service_tenant_id=$(keystone tenant-get "$SERVICE_TENANT_NAME" | awk '/ id / {print $4}')
-echo "Service tenant id: $service_tenant_id"
-
 # Configure nova related parameters
 iniset_sudo $conf DEFAULT notify_nova_on_port_status_changes True
 iniset_sudo $conf DEFAULT notify_nova_on_port_data_changes True
 iniset_sudo $conf DEFAULT nova_url http://controller-mgmt:8774/v2
-iniset_sudo $conf DEFAULT nova_admin_auth_url http://controller-mgmt:35357/v2.0
-iniset_sudo $conf DEFAULT nova_region_name "$REGION"
-iniset_sudo $conf DEFAULT nova_admin_username "$nova_admin_user"
-iniset_sudo $conf DEFAULT nova_admin_tenant_id "$service_tenant_id"
-iniset_sudo $conf DEFAULT nova_admin_password "$nova_admin_password"
+
+iniset_sudo $conf nova auth_url http://controller-mgmt:35357
+iniset_sudo $conf nova auth_plugin password
+iniset_sudo $conf nova project_domain_id default
+iniset_sudo $conf nova user_domain_id default
+iniset_sudo $conf nova region_name "$REGION"
+iniset_sudo $conf nova project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf nova username "$nova_admin_user"
+iniset_sudo $conf nova password "$nova_admin_password"
 iniset_sudo $conf DEFAULT verbose True
 
 echo "Configuring the OVS plug-in to use GRE tunneling."
 conf=/etc/neutron/plugins/ml2/ml2_conf.ini
 
 # Edit the [ml2] section.
-iniset_sudo $conf ml2 type_drivers flat,gre
+iniset_sudo $conf ml2 type_drivers flat,vlan,gre,vxlan
 iniset_sudo $conf ml2 tenant_network_types gre
 iniset_sudo $conf ml2 mechanism_drivers openvswitch
 
@@ -130,24 +139,22 @@ iniset_sudo $conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 iniset_sudo $conf neutron url http://controller-mgmt:9696
 iniset_sudo $conf neutron auth_strategy keystone
 iniset_sudo $conf neutron admin_auth_url http://controller-mgmt:35357/v2.0
-iniset_sudo $conf neutron admin_tenant_name "$SERVICE_TENANT_NAME"
+iniset_sudo $conf neutron admin_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf neutron admin_username "$neutron_admin_user"
 iniset_sudo $conf neutron admin_password "$neutron_admin_password"
 
 # service_neutron_metadata_proxy, neutron_metadata_proxy_shared_secret from:
-# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-network-node.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-network-node.html
 iniset_sudo $conf neutron service_metadata_proxy True
 iniset_sudo $conf neutron metadata_proxy_shared_secret "$METADATA_SECRET"
 
 sudo neutron-db-manage \
     --config-file /etc/neutron/neutron.conf \
     --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
-    upgrade juno
+    upgrade head
 
-echo "Restart nova services"
+echo "Restarting nova services."
 sudo service nova-api restart
-sudo service nova-scheduler restart
-sudo service nova-conductor restart
 
 echo "Restarting neutron service."
 sudo service neutron-server restart

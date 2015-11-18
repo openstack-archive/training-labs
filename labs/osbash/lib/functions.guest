@@ -145,9 +145,11 @@ function as_root_exec_script {
 }
 
 #-------------------------------------------------------------------------------
-# Root wrapper around devstack function for manipulating config files
+# Root wrapper around devstack functions for manipulating config files
 #-------------------------------------------------------------------------------
 
+# Set an option in an INI file
+# iniset config-file section option value
 function iniset_sudo {
     local file=$1
     shift
@@ -156,6 +158,29 @@ function iniset_sudo {
     sudo cp -fv "$file" "$tmpfile"
     iniset "$tmpfile" "$@"
     cat "$tmpfile" | sudo tee "$file" >/dev/null
+}
+
+# Comment an option in an INI file
+# inicomment config-file section option
+function inicomment_sudo {
+    local file=$1
+    shift
+    local tmpfile=$(mktemp)
+    # Create a temporary copy, work on it, and copy it back into place
+    sudo cp -fv "$file" "$tmpfile"
+    inicomment "$tmpfile" "$@"
+    cat "$tmpfile" | sudo tee "$file" >/dev/null
+}
+
+# Determinate is the given option present in the INI file
+# ini_has_option config-file section option
+function ini_has_option_sudo {
+    local file=$1
+    shift
+    local tmpfile=$(mktemp)
+    # Create a temporary copy, work on it
+    sudo cp -fv "$file" "$tmpfile"
+    ini_has_option "$tmpfile" "$@"
 }
 
 #-------------------------------------------------------------------------------
@@ -241,7 +266,7 @@ function setup_database {
 # Wait for keystone to come up
 function wait_for_keystone {
     echo -n "Waiting for keystone to come up."
-    until keystone user-list >/dev/null 2>&1; do
+    until openstack user list >/dev/null 2>&1; do
         echo -n .
         sleep 1
     done

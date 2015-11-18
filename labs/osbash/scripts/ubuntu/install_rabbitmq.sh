@@ -15,5 +15,8 @@ indicate_current_auto
 echo "Installing RabbitMQ."
 sudo apt-get install -y rabbitmq-server
 
-echo "Setting RabbitMQ password to '$RABBIT_PASSWORD'."
-sudo rabbitmqctl change_password guest "$RABBIT_PASSWORD"
+echo "Adding openstack user to messaging service."
+sudo rabbitmqctl add_user openstack "$RABBIT_PASSWORD"
+
+echo "Permit configuration, write and read access for the openstack user."
+sudo rabbitmqctl set_permissions openstack ".*" ".*" ".*"

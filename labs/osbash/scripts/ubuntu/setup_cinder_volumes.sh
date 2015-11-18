@@ -12,7 +12,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up Block Storage service (cinder).
-# http://docs.openstack.org/juno/install-guide/install/apt/content/cinder-install-storage-node.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-install-storage-node.html
 #------------------------------------------------------------------------------
 
 # Get FOURTH_OCTET for this node
@@ -20,6 +20,9 @@ source "$CONFIG_DIR/config.$(hostname)"
 
 MY_MGMT_IP=$(get_ip_from_net_and_fourth "MGMT_NET" "$FOURTH_OCTET")
 echo "IP address of this node's interface in management network: $MY_MGMT_IP."
+
+echo "Installing qemu support package for non-raw image types."
+sudo apt-get install -y qemu
 
 echo "Installing the Logical Volume Manager (LVM)."
 sudo apt-get install -y lvm2
@@ -70,23 +73,36 @@ iniset_sudo $conf database connection "$database_url"
 
 # Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT rpc_backend rabbit
-iniset_sudo $conf DEFAULT rabbit_host controller-mgmt
-iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
+
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller-mgmt
+iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
 
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
 # Configure [keystone_authtoken] section.
 cinder_admin_user=$(service_to_user_name cinder)
 cinder_admin_password=$(service_to_user_password cinder)
-iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000/v2.0
-iniset_sudo $conf keystone_authtoken identity_uri http://controller-mgmt:35357
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_TENANT_NAME"
-iniset_sudo $conf keystone_authtoken admin_user "$cinder_admin_user"
-iniset_sudo $conf keystone_authtoken admin_password "$cinder_admin_password"
+iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000
+iniset_sudo $conf keystone_authtoken auth_url http://controller-mgmt:35357
+iniset_sudo $conf keystone_authtoken auth_plugin password
+iniset_sudo $conf keystone_authtoken project_domain_id default
+iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf keystone_authtoken username "$cinder_admin_user"
+iniset_sudo $conf keystone_authtoken password "$cinder_admin_password"
 
 iniset_sudo $conf DEFAULT my_ip "$MY_MGMT_IP"
 
+iniset_sudo $conf lvm volume_driver cinder.volume.drivers.lvm.LVMVolumeDriver
+iniset_sudo $conf lvm volume_group  cinder-volumes
+iniset_sudo $conf lvm iscsi_protocol iscsi
+iniset_sudo $conf lvm iscsi_helper  tgtadm
+
+iniset_sudo $conf DEFAULT enabled_backends lvm
 iniset_sudo $conf DEFAULT glance_host controller-mgmt
+
+iniset_sudo $conf oslo_concurrency lock_path /var/lock/cinder
 
 iniset_sudo $conf DEFAULT verbose True
 
@@ -98,7 +114,7 @@ sudo rm -f /var/lib/cinder/cinder.sqlite
 
 #------------------------------------------------------------------------------
 # Verify the Block Storage installation
-# http://docs.openstack.org/juno/install-guide/install/apt/content/cinder-verify.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying Block Storage installation on controller node."
@@ -153,8 +169,9 @@ AUTH="source $CONFIG_DIR/demo-openstackrc.sh"
 echo "cinder create --display-name demo-volume1 1"
 node_ssh controller-mgmt "$AUTH; cinder create --display-name demo-volume1 1;sleep 20"
 
-echo "check if cinder has the given volume"
+echo -n "Waiting for cinder to list the new volume."
 until node_ssh controller-mgmt "$AUTH; cinder list | grep demo-volume1" > /dev/null 2>&1; do
+    echo -n .
     sleep 1
 done
 

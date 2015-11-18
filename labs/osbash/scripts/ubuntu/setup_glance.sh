@@ -10,7 +10,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the Image Service (glance).
-# http://docs.openstack.org/juno/install-guide/install/apt/content/glance-install.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/glance-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for glance."
@@ -26,28 +26,27 @@ glance_admin_password=$(service_to_user_password glance)
 wait_for_keystone
 
 echo "Creating glance user and giving it admin role under service tenant."
-keystone user-create \
-    --name "$glance_admin_user" \
-    --pass "$glance_admin_password" \
+openstack user create \
+    --password "$glance_admin_password" \
+    "$glance_admin_user"
 
-keystone user-role-add \
+openstack role add \
+    --project "$SERVICE_PROJECT_NAME" \
     --user "$glance_admin_user" \
-    --tenant "$SERVICE_TENANT_NAME" \
-    --role "$ADMIN_ROLE_NAME"
+    "$ADMIN_ROLE_NAME"
 
 echo "Registering glance with keystone so that other services can locate it."
-keystone service-create \
+openstack service create \
     --name glance \
-    --type image \
-    --description "OpenStack Image Service"
+    --description "OpenStack Image Service" \
+    image
 
-glance_service_id=$(keystone service-list | awk '/ image / {print $2}')
-keystone endpoint-create \
-    --service-id "$glance_service_id" \
+openstack endpoint create \
     --publicurl "http://controller-api:9292" \
     --internalurl "http://controller-mgmt:9292" \
     --adminurl "http://controller-mgmt:9292" \
-    --region "$REGION"
+    --region "$REGION" \
+    image
 
 echo "Installing glance."
 sudo apt-get install -y glance python-glanceclient
@@ -65,26 +64,56 @@ echo "Database connection: $database_url."
 
 echo "Configuring glance-api.conf."
 conf=/etc/glance/glance-api.conf
+
+# Database
 iniset_sudo $conf database connection "$database_url"
-iniset_sudo $conf keystone_authtoken auth_uri "http://controller-mgmt:5000/v2.0"
-iniset_sudo $conf keystone_authtoken identity_uri "http://controller-mgmt:35357"
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_TENANT_NAME"
-iniset_sudo $conf keystone_authtoken admin_user "$glance_admin_user"
-iniset_sudo $conf keystone_authtoken admin_password "$glance_admin_password"
+
+# Keystone_authtoken
+iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000
+iniset_sudo $conf keystone_authtoken auth_url http://controller-mgmt:35357
+iniset_sudo $conf keystone_authtoken auth_plugin password
+iniset_sudo $conf keystone_authtoken project_domain_id default
+iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf keystone_authtoken username "$glance_admin_user"
+iniset_sudo $conf keystone_authtoken password "$glance_admin_password"
+
+# Paste_deploy
 iniset_sudo $conf paste_deploy flavor "keystone"
+
+# Glance_store
 iniset_sudo $conf glance_store default_store file
 iniset_sudo $conf glance_store filesystem_store_datadir /var/lib/glance/images/
+
+# Default section
+iniset_sudo $conf DEFAULT notification_driver noop
 iniset_sudo $conf DEFAULT verbose True
 
 echo "Configuring glance-registry.conf."
 conf=/etc/glance/glance-registry.conf
+
+# Database section
 iniset_sudo $conf database connection "$database_url"
-iniset_sudo $conf keystone_authtoken auth_uri "http://controller-mgmt:5000/v2.0"
-iniset_sudo $conf keystone_authtoken identity_uri "http://controller-mgmt:35357"
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_TENANT_NAME"
-iniset_sudo $conf keystone_authtoken admin_user "$glance_admin_user"
-iniset_sudo $conf keystone_authtoken admin_password "$glance_admin_password"
+
+# Keystone authtoken section
+iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000
+iniset_sudo $conf keystone_authtoken auth_url http://controller-mgmt:35357
+iniset_sudo $conf keystone_authtoken auth_plugin password
+iniset_sudo $conf keystone_authtoken project_domain_id default
+iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf keystone_authtoken username "$glance_admin_user"
+iniset_sudo $conf keystone_authtoken password "$glance_admin_password"
+
+# Glance store
+iniset_sudo $conf glance_store default_store file
+iniset_sudo $conf glance_store filesystem_store_datadir /var/lib/glance/images/
+
+# Paste deploy section
 iniset_sudo $conf paste_deploy flavor "keystone"
+
+# Default section
+iniset_sudo $conf DEFAULT notification_driver noop
 iniset_sudo $conf DEFAULT verbose True
 
 echo "Creating the database tables for glance."
@@ -99,7 +128,7 @@ sudo rm -f /var/lib/glance/glance.sqlite
 
 #------------------------------------------------------------------------------
 # Verify the Image Service installation
-# http://docs.openstack.org/juno/install-guide/install/apt/content/glance-verify.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/glance-verify.html
 #------------------------------------------------------------------------------
 
 echo "Waiting for glance to start."
@@ -117,7 +146,8 @@ glance image-create \
     --file "$HOME/img/$(basename $CIRROS_URL)" \
     --disk-format qcow2 \
     --container-format bare \
-    --is-public True
+    --visibility public \
+    --progress
 
 echo "Verifying that the image was successfully added to the service."
 

@@ -11,12 +11,11 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for network node.
-# http://docs.openstack.org/juno/install-guide/install/apt/content/neutron-network-node.html
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-network-node.html
 #------------------------------------------------------------------------------
 
 echo "Editing /etc/sysctl.conf: enable IP forwarding, disable RPF filter."
 cat << SYSCTL | sudo tee -a /etc/sysctl.conf
-# Enable IP forwarding
 net.ipv4.ip_forward=1
 # Disable Reverse Path Forwarding filter (RFC 3704)
 net.ipv4.conf.all.rp_filter=0
@@ -27,8 +26,9 @@ SYSCTL
 sudo sysctl -p
 
 echo "Installing networking components for network node."
-sudo apt-get install -y neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
-    neutron-l3-agent neutron-dhcp-agent
+sudo apt-get install -y \
+    neutron-plugin-ml2 neutron-plugin-openvswitch-agent \
+    neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent
 
 # neutron-l3-agent has just been installed and is about to start. We are also
 # about to change its configuration file which tends to result in the agent
@@ -50,18 +50,23 @@ echo "Configuring $conf."
 
 # Configure AMQP parameters
 iniset_sudo $conf DEFAULT rpc_backend rabbit
-iniset_sudo $conf DEFAULT rabbit_host controller-mgmt
-iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
+
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller-mgmt
+iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
 
 # Configuring [DEFAULT] section
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
 # Configuring [keystone_authtoken] section
-iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000/v2.0
-iniset_sudo $conf keystone_authtoken identity_uri http://controller-mgmt:35357
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_TENANT_NAME"
-iniset_sudo $conf keystone_authtoken admin_user "$neutron_admin_user"
-iniset_sudo $conf keystone_authtoken admin_password "$neutron_admin_password"
+iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000
+iniset_sudo $conf keystone_authtoken auth_url http://controller-mgmt:35357
+iniset_sudo $conf keystone_authtoken auth_plugin password
+iniset_sudo $conf keystone_authtoken project_domain_id default
+iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf keystone_authtoken username "$neutron_admin_user"
+iniset_sudo $conf keystone_authtoken password "$neutron_admin_password"
 
 # Configure network plugin parameters
 iniset_sudo $conf DEFAULT core_plugin ml2
@@ -74,7 +79,7 @@ echo "Configuring the OVS plug-in to use GRE tunneling."
 conf=/etc/neutron/plugins/ml2/ml2_conf.ini
 
 # Under the ml2 section
-iniset_sudo $conf ml2 type_drivers flat,gre
+iniset_sudo $conf ml2 type_drivers flat,vlan,gre,vxlan
 iniset_sudo $conf ml2 tenant_network_types gre
 iniset_sudo $conf ml2 mechanism_drivers openvswitch
 
@@ -90,7 +95,6 @@ iniset_sudo $conf securitygroup firewall_driver neutron.agent.linux.iptables_fir
 
 # Under the ovs section
 iniset_sudo $conf ovs local_ip "$(hostname_to_ip network-data)"
-iniset_sudo $conf ovs enable_tunneling True
 iniset_sudo $conf ovs bridge_mappings external:br-ex
 
 iniset_sudo $conf agent tunnel_types gre
@@ -98,8 +102,9 @@ iniset_sudo $conf agent tunnel_types gre
 echo "Configuring Layer-3 agent."
 conf=/etc/neutron/l3_agent.ini
 iniset_sudo $conf DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
-iniset_sudo $conf DEFAULT use_namespaces True
-iniset_sudo $conf DEFAULT external_network_bridge br-ex
+# The external_network_bridge option intentionally lacks a value to enable
+# multiple external networks on a single agent.
+iniset_sudo $conf DEFAULT external_network_bridge ""
 iniset_sudo $conf DEFAULT router_delete_namespaces True
 iniset_sudo $conf DEFAULT verbose True
 
@@ -107,7 +112,6 @@ echo "Configuring the DHCP agent"
 conf=/etc/neutron/dhcp_agent.ini
 iniset_sudo $conf DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
 iniset_sudo $conf DEFAULT dhcp_driver neutron.agent.linux.dhcp.Dnsmasq
-iniset_sudo $conf DEFAULT use_namespaces True
 iniset_sudo $conf DEFAULT dhcp_delete_namespaces True
 iniset_sudo $conf DEFAULT verbose True
 iniset_sudo $conf DEFAULT dnsmasq_config_file /etc/neutron/dnsmasq-neutron.conf
@@ -137,11 +141,15 @@ sudo killall dnsmasq||rc=$?
 
 echo "Configuring the metadata agent"
 conf=/etc/neutron/metadata_agent.ini
-iniset_sudo $conf DEFAULT auth_url http://controller-mgmt:5000/v2.0
+iniset_sudo $conf DEFAULT auth_uri http://controller-mgmt:5000
+iniset_sudo $conf DEFAULT auth_url http://controller-mgmt:35357
 iniset_sudo $conf DEFAULT auth_region "$REGION"
-iniset_sudo $conf DEFAULT admin_tenant_name "$SERVICE_TENANT_NAME"
-iniset_sudo $conf DEFAULT admin_user "$neutron_admin_user"
-iniset_sudo $conf DEFAULT admin_password "$neutron_admin_password"
+iniset_sudo $conf DEFAULT auth_plugin password
+iniset_sudo $conf DEFAULT project_domain_id default
+iniset_sudo $conf DEFAULT user_domain_id default
+iniset_sudo $conf DEFAULT project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf DEFAULT username "$neutron_admin_user"
+iniset_sudo $conf DEFAULT password "$neutron_admin_password"
 iniset_sudo $conf DEFAULT nova_metadata_ip "$(hostname_to_ip controller-mgmt)"
 iniset_sudo $conf DEFAULT metadata_proxy_shared_secret "$METADATA_SECRET"
 iniset_sudo $conf DEFAULT verbose True
@@ -184,6 +192,8 @@ ping -c 1 controller-api
 
 echo "Restarting the network service."
 sudo service neutron-plugin-openvswitch-agent restart
+# Without sleep, we get port in limbo; FIXME needs a proper test condition
+sleep 1
 sudo service neutron-l3-agent restart
 
 echo -n "Checking VLAN tags."
