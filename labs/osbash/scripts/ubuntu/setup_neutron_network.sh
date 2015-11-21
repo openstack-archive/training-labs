@@ -116,11 +116,6 @@ iniset_sudo $conf DEFAULT dhcp_delete_namespaces True
 iniset_sudo $conf DEFAULT verbose True
 iniset_sudo $conf DEFAULT dnsmasq_config_file /etc/neutron/dnsmasq-neutron.conf
 
-# Configure a DNS server to be used by VM instances
-if [ -n "${TENANT_VM_DNS_SERVER:-''}" ]; then
-    iniset_sudo $conf DEFAULT dnsmasq_dns_servers "$TENANT_VM_DNS_SERVER"
-fi
-
 cat << DNSMASQ | sudo tee /etc/neutron/dnsmasq-neutron.conf
 # Set interface MTU to 1454 (for instance, ssh authentication may fail
 # otherwise due to GRE overhead)

@@ -28,6 +28,7 @@ echo "Creating a subnet on the tenant network."
 neutron subnet-create demo-net \
     "$TENANT_NETWORK_CIDR" \
     --name demo-subnet \
+    --dns-nameserver "$TENANT_VM_DNS_SERVER" \
     --gateway "$TENANT_NETWORK_GATEWAY"
 
 echo "Creating a router on the tenant network."
