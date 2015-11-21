@@ -171,7 +171,7 @@ function wbatch_create_hostnet {
 
     sed -e "
         s,%APINET%,$API_NET,g;
-        s,%DATANET%,$DATA_NET,g;
+        s,%TUNNELNET%,$TUNNEL_NET,g;
         s,%MGMTNET%,$MGMT_NET,g;
         " "$WBATCH_TEMPLATE_DIR/template-create_hostnet_bat" | wbatch_write_stdin
 
@@ -221,7 +221,7 @@ function wbatch_get_hostif_subst {
         ${MGMT_NET_IF:-""})
             echo 'VirtualBox Host-Only Ethernet Adapter'
             ;;
-        ${DATA_NET_IF:-""})
+        ${TUNNEL_NET_IF:-""})
             echo 'VirtualBox Host-Only Ethernet Adapter #2'
             ;;
         ${API_NET_IF:-""})
