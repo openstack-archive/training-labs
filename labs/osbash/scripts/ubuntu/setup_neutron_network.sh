@@ -137,7 +137,7 @@ log-dhcp
 DNSMASQ
 
 # Catch and ignore error status if no dnsmasq process is found (the default)
-sudo killall dnsmasq||rc=$?
+sudo pkill dnsmasq || rc=$?
 
 echo "Configuring the metadata agent"
 conf=/etc/neutron/metadata_agent.ini
