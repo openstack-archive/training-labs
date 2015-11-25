@@ -26,10 +26,10 @@ CIRROS_URL="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 # DEMO_NET
 : ${TENANT_NETWORK_GATEWAY:=192.168.1.1}
 : ${TENANT_NETWORK_CIDR:=192.168.1.0/24}
-# Comma-separated list of DNS name servers used by dnsmasq to serve instance
-# VMs in neutron subnets with dns_nameservers unset.
-# Default is Google Public DNS (8.8.8.8); to disable, set to "".
-: ${TENANT_VM_DNS_SERVER:=8.8.8.8}
+
+# DNS name server used by instance VMs.
+# Default is Google Public DNS (8.8.4.4).
+: ${TENANT_VM_DNS_SERVER:=8.8.4.4}
 
 : ${REGION:=RegionOne}
 
