@@ -345,6 +345,10 @@ function command_from_config {
             vm_wait_for_shutdown "$vm_name"
             ;;
         snapshot_cycle)
+            # Skip command if user disabled snapshot cycles
+            if [ "${SNAP_CYCLE:-}" = "no" ]; then
+                continue
+            fi
             # Format: snapshot_cycle [-g <gui_type>] [-n <node_name>]
             # comprises shutdown, boot, wait_for_shutdown, snapshot
             get_cmd_options $args

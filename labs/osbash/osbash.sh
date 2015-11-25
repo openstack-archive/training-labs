@@ -38,6 +38,7 @@ function usage {
     echo "-g GUI     GUI type during build"
     #echo "-e EXPORT Export node VMs"
     echo "--no-color Disables colors during build"
+    echo "--no-snap-cycle Disables snapshot cycles during build"
     echo
     echo "TARGET     basedisk: build configured basedisk"
     echo "           cluster : build OpenStack cluster [all nodes]"
@@ -58,6 +59,10 @@ function print_config {
     else
         echo -e "${CInfo:-}Base disk:${CData:-} $basedisk${CReset:-}"
         echo -e "${CInfo:-}Distribution name: ${CData:-} $(get_distro_name "$DISTRO")${CReset:-}"
+    fi
+
+    if [ "${SNAP_CYCLE:-}" = "no" ]; then
+        echo -e "${CInfo:-}Skipping snapshot cycles.${CReset:-}"
     fi
 
     if [ -n "${EXPORT_OVA:-}" ]; then
@@ -114,6 +119,9 @@ while getopts :be:g:-:hnt:w opt; do
             case $OPTARG in
                 no-color)
                     unset CError CStatus CInfo CProcess CData CMissing CReset
+                    ;;
+                no-snap-cycle)
+                    SNAP_CYCLE="no"
                     ;;
                 help)
                     usage

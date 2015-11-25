@@ -29,3 +29,7 @@ echo "$NODE_NAME" | sudo tee /etc/hostname > /dev/null
 
 # Configure network interfaces
 config_network
+
+for iface in $(ip -o link show|grep -o "eth[[:digit:]]"); do
+    sudo ifup "$iface"
+done
