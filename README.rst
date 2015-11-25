@@ -1,5 +1,5 @@
 =============
-training labs
+Training labs
 =============
 
 About
@@ -143,7 +143,7 @@ Specs
 
 To review specifications, see http://specs.openstack.org/openstack/docs-specs/specs/liberty/traininglabs.html
 
-Mailing Lists, IRC
+Mailing lists, IRC
 ------------------
 
 To contribute, join the IRC channel, ``#openstack-doc``, on IRC freenode
