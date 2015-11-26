@@ -1,7 +1,5 @@
 # This file contains OpenStack configuration data. It is used by both
 # host (osbash, Windows batch) and VM guest scripts.
-# Follow install guides for more information on the network configuration:
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_basic_environment.html#basics-networking
 
 # one of: icehouse, juno, kilo
 : ${OPENSTACK_RELEASE:=kilo}
@@ -9,9 +7,13 @@
 # CirrOS image URL
 CIRROS_URL="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 
+#------------------------------------------------------------------------------
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_basic_environment.html#basics-networking
+#------------------------------------------------------------------------------
+
 # Networks used by OpenStack training-labs setup
 : ${MGMT_NET:=10.0.0.1}
-: ${DATA_NET:=10.0.1.1}
+: ${TUNNEL_NET:=10.0.1.1}
 : ${API_NET:=203.0.113.1}
 # FIXME API_NET and EXT_NET should be different networks as soon as our
 #       setup allows it.
@@ -22,6 +24,10 @@ CIRROS_URL="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 : ${FLOATING_IP_END:=203.0.113.200}
 : ${EXTERNAL_NETWORK_GATEWAY:=203.0.113.1}
 : ${EXTERNAL_NETWORK_CIDR:=203.0.113.0/24}
+
+#------------------------------------------------------------------------------
+# http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron_initial-tenant-network.html
+#------------------------------------------------------------------------------
 
 # DEMO_NET
 : ${TENANT_NETWORK_GATEWAY:=192.168.1.1}

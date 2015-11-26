@@ -227,7 +227,7 @@ echo "Building nodes using base disk $(get_base_disk_name)"
 
 ${WBATCH:-:} wbatch_create_hostnet
 MGMT_NET_IF=$(create_network "MGMT_NET")
-DATA_NET_IF=$(create_network "DATA_NET")
+TUNNEL_NET_IF=$(create_network "TUNNEL_NET")
 API_NET_IF=$(create_network "API_NET")
 #-------------------------------------------------------------------------------
 source "$OSBASH_LIB_DIR/$PROVIDER-install_nodes.sh"

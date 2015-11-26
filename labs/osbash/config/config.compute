@@ -9,7 +9,7 @@ FOURTH_OCTET=31
 # Assign network interfaces to networks
 NET_IF_0=nat
 NET_IF_1=MGMT_NET
-NET_IF_2=DATA_NET
+NET_IF_2=TUNNEL_NET
 
 # A default instance within compute uses 512 MB RAM
 VM_MEM=1024

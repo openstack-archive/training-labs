@@ -426,7 +426,7 @@ function config_network {
     unset -v NET_IF_0 NET_IF_1 NET_IF_2 NET_IF_3
     source "$CONFIG_DIR/config.$(hostname)"
 
-    # Get API_NET, DATA_NET, MGMT_NET
+    # Get API_NET, TUNNEL_NET, MGMT_NET
     source "$CONFIG_DIR/openstack"
 
     # Iterate over all NET_IF_? variables
