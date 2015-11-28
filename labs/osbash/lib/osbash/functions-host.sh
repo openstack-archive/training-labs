@@ -455,4 +455,31 @@ function find_install-iso {
     fi
 }
 
+function check_md5 {
+    local file=$1
+    local csum=$2
+    local md5exe
+    if [ ! -f "$file" ]; then
+        echo -e >&2 "${CError:-}File $file not found. Aborting.${CReset:-}"
+        exit 1
+    fi
+    if ! md5exe=$(which md5sum); then
+        # On Mac OS X, the tool is called md5
+        if ! md5exe=$(which md5); then
+            echo -e >&2 "${CError:-}Neither md5sum nor md5 executable found." \
+                " Aborting.${CReset:-}"
+            exit 1
+        fi
+    fi
+    echo -e >&2 -n "${CStatus:-}Verifying MD5 checksum: ${CReset:-}"
+    if $md5exe "$file" | grep -q "$csum"; then
+        echo >&2 "okay."
+    else
+        echo -e >&2 "${CError:-}Verification failed. File corrupt:${CReset:-}"
+        echo >&2 "$file"
+        echo -e >&2 "${CError:-}Please remove file and re-run osbash script.${CReset:-}"
+        exit 1
+    fi
+}
+
 # vim: set ai ts=4 sw=4 et ft=sh:
