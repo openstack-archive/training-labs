@@ -356,6 +356,10 @@ echo "ID for demo-net tenant network: $DEMO_NET_ID"
 echo "Listing available security groups."
 nova secgroup-list
 
+echo "Settings for demo-subnet:"
+neutron subnet-show demo-subnet
+echo
+
 if [ "$EXT_DNS" = true ]; then
     echo "Setting DNS name server for subnet (passed to booting instance VMs)."
     neutron subnet-update demo-subnet --dns_nameservers list=true 8.8.4.4
@@ -364,6 +368,7 @@ else
     echo "Clearing DNS name server for subnet (passed to booting instance VMs)."
     neutron subnet-update demo-subnet --dns_nameservers action=clear
 fi
+
 echo "Settings for demo-subnet:"
 neutron subnet-show demo-subnet
 echo
@@ -735,6 +740,18 @@ patient_ping "$floating_ip"
 echo
 echo "Accessing our instance using SSH from the controller node."
 ssh_no_chk "cirros@$floating_ip" uptime
+
+echo
+echo "Interface configuration on instance VM."
+ssh_no_chk "cirros@$floating_ip" ip addr
+
+echo
+echo "Routing information on instance VM."
+ssh_no_chk "cirros@$floating_ip" /sbin/route -n
+
+echo
+echo "/etc/resolv.conf on instance VM."
+ssh_no_chk "cirros@$floating_ip" cat /etc/resolv.conf
 
 echo
 echo "Pinging our own floating IP from inside the instance."
