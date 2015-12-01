@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
+
 set -o errexit -o nounset
+
 TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/credentials"
 source "$LIB_DIR/functions.guest.sh"
 source "$CONFIG_DIR/admin-openstackrc.sh"
+
 exec_logfile
 
 indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up Block Storage service (cinder).
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-install-storage-node.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/cinder-storage-install.html
 #------------------------------------------------------------------------------
 
 MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
@@ -19,6 +23,10 @@ echo "IP address of this node's interface in management network: $MY_MGMT_IP."
 
 echo "Installing qemu support package for non-raw image types."
 sudo apt-get install -y qemu
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Prerequisites
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing the Logical Volume Manager (LVM)."
 sudo apt-get install -y lvm2
@@ -48,6 +56,10 @@ sudo vgcreate cinder-volumes $cinder_loop_dev
 # we just set up, but scanning our block devices to find our volume group
 # is fast enough.
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Install and configure Cinder Volumes
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 echo "Installing cinder."
 sudo apt-get install -y cinder-volume python-mysqldb
 
@@ -57,12 +69,14 @@ echo "Configuring $conf."
 function get_database_url {
     local db_user=$(service_to_db_user cinder)
     local db_password=$(service_to_db_password cinder)
-    local database_host=controller-mgmt
+    local database_host=controller
 
-    echo "mysql://$db_user:$db_password@$database_host/cinder"
+    echo "mysql+pymysql://$db_user:$db_password@$database_host/cinder"
 }
 
 database_url=$(get_database_url)
+cinder_admin_user=$(service_to_user_name cinder)
+cinder_admin_password=$(service_to_user_password cinder)
 
 echo "Setting database connection: $database_url."
 iniset_sudo $conf database connection "$database_url"
@@ -70,17 +84,15 @@ iniset_sudo $conf database connection "$database_url"
 # Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT rpc_backend rabbit
 
-iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller-mgmt
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
 iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
 iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
 
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
 # Configure [keystone_authtoken] section.
-cinder_admin_user=$(service_to_user_name cinder)
-cinder_admin_password=$(service_to_user_password cinder)
-iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000
-iniset_sudo $conf keystone_authtoken auth_url http://controller-mgmt:35357
+iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
+iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
 iniset_sudo $conf keystone_authtoken auth_plugin password
 iniset_sudo $conf keystone_authtoken project_domain_id default
 iniset_sudo $conf keystone_authtoken user_domain_id default
@@ -96,12 +108,13 @@ iniset_sudo $conf lvm iscsi_protocol iscsi
 iniset_sudo $conf lvm iscsi_helper  tgtadm
 
 iniset_sudo $conf DEFAULT enabled_backends lvm
-iniset_sudo $conf DEFAULT glance_host controller-mgmt
+iniset_sudo $conf DEFAULT glance_host controller
 
-iniset_sudo $conf oslo_concurrency lock_path /var/lock/cinder
+iniset_sudo $conf oslo_concurrency lock_path /var/lib/cinder/tmp
 
 iniset_sudo $conf DEFAULT verbose True
 
+# Finalize installation
 echo "Restarting cinder service."
 sudo service tgt restart
 sudo service cinder-volume restart
@@ -110,7 +123,7 @@ sudo rm -f /var/lib/cinder/cinder.sqlite
 
 #------------------------------------------------------------------------------
 # Verify the Block Storage installation
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-verify.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/cinder-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying Block Storage installation on controller node."
@@ -121,16 +134,17 @@ AUTH="source $CONFIG_DIR/admin-openstackrc.sh"
 # It takes time for Cinder to be aware of its services status.
 # Force restart cinder API and wait for 20 seconds.
 echo "Restarting Cinder API."
-node_ssh controller-mgmt "sudo service cinder-api restart"
+node_ssh controller "sudo service cinder-api restart"
 sleep 20
 
 echo "Waiting for cinder to start."
-until node_ssh controller-mgmt "$AUTH; cinder service-list" >/dev/null 2>&1; do
+until node_ssh controller "$AUTH; cinder service-list" >/dev/null 2>&1; do
     sleep 1
 done
 
 echo "cinder service-list"
-node_ssh controller-mgmt "$AUTH; cinder service-list"
+node_ssh controller "$AUTH; cinder service-list"
+
 
 function check_cinder_services {
 
@@ -139,7 +153,7 @@ function check_cinder_services {
     # Cinder services.
     local i=1
     while [ : ]; do
-        if [[ -z  $(node_ssh controller-mgmt "$AUTH; cinder service-list" | grep down) ]] > /dev/null 2>&1; then
+        if [[ -z  $(node_ssh controller "$AUTH; cinder service-list" | grep down) ]] > /dev/null 2>&1; then
             echo "Cinder services seem to be up and running!"
             return 0
         fi
@@ -163,10 +177,10 @@ echo "Sourcing the demo credentials."
 AUTH="source $CONFIG_DIR/demo-openstackrc.sh"
 
 echo "cinder create --display-name demo-volume1 1"
-node_ssh controller-mgmt "$AUTH; cinder create --display-name demo-volume1 1;sleep 20"
+node_ssh controller "$AUTH; cinder create --display-name demo-volume1 1;sleep 20"
 
 echo -n "Waiting for cinder to list the new volume."
-until node_ssh controller-mgmt "$AUTH; cinder list | grep demo-volume1" > /dev/null 2>&1; do
+until node_ssh controller "$AUTH; cinder list | grep demo-volume1" > /dev/null 2>&1; do
     echo -n .
     sleep 1
 done
@@ -177,7 +191,7 @@ function wait_for_cinder_volume {
     echo -n 'Waiting for cinder volume to be created.'
     local i=1
     while [ : ]; do
-        if [[ -z  $(node_ssh controller-mgmt "$AUTH;cinder list" | grep creating) ]] > /dev/null 2>&1; then
+        if [[ -z  $(node_ssh controller "$AUTH;cinder list" | grep creating) ]] > /dev/null 2>&1; then
             # Proceed if the state of cinder-volumes is error or created.
             # Cinder volumes cannot be deleted when it is in creating state.
             # Throw an error and stop this script.
@@ -202,7 +216,7 @@ echo "Checking if volume is created."
 wait_for_cinder_volume
 
 echo "cinder delete demo-volume1"
-node_ssh controller-mgmt "$AUTH; cinder delete demo-volume1"
+node_ssh controller "$AUTH; cinder delete demo-volume1"
 
 echo "cinder list"
-node_ssh controller-mgmt "$AUTH; cinder list"
+node_ssh controller "$AUTH; cinder list"

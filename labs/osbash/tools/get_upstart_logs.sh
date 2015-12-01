@@ -24,7 +24,7 @@ else
     fi
 fi
 
-for node in controller network compute; do
+for node in controller compute1; do
     (
     source "$CONFIG_DIR/config.$node"
     node_dir=$RESULTS_DIR/$node

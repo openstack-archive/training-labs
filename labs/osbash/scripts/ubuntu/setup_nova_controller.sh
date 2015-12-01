@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
+
 set -o errexit -o nounset
+
 TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/credentials"
 source "$LIB_DIR/functions.guest.sh"
+
 exec_logfile
 
 indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install Compute controller services
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_nova.html#nova-controller-install
+# http://docs.openstack.org/liberty/install-guide-ubuntu/nova-controller-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for nova."
@@ -27,6 +31,7 @@ wait_for_keystone
 
 echo "Creating nova user and giving it the admin role."
 openstack user create \
+    --domain default  \
     --password "$nova_admin_password" \
     "$nova_admin_user"
 
@@ -41,12 +46,18 @@ openstack service create \
     --description "OpenStack Compute" \
     compute
 
+echo "Creating nova endpoints."
 openstack endpoint create \
-    --publicurl 'http://controller-api:8774/v2/%(tenant_id)s' \
-    --internalurl 'http://controller-mgmt:8774/v2/%(tenant_id)s' \
-    --adminurl 'http://controller-mgmt:8774/v2/%(tenant_id)s' \
     --region "$REGION" \
-    compute
+    compute public http://controller:8774/v2/%\(tenant_id\)s
+
+openstack endpoint create \
+    --region "$REGION" \
+    compute internal http://controller:8774/v2/%\(tenant_id\)s
+
+openstack endpoint create \
+    --region "$REGION" \
+    compute admin http://controller:8774/v2/%\(tenant_id\)s
 
 echo "Installing nova for controller node."
 sudo apt-get install -y \
@@ -56,9 +67,9 @@ sudo apt-get install -y \
 function get_database_url {
     local db_user=$(service_to_db_user nova)
     local db_password=$(service_to_db_password nova)
-    local database_host=controller-mgmt
+    local database_host=controller
 
-    echo "mysql://$db_user:$db_password@$database_host/nova"
+    echo "mysql+pymysql://$db_user:$db_password@$database_host/nova"
 }
 
 database_url=$(get_database_url)
@@ -73,17 +84,17 @@ echo "Configuring nova services."
 # Default Section.
 iniset_sudo $conf DEFAULT rpc_backend rabbit
 
-# oslo_messaging_rabbit section.
-iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller-mgmt
+# Configure [oslo_messaging_rabbit] section.
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
 iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
 iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
 
-
+# Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
-# Configure keystone_authtoken section.
-iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000
-iniset_sudo $conf keystone_authtoken auth_url http://controller-mgmt:35357
+# Configure [keystone_authtoken] section.
+iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
+iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
 iniset_sudo $conf keystone_authtoken auth_plugin password
 iniset_sudo $conf keystone_authtoken project_domain_id default
 iniset_sudo $conf keystone_authtoken user_domain_id default
@@ -91,18 +102,28 @@ iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$nova_admin_user"
 iniset_sudo $conf keystone_authtoken password "$nova_admin_password"
 
-# Default section
-iniset_sudo $conf DEFAULT my_ip "$(hostname_to_ip controller-mgmt)"
-iniset_sudo $conf DEFAULT vncserver_listen controller-mgmt
-iniset_sudo $conf DEFAULT vncserver_proxyclient_address controller-mgmt
+# Configure [DEFAULT] section.
+iniset_sudo $conf DEFAULT my_ip "$(hostname_to_ip controller)"
 
-# Glance section
-iniset_sudo $conf glance host controller-mgmt
+iniset_sudo $conf DEFAULT network_api_class nova.network.neutronv2.api.API
+iniset_sudo $conf DEFAULT security_group_api neutron
+iniset_sudo $conf DEFAULT linuxnet_interface_driver                 \
+                    nova.network.linux_net.NeutronLinuxBridgeInterfaceDriver
+iniset_sudo $conf DEFAULT                                           \
+                    firewall_driver nova.virt.firewall.NoopFirewallDriver
 
-# oslo_concurrency section
+# Configure [VNC] section.
+iniset_sudo $conf vnc vncserver_listen '$my_ip'
+iniset_sudo $conf vnc vncserver_proxyclient_address '$my_ip'
+
+# Configure [glance] section.
+iniset_sudo $conf glance host controller
+
+# Configure [oslo_concurrency] section.
 iniset_sudo $conf oslo_concurrency lock_path /var/lib/nova/tmp
 
-# default section
+# Configure [DEFAULT] section.
+iniset_sudo $conf DEFAULT enabled_apis osapi_compute,metadata
 iniset_sudo $conf DEFAULT verbose True
 
 echo "Creating the database tables for nova."
@@ -113,30 +134,33 @@ declare -a nova_services=(nova-api nova-cert nova-consoleauth \
     nova-scheduler nova-conductor nova-novncproxy)
 
 for nova_service in "${nova_services[@]}"; do
-    echo "Restarting $nova_service"
+    echo "Restarting $nova_service."
     sudo service "$nova_service" restart
 done
 
-# Remove SQLite database created by Ubuntu package for nova.
-sudo rm -v /var/lib/nova/nova.sqlite
+echo "Removing default SQLite database."
+sudo rm -f /var/lib/nova/nova.sqlite
 
 #------------------------------------------------------------------------------
 # Verify the Compute controller installation
 #------------------------------------------------------------------------------
 
 echo "Verify nova service status."
-# This call needs root privileges for read access to /etc/nova/nova.conf.
-echo "sudo nova-manage service list"
-sudo nova-manage service list
+echo "Checking nova services."
+loop=0
+until nova service-list 2>/dev/null; do
+    echo -n .
+    loop=$((loop+1))
+    if ((loop%10 == 0)); then
+        echo
+        echo still checking
+    fi
+    sleep 1
+done
 
-echo "nova service-list"
-nova service-list
-
-echo "nova endpoints"
+echo "Checking nova endpoints."
 nova endpoints
 
-echo "nova image-list"
+echo "Checking nova images."
 nova image-list
 
-echo "nova list-extensions"
-nova list-extensions

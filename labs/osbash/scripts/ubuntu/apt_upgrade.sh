@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
+
 set -o errexit -o nounset
+
 TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/openstack"
 source "$LIB_DIR/functions.guest.sh"
@@ -9,19 +12,11 @@ indicate_current_auto
 
 exec_logfile
 
-# XXX We assume that apt_init.sh set up repos and updated the apt index files
+# Note: We assume that apt_init.sh set up repos and updated the apt index files
 
 # Upgrade installed packages and the kernel
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
 sudo apt-get -y dist-upgrade
-
-# XXX Not a great location for Vagrant specific code
-if [[ $VM_SHELL_USER = vagrant ]]; then
-    init_os_ident
-    if is_ubuntu; then
-        sudo apt-get -y install virtualbox-guest-dkms
-    fi
-fi
 
 # If we upgraded the kernel, remove the old one
 INSTALLED_KERNEL=$(readlink /vmlinuz)

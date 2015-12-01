@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
+
 set -o errexit -o nounset
+
 TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/openstack"
-# Pick up VM_PROXY
 source "$CONFIG_DIR/localrc"
 source "$LIB_DIR/functions.guest.sh"
 
@@ -50,20 +52,9 @@ function ubuntu_cloud_archive {
         -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
 }
 
-function apache_fix {
-
-    # On '$service apache2 restart', apache will use a text browser to check
-    # connectivity on '127.0.0.1' or 'localhost'. Apache needs www-browser
-    # (/etc/alternatives/www-browser) virtual package to carry out this check.
-    # Include a basic text browser to preemptively avoid this error.
-    sudo apt-get -y install w3m
-
-}
-
 # precise needs the cloud archive, and so does trusty for non-Icehouse releases
 if grep -qs DISTRIB_CODENAME=precise /etc/lsb-release ||
         [ "$OPENSTACK_RELEASE" != "icehouse" ]; then
     echo "Enabling the Ubuntu cloud archive."
     ubuntu_cloud_archive
-    apache_fix
 fi

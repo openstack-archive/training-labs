@@ -9,7 +9,8 @@ source "$OSBASH_LIB_DIR/$PROVIDER-functions.sh"
 
 OSBASH=exec_cmd
 
-VM_LIST="controller network compute"
+# TODO Add better method for getting VM_LIST
+VM_LIST="controller compute1"
 
 function usage {
     # Setting to empty string selects latest (current snapshot)

@@ -280,7 +280,7 @@ function wait_for_neutron {
         if [ "$cnt" -eq 10 ]; then
             echo
             echo "ERROR No response from neutron. Restarting neutron-server."
-            node_ssh controller-mgmt "$auth; sudo service neutron-server restart"
+            node_ssh controller "$auth; sudo service neutron-server restart"
             echo -n "Waiting for neutron to come up."
         elif [ "$cnt" -eq 20 ]; then
             echo

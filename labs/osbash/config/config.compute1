@@ -1,18 +1,16 @@
 # Node VM configuration. Used by osbash/wbatch (host and guest).
 
 # Port forwarding
-# ssh access to controller: 127.0.0.1:2230
-VM_SSH_PORT=2230
-# Dashboard access: 127.0.0.1:8888
-VM_WWW_PORT=8888
+# ssh access to compute1: 127.0.0.1:2232
+VM_SSH_PORT=2232
 
 # Assign network interfaces to networks
 NET_IF_0=dhcp
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/liberty/install-guide-ubuntu/environment-networking-controller.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/environment-networking-compute.html
 #------------------------------------------------------------------------------
 # Mgmt network
-NET_IF_1="static 10.0.0.11"
+NET_IF_1="static 10.0.0.31"
 # Public network (select network, IP address configured manually)
 NET_IF_2="manual 203.0.113.0"
 
@@ -20,7 +18,9 @@ NET_IF_2="manual 203.0.113.0"
 # http://docs.openstack.org/liberty/install-guide-ubuntu/environment.html
 #------------------------------------------------------------------------------
 # Controller node is running many services.
-VM_MEM=2560
+# A default instance within compute uses 512 MB RAM. The install-guide
+# demands 2048 MB of RAM, but 1024 MB is enough for one CirrOS instance.
+VM_MEM=1024
 
 # Override number of virtual CPUs (default is 1)
 # To edit uncomment the line below

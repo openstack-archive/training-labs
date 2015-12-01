@@ -94,6 +94,25 @@ function remove_last_octet {
     echo "${1%.*}"
 }
 
+function netname_to_network {
+    local net_name=$1
+    local index
+
+    if [ -z "${NET_NAME+1}" ]; then
+        # NET_NAME array is undefined
+        get_host_network_config
+    fi
+
+    for index in "${!NET_NAME[@]}"; do
+        if [ "$net_name" = "${NET_NAME[index]}" ]; then
+            echo "${NET_IP[index]}"
+            return 0
+        fi
+    done
+    echo >&2 "ERROR: No network named $net_name."
+    exit 1
+}
+
 function ip_to_netname {
     local ip=$1
     local ip_net=$(remove_last_octet "$ip").0

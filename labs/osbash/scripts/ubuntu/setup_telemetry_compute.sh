@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
+
 set -o errexit -o nounset
+
 TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/credentials"
 source "$LIB_DIR/functions.guest.sh"
 source "$CONFIG_DIR/openstack"
+
 exec_logfile
 
 indicate_current_auto
@@ -28,17 +32,20 @@ iniset_sudo $conf publisher telemetry_secret "$TELEMETRY_SECRET"
 # Configure RabbitMQ variables
 iniset_sudo $conf DEFAULT rpc_backend rabbit
 
-iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller-mgmt
+# Configure [oslo_messaging_rabbit] section.
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
 iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
 iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
 
-iniset_sudo $conf keystone_authtoken auth_uri http://controller-mgmt:5000/v2.0
-iniset_sudo $conf keystone_authtoken identity_uri http://controller-mgmt:35357
+# Configure [ketstone_authtoken] section.
+iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000/v2.0
+iniset_sudo $conf keystone_authtoken identity_uri http://controller:35357
 iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken admin_user "$ceilometer_admin_user"
 iniset_sudo $conf keystone_authtoken admin_password "$ceilometer_admin_password"
 
-iniset_sudo $conf service_credentials os_auth_url http://controller-mgmt:5000/v2.0
+# Configure [service_credentials] section.
+iniset_sudo $conf service_credentials os_auth_url http://controller:5000/v2.0
 iniset_sudo $conf service_credentials os_username "$ceilometer_admin_user"
 iniset_sudo $conf service_credentials os_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf service_credentials os_password "$ceilometer_admin_password"
@@ -50,6 +57,7 @@ iniset_sudo $conf DEFAULT verbose True
 echo "Configuring nova.conf."
 conf=/etc/ceilometer/ceilometer.conf
 
+# Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT instance_usage_audit True
 iniset_sudo $conf DEFAULT instance_usage_audit_period hour
 iniset_sudo $conf DEFAULT notify_on_state_change vm_and_task_state
@@ -87,19 +95,19 @@ echo "Verifying the telemetry installation."
 AUTH="source $CONFIG_DIR/admin-openstackrc.sh"
 
 echo "Waiting for ceilometer to start."
-until node_ssh controller-mgmt "$AUTH; ceilometer meter-list" >/dev/null 2>&1; do
+until node_ssh controller "$AUTH; ceilometer meter-list" >/dev/null 2>&1; do
     sleep 1
 done
 
 echo "List available meters."
-node_ssh controller-mgmt "$AUTH; ceilometer meter-list"
+node_ssh controller "$AUTH; ceilometer meter-list"
 
 echo "Download an image from the Image Service."
 img_name=$(basename "$CIRROS_URL" -disk.img)
-node_ssh controller-mgmt "$AUTH; glance image-download \"$img_name\" > /tmp/cirros.img"
+node_ssh controller "$AUTH; glance image-download \"$img_name\" > /tmp/cirros.img"
 
 echo "List available meters again to validate detection of the image download."
-node_ssh controller-mgmt "$AUTH; ceilometer meter-list"
+node_ssh controller "$AUTH; ceilometer meter-list"
 
 echo "Retrieve usage statistics from the image.download meter."
-node_ssh controller-mgmt "$AUTH; ceilometer statistics -m image.download -p 60"
+node_ssh controller "$AUTH; ceilometer statistics -m image.download -p 60"

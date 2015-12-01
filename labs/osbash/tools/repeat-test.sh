@@ -13,7 +13,8 @@ LOG_NAME=test.log
 RESULTS_ROOT=$LOG_DIR/test-results
 
 CONTROLLER_SNAPSHOT="controller_node_installed"
-TEST_SCRIPT=$TOP_DIR/scripts/test/launch_instance.sh
+# TODO Add better method for setting TEST_SCRIPT
+TEST_SCRIPT=$TOP_DIR/scripts/test/launch_instance_private_net.sh
 
 VERBOSE=${VERBOSE:=1}
 

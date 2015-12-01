@@ -8,7 +8,9 @@ indicate_current_auto
 
 exec_logfile
 
-HOST_NAME=$(hostname)
+# The install-guide wants to use the hostname as the name of the interface
+# in the mgmt network. We cannot allow 127.0.0.1 to share the name.
+HOST_NAME=$(hostname)-lo
 HOST_FILE=/etc/hosts
 
 if ! grep -q "^[^#].*$HOST_NAME" $HOST_FILE; then
@@ -22,5 +24,5 @@ if ! grep -q "^[^#].*$HOST_NAME" $HOST_FILE; then
     fi
 fi
 
-# Add entries for the rest of the OpenStack training-labs
+# Add entries for the OpenStack training-labs cluster
 cat "$CONFIG_DIR/hosts.multi" | sudo tee -a /etc/hosts

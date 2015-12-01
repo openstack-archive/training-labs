@@ -37,7 +37,7 @@ indicate_current_auto
 # server. The default uses dnsmasq running on a node.
 : ${EXT_DNS:=true}
 
-DEMO_INSTANCE_NAME=demo-instance1
+DEMO_INSTANCE_NAME=private-instance
 
 echo "SUM --- BEGIN"
 
@@ -86,48 +86,40 @@ function wait_for_service {
 
 echo "Running on host: $(hostname)"
 
-echo "Checking network connection to network node."
-ping -c1 network-mgmt
-echo
-
 echo "Checking network connection to compute node."
-ping -c1 compute-mgmt
+ping -c1 compute1
 echo
 
 echo "Checking services on network node."
-wait_for_service network-mgmt openvswitch-switch
-wait_for_service network-mgmt neutron-plugin-openvswitch-agent
-wait_for_service network-mgmt neutron-l3-agent
-wait_for_service network-mgmt neutron-dhcp-agent
-wait_for_service network-mgmt neutron-metadata-agent
+wait_for_service controller neutron-l3-agent
+wait_for_service controller neutron-dhcp-agent
+wait_for_service controller neutron-metadata-agent
 echo
 
 echo "Checking services on compute node."
-wait_for_service compute-mgmt nova-compute
-wait_for_service compute-mgmt openvswitch-switch
-wait_for_service compute-mgmt neutron-plugin-openvswitch-agent
+wait_for_service compute1 nova-compute
 echo
 
 function wait_for_nova_compute {
-    if sudo nova-manage service list --service nova-compute | \
-            grep -q ":-)"; then
+    if openstack compute service list --service nova-compute | \
+            grep -q "up"; then
         return 0
     fi
-    echo "  Waiting for nova-compute to switch from XXX to :-)."
-    if ssh_no_chk_node compute-mgmt service nova-compute status | \
+    echo "  Waiting for nova-compute service in state 'up'."
+    if ssh_no_chk_node compute1 service nova-compute status | \
             grep -q "start/running"; then
         echo -n "  Service is up, waiting (may take a few minutes)."
     fi
     local cnt=0
     local start=$(date +%s)
-    while sudo nova-manage service list --service nova-compute | grep -q XXX; do
+    while openstack compute service list --service nova-compute | grep -q down; do
         cnt=$((cnt + 1))
         sleep 5
-        if ssh_no_chk_node compute-mgmt service nova-compute status | \
+        if ssh_no_chk_node compute1 service nova-compute status | \
                 grep -q "start/running"; then
             if [ $cnt -eq 300 ]; then
                 # This should never happen.
-                echo "SUM ABORT nova-compute remains XXX while up."
+                echo "SUM ABORT nova-compute status remains down while service is up."
                 echo "Aborting."
                 exit 1
             fi
@@ -136,7 +128,7 @@ function wait_for_nova_compute {
             echo
             echo "SUM ERROR nova-compute on compute node has died."
             echo "Restarting nova-compute on compute node."
-            ssh_no_chk_node compute-mgmt \
+            ssh_no_chk_node compute1 \
                 sudo service nova-compute restart
             NOVA_COMPUTE_RESTART=$((${NOVA_COMPUTE_RESTART:-0} + 1))
         fi
@@ -146,6 +138,8 @@ function wait_for_nova_compute {
 
 function wait_for_nova_services {
     local start=$(date +%s)
+
+    # TODO Can we replace "sudo nova-manage" with "openstack" here, too?
 
     echo "Checking services in sudo nova-manage service list."
     echo -n "  Waiting for controller services to switch from XXX to :-)."
@@ -229,72 +223,6 @@ function wait_for_neutron_agents {
 
 wait_for_neutron_agents
 
-function check_namespaces {
-    local cnt
-
-    echo -n "Getting router namespace."
-    cnt=0
-    until ssh_no_chk_node network-mgmt ip netns | grep qrouter; do
-        cnt=$((cnt + 1))
-        sleep 1
-        echo -n "."
-    done
-    echo "SUM wait for router namespace: $cnt"
-    local nsrouter=$(ssh_no_chk_node network-mgmt ip netns | grep qrouter)
-
-    echo -n "Getting DHCP namespace."
-    cnt=0
-    until ssh_no_chk_node network-mgmt ip netns | grep qdhcp; do
-        cnt=$((cnt + 1))
-        if [ $cnt -eq 10 ]; then
-            echo
-            echo "SUM ERROR No DCHP namespace, restarting neutron-dhcp-agent."
-            echo "Restarting neutron-dhcp-agent on network node."
-            ssh_no_chk_node network-mgmt \
-                sudo service neutron-dhcp-agent restart
-        fi
-        sleep 1
-        echo -n "."
-    done
-    echo "SUM wait for DHCP namespace: $cnt"
-    local nsdhcp=$(ssh_no_chk_node network-mgmt ip netns | grep qdhcp)
-
-    echo -n "Waiting for interface qr-* in router namespace."
-    cnt=0
-    until ssh_no_chk_node network-mgmt \
-            sudo ip netns exec "$nsrouter" ip addr | \
-            grep -Po "(?<=: )qr-.*(?=:)"; do
-        cnt=$((cnt + 1))
-        sleep 1
-        echo -n "."
-    done
-    echo "SUM wait for interface qr-*: $cnt"
-
-    echo -n "Waiting for interface qg-* in router namespace."
-    cnt=0
-    until ssh_no_chk_node network-mgmt \
-            sudo ip netns exec "$nsrouter" ip addr | \
-            grep -Po "(?<=: )qg-.*(?=:)"; do
-        cnt=$((cnt + 1))
-        sleep 1
-        echo -n "."
-    done
-    echo "SUM wait for interface qg-*: $cnt"
-
-    echo -n "Waiting for interface tap* in DHCP namespace."
-    cnt=0
-    until ssh_no_chk_node network-mgmt \
-            sudo ip netns exec "$nsdhcp" ip addr | \
-            grep -Po "(?<=: )tap.*(?=:)"; do
-        cnt=$((cnt + 1))
-        sleep 1
-        echo -n "."
-    done
-    echo "SUM wait for interface tap*: $cnt"
-}
-
-check_namespaces
-
 if [ ! -f ~/.ssh/id_rsa ]; then
     echo "Generating an ssh key pair (saved to ~/.ssh/id_rsa*)."
     # For training cluster: no password protection on keys to make scripting
@@ -303,20 +231,20 @@ if [ ! -f ~/.ssh/id_rsa ]; then
 fi
 
 function check_demo_key {
-    echo -n "Checking if 'demo-key' is already in our OpenStack environment: "
-    if nova keypair-show demo-key >/dev/null 2>&1; then
+    echo -n "Checking if 'mykey' is already in our OpenStack environment: "
+    if nova keypair-show mykey >/dev/null 2>&1; then
         echo "yes."
 
-        echo -n "Checking if the 'demo-key' key pair matches our ssh key: "
+        echo -n "Checking if the 'mykey' key pair matches our ssh key: "
 
         ssh_key=$(< ~/.ssh/id_rsa.pub awk '{print $2}')
-        stored_key=$(nova keypair-show demo-key | \
+        stored_key=$(nova keypair-show mykey | \
             awk '/^Public key: ssh-rsa/ {print $4}')
 
         if [ "$ssh_key" != "$stored_key" ]; then
             echo "no."
-            echo "Removing the 'demo-key' from the OpenStack envirnoment."
-            nova keypair-delete demo-key
+            echo "Removing the 'mykey' from the OpenStack envirnoment."
+            nova keypair-delete mykey
         else
             echo "yes."
         fi
@@ -326,13 +254,32 @@ function check_demo_key {
 }
 check_demo_key
 
-if ! nova keypair-show demo-key 2>/dev/null; then
+if ! nova keypair-show mykey 2>/dev/null; then
     echo "Adding the public key to our OpenStack environment."
-    nova keypair-add --pub-key ~/.ssh/id_rsa.pub demo-key
+    nova keypair-add --pub-key ~/.ssh/id_rsa.pub mykey
 fi
+
 
 echo "Verifying addition of the public key."
 nova keypair-list
+
+echo
+echo "Permitting ICMP (ping) to our instances."
+nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0 || rc=$?
+if [ ${rc:-0} -ne 0 ]; then
+    echo "Rule was already there."
+fi
+
+echo
+echo "Permitting secure shell (SSH) access to our instances."
+nova secgroup-add-rule default tcp 22 22 0.0.0.0/0 || rc=$?
+if [ ${rc:-0} -ne 0 ]; then
+    echo "Rule was already there."
+fi
+
+echo
+echo "Verifying security-group rules."
+nova secgroup-list-rules default
 
 echo "Listing available flavors."
 nova flavor-list
@@ -346,27 +293,29 @@ wait_for_neutron
 echo "Listing available networks."
 neutron net-list
 
-DEMO_NET_ID=$(neutron net-list | awk '/ demo-net / {print $2}')
-echo "ID for demo-net tenant network: $DEMO_NET_ID"
+PRIVATE_NET_ID=$(neutron net-list | awk '/ private / {print $2}')
+echo "ID for demo-net tenant network: $PRIVATE_NET_ID"
 
 echo "Listing available security groups."
 nova secgroup-list
 
-echo "Settings for demo-subnet:"
-neutron subnet-show demo-subnet
+PRIVATE_SUBNET=private
+
+echo "Settings for $PRIVATE_SUBNET:"
+neutron subnet-show $PRIVATE_SUBNET
 echo
 
 if [ "$EXT_DNS" = true ]; then
     echo "Setting DNS name server for subnet (passed to booting instance VMs)."
-    neutron subnet-update demo-subnet --dns_nameservers list=true 8.8.4.4
+    neutron subnet-update $PRIVATE_SUBNET --dns_nameservers list=true 8.8.4.4
     echo
 else
     echo "Clearing DNS name server for subnet (passed to booting instance VMs)."
-    neutron subnet-update demo-subnet --dns_nameservers action=clear
+    neutron subnet-update $PRIVATE_SUBNET --dns_nameservers action=clear
 fi
 
-echo "Settings for demo-subnet:"
-neutron subnet-show demo-subnet
+echo "Settings for $PRIVATE_SUBNET:"
+neutron subnet-show $PRIVATE_SUBNET
 echo
 
 nova list
@@ -407,9 +356,9 @@ function request_instance {
     nova boot \
         --flavor m1.tiny \
         --image "$img_name" \
-        --nic net-id="$DEMO_NET_ID" \
+        --nic net-id="$PRIVATE_NET_ID" \
         --security-group default \
-        --key-name demo-key \
+        --key-name mykey \
         "$DEMO_INSTANCE_NAME" > "$instance_info"
     VM_LAUNCHES=$(( VM_LAUNCHES + 1 ))
 }
@@ -664,26 +613,8 @@ echo "Obtaining a VNC session URL for our instance."
 nova get-vnc-console "$DEMO_INSTANCE_NAME" novnc
 
 echo
-echo "Permitting ICMP (ping) to our instances."
-nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0 2>/dev/null || rc=$?
-if [ ${rc:-0} -ne 0 ]; then
-    echo "Rule was already there."
-fi
-
-echo
-echo "Permitting secure shell (SSH) access to our instances."
-nova secgroup-add-rule default tcp 22 22 0.0.0.0/0 2>/dev/null || rc=$?
-if [ ${rc:-0} -ne 0 ]; then
-    echo "Rule was already there."
-fi
-
-echo
-echo "Verifying security-group rules."
-nova secgroup-list-rules default
-
-echo
-echo "Creating a floating IP address on the ext-net external network."
-floating_ip_id=$(neutron floatingip-create ext-net | awk '/ id / {print $4}')
+echo "Creating a floating IP address on the public network."
+floating_ip_id=$(neutron floatingip-create public | awk '/ id / {print $4}')
 neutron floatingip-show "$floating_ip_id"
 
 floating_ip=$(neutron floatingip-show "$floating_ip_id" |
@@ -753,30 +684,6 @@ echo
 echo "Pinging our own floating IP from inside the instance."
 ssh_no_chk "cirros@$floating_ip" ping -c1 "$floating_ip"
 
-echo
-echo "Pinging IP address of controller-api."
-ssh_no_chk "cirros@$floating_ip" ping -c1 "$(hostname_to_ip controller-api)"
-
-if [ "$EXT_DNS" = true ]; then
-    echo "Skipping tests of dnsmasq /etc/hosts."
-else
-    # Works only with dnsmasq using the node's /etc/hosts
-    echo
-    echo "Pinging controller-api (test local DNS name resolution)."
-    ssh_no_chk "cirros@$floating_ip" ping -c1 controller-api
-    echo
-    echo "Pinging network-api."
-    ssh_no_chk "cirros@$floating_ip" ping -c1 network-api
-fi
-
-if [ "$MASQUERADING" = true -a "$EXT_DNS" = false ]; then
-    echo
-    echo "This may work thanks to masquerading."
-    ssh_no_chk "cirros@$floating_ip" ping -c1 network-mgmt
-    echo
-    ssh_no_chk "cirros@$floating_ip" ping -c1 network-data
-fi
-
 function test_internet {
     if [ "$MASQUERADING" = true ]; then
         local ext_ping=1
@@ -803,12 +710,6 @@ function test_internet {
 }
 
 test_internet
-
-if [ "$EXT_DNS" = true ]; then
-    echo
-    echo "Removing DNS name servers from subnet."
-    neutron subnet-update demo-subnet --dns_nameservers action=clear
-fi
 
 echo
 echo "Summary"

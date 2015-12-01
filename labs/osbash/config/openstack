@@ -1,39 +1,42 @@
 # This file contains OpenStack configuration data. It is used by both
 # host (osbash, Windows batch) and VM guest scripts.
 
-# one of: icehouse, juno, kilo
-: ${OPENSTACK_RELEASE:=kilo}
+# one of: icehouse [end of life], juno, kilo, liberty
+: ${OPENSTACK_RELEASE:=liberty}
 
 # CirrOS image URL
 CIRROS_URL="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_basic_environment.html#basics-networking
+# http://docs.openstack.org/liberty/install-guide-ubuntu/environment-networking.html
 #------------------------------------------------------------------------------
 
 # Networks used by OpenStack training-labs setup
 NETWORK_1="mgmt 10.0.0.0"
-NETWORK_2="tunnel 10.0.1.0"
-# API/external network
-NETWORK_3="api 203.0.113.0"
-
-# External network
-: ${FLOATING_IP_START:=203.0.113.101}
-: ${FLOATING_IP_END:=203.0.113.200}
-: ${EXTERNAL_NETWORK_GATEWAY:=203.0.113.1}
-: ${EXTERNAL_NETWORK_CIDR:=203.0.113.0/24}
+NETWORK_2="public 203.0.113.0"
 
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron_initial-tenant-network.html
+# http://docs.openstack.org/liberty/install-guide-ubuntu/launch-instance-networks-public.html
 #------------------------------------------------------------------------------
 
-# DEMO_NET
-: ${TENANT_NETWORK_GATEWAY:=192.168.1.1}
-: ${TENANT_NETWORK_CIDR:=192.168.1.0/24}
+# Public network
+: ${PUBLIC_NETWORK_CIDR:=203.0.113.0/24}
+: ${PUBLIC_NETWORK_GATEWAY:=203.0.113.1}
+# Floating IP addresses
+: ${START_IP_ADDRESS:=203.0.113.101}
+: ${END_IP_ADDRESS:=203.0.113.200}
+
+#------------------------------------------------------------------------------
+# http://docs.openstack.org/liberty/install-guide-ubuntu/launch-instance-networks-private.html
+#------------------------------------------------------------------------------
+
+# Private demo network
+: ${PRIVATE_NETWORK_CIDR:=172.16.1.0/24}
+: ${PRIVATE_NETWORK_GATEWAY:=172.16.1.1}
 
 # DNS name server used by instance VMs.
 # Default is Google Public DNS (8.8.4.4).
-: ${TENANT_VM_DNS_SERVER:=8.8.4.4}
+: ${DNS_RESOLVER:=8.8.4.4}
 
 : ${REGION:=RegionOne}
 

@@ -28,5 +28,5 @@ ssh \
     -o "UserKnownHostsFile /dev/null" \
     -o "StrictHostKeyChecking no" \
     -i "$HOME/.ssh/osbash_key" \
-    controller-mgmt \
+    controller \
     sudo /sbin/shutdown -P now

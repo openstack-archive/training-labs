@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
+
 set -o errexit -o nounset
+
 TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/credentials"
 source "$LIB_DIR/functions.guest.sh"
 source "$CONFIG_DIR/openstack"
+
 exec_logfile
 
 indicate_current_auto
@@ -33,25 +37,25 @@ echo "Verifying neutron lbaas installation."
 
 echo "Waiting for neutron-lbaas-agent to start."
 AUTH="source $CONFIG_DIR/demo-openstackrc.sh"
-until node_ssh controller-mgmt "$AUTH; neutron lb-pool-list" >/dev/null 2>&1; do
+until node_ssh controller "$AUTH; neutron lb-pool-list" >/dev/null 2>&1; do
     sleep 1
 done
 
 LB_NUMBER=$(date +"%d%m%y%H%M%S")
 echo "neutron lb-pool-create --lb-method ROUND_ROBIN --name test-lb$LB_NUMBER --protocol HTTP --subnet-id demo-subnet"
-node_ssh controller-mgmt "$AUTH; neutron lb-pool-create --lb-method ROUND_ROBIN --name test-lb$LB_NUMBER --protocol HTTP --subnet-id demo-subnet"
+node_ssh controller "$AUTH; neutron lb-pool-create --lb-method ROUND_ROBIN --name test-lb$LB_NUMBER --protocol HTTP --subnet-id demo-subnet"
 
 echo "Checking if created pool is active."
-until node_ssh controller-mgmt "$AUTH; neutron lb-pool-list | grep test-lb$LB_NUMBER | grep -i ACTIVE" > /dev/null 2>&1; do
+until node_ssh controller "$AUTH; neutron lb-pool-list | grep test-lb$LB_NUMBER | grep -i ACTIVE" > /dev/null 2>&1; do
     sleep 1
 done
 echo "Success."
 
 echo "neutron lb-pool-list"
-node_ssh controller-mgmt "$AUTH; neutron lb-pool-list"
+node_ssh controller "$AUTH; neutron lb-pool-list"
 
 echo "neutron lb-pool-delete test-lb$LB_NUMBER"
-node_ssh controller-mgmt "$AUTH; neutron lb-pool-delete test-lb$LB_NUMBER"
+node_ssh controller "$AUTH; neutron lb-pool-delete test-lb$LB_NUMBER"
 
 echo "neutron lb-pool-list"
-node_ssh controller-mgmt "$AUTH; neutron lb-pool-list"
+node_ssh controller "$AUTH; neutron lb-pool-list"
