@@ -207,7 +207,7 @@ done
 echo
 
 echo -n " - br-tun interfaces"
-until (( $(sudo ovs-vsctl list-ifaces br-tun |
+until (( $(sudo ovs-vsctl list-ifaces br-tun | \
             grep -c -e gre -e patch-int) >= 2 )); do
     echo -n "."
     sleep 1
@@ -215,16 +215,16 @@ done
 echo
 
 echo -n " - br-int interfaces"
-until (( $(sudo ovs-vsctl list-ifaces br-int |
-           grep -c -e int-br-ex -e patch-tun) >= 2 )); do
+until (( $(sudo ovs-vsctl list-ifaces br-int | \
+            grep -c -e int-br-ex -e patch-tun) >= 2 )); do
     echo -n "."
     sleep 1
 done
 echo
 
 echo -n " - br-ex interfaces"
-until (( $(sudo ovs-vsctl list-ifaces br-ex |
-           grep -c -e phy-br-ex) >= 1 ));  do
+until (( $(sudo ovs-vsctl list-ifaces br-ex | \
+            grep -c -e phy-br-ex) >= 1 ));  do
     echo -n "."
     sleep 1
 done

@@ -245,7 +245,7 @@ openstack \
     --os-username "$ADMIN_USER_NAME" \
     --os-auth-type password \
     --os-password "$ADMIN_PASSWORD" \
-      token issue
+    token issue
 
 echo "Requesting project list."
 openstack \
