@@ -185,10 +185,51 @@ INTERFACES
 # Check if we can get to the API network again
 ping -c 1 controller-api
 
+
 echo "Restarting the network service."
 sudo service neutron-plugin-openvswitch-agent restart
-# Without sleep, we get port in limbo; FIXME needs a proper test condition
-sleep 1
+
+# Before starting the L3 agent, we have to be certain the OVS bridges
+# are all set up.
+# This can take a few seconds.
+# We check whether
+# - br-tun bridge exists
+# - br-tun has a gre, a patch-int and a br-tun interface
+# - br-int has a patch-tun and an int-br-ex interface
+# - br-ex has a phy-br-ex interface
+
+echo "Checking if OVS bridges are up"
+echo -n " - br-tun"
+until sudo ovs-vsctl br-exists br-tun; do
+    echo -n "."
+    sleep 1
+done
+echo
+
+echo -n " - br-tun interfaces"
+until (( $(sudo ovs-vsctl list-ifaces br-tun |
+            grep -c -e gre -e patch-int) >= 2 )); do
+    echo -n "."
+    sleep 1
+done
+echo
+
+echo -n " - br-int interfaces"
+until (( $(sudo ovs-vsctl list-ifaces br-int |
+           grep -c -e int-br-ex -e patch-tun) >= 2 )); do
+    echo -n "."
+    sleep 1
+done
+echo
+
+echo -n " - br-ex interfaces"
+until (( $(sudo ovs-vsctl list-ifaces br-ex |
+           grep -c -e phy-br-ex) >= 1 ));  do
+    echo -n "."
+    sleep 1
+done
+echo
+
 sudo service neutron-l3-agent restart
 
 echo -n "Checking VLAN tags."
