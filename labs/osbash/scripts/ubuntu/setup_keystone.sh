@@ -5,7 +5,7 @@ source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/credentials"
 # Get REGION
 source "$CONFIG_DIR/openstack"
-source "$LIB_DIR/functions.guest"
+source "$LIB_DIR/functions.guest.sh"
 
 exec_logfile
 

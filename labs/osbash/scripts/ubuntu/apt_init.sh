@@ -5,7 +5,7 @@ source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/openstack"
 # Pick up VM_PROXY
 source "$CONFIG_DIR/localrc"
-source "$LIB_DIR/functions.guest"
+source "$LIB_DIR/functions.guest.sh"
 
 indicate_current_auto
 

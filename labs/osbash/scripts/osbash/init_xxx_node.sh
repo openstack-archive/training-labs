@@ -7,7 +7,7 @@ set -o errexit -o nounset
 TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/credentials"
-source "$LIB_DIR/functions.guest"
+source "$LIB_DIR/functions.guest.sh"
 
 # Determine hostname from script name
 re=".*init_(.*)_node.sh$"

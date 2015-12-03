@@ -6,7 +6,7 @@ set -o errexit -o nounset
 
 TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
 source "$TOP_DIR/config/paths"
-source "$LIB_DIR/functions.guest"
+source "$LIB_DIR/functions.guest.sh"
 
 indicate_current_auto
 

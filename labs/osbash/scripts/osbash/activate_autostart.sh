@@ -11,7 +11,7 @@ TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
 source "$TOP_DIR/config/paths"
 # source_deploy doesn't work here
 source "$CONFIG_DIR/deploy.osbash"
-source "$LIB_DIR/functions.guest"
+source "$LIB_DIR/functions.guest.sh"
 
 readonly RCAUTOSTART=osbashauto
 
