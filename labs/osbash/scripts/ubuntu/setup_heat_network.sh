@@ -25,7 +25,7 @@ done
 
 echo "Creating a test heat template."
 
-node_ssh controller-mgmt "echo '
+node_ssh controller-mgmt "cat > test-stack.yml" << HEAT
 heat_template_version: 2014-10-16
 description: A simple server.
 
@@ -49,13 +49,14 @@ resources:
 outputs:
   private_ip:
     description: IP address of the server in the private network
-    value: { get_attr: [ server, first_address ] }' > test-stack.yml"
+    value: { get_attr: [ server, first_address ] }
+HEAT
 
 NET_ID=$(node_ssh controller-mgmt "$AUTH; nova net-list" | awk '/ demo-net / { print $2 }')
 img_name=$(basename "$CIRROS_URL" -disk.img)
 
 node_ssh controller-mgmt "$AUTH; heat stack-create -f test-stack.yml \
-      -P 'ImageID=$img_name;NetID=$NET_ID' testStack"
+    -P 'ImageID=$img_name;NetID=$NET_ID' testStack"
 
 echo "Verifying successful creation of stack."
 

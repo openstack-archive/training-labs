@@ -45,8 +45,7 @@ function check_apache_service {
         sudo service apache2 stop
         sleep 10
         i=$((i + 1))
-        if [ $i -gt 3 ]
-        then
+        if [ $i -gt 3 ]; then
             break
         fi
     done
