@@ -340,12 +340,8 @@ nova flavor-list
 echo "Listing available images."
 nova image-list
 
-echo -n "Waiting for neutron to start."
-until neutron net-list >/dev/null 2>&1; do
-    sleep 1
-    echo -n .
-done
-echo
+# Wait for neutron to start
+wait_for_neutron
 
 echo "Listing available networks."
 neutron net-list

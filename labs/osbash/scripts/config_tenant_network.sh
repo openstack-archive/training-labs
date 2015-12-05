@@ -16,10 +16,8 @@ indicate_current_auto
 echo "Sourcing the demo credentials."
 source "$CONFIG_DIR/demo-openstackrc.sh"
 
-echo "Waiting for neutron to start."
-until neutron net-list >/dev/null 2>&1; do
-    sleep 1
-done
+# Wait for neutron to start
+wait_for_neutron
 
 echo "Creating the tenant network."
 neutron net-create demo-net

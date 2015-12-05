@@ -263,6 +263,31 @@ function setup_database {
     mysql_exe "GRANT ALL ON ${service}.* TO '$db_user'@'localhost' IDENTIFIED BY '$db_password';"
 }
 
+# Wait for neutron to come up. Due to a race during the operating system boot
+# process, the neutron server sometimes fails to come up. We restart the
+# neutron server if it does not reply for too long.
+function wait_for_neutron {
+    echo -n "Waiting for neutron to come up."
+    local cnt=0
+    local auth="source $CONFIG_DIR/demo-openstackrc.sh"
+    until neutron net-list >/dev/null 2>&1; do
+        if [ "$cnt" -eq 10 ]; then
+            echo
+            echo "ERROR No response from neutron. Restarting neutron-server."
+            node_ssh controller-mgmt "$auth; sudo service neutron-server restart"
+            echo -n "Waiting for neutron to come up."
+        elif [ "$cnt" -eq 20 ]; then
+            echo
+            echo "ERROR neutron does not seem to come up. Aborting."
+            exit 1
+        fi
+        echo -n .
+        sleep 1
+        cnt=$((cnt + 1))
+    done
+    echo
+}
+
 # Wait for keystone to come up
 function wait_for_keystone {
     echo -n "Waiting for keystone to come up."
