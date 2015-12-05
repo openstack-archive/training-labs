@@ -360,7 +360,7 @@ function command_from_config {
             get_cmd_options $args
             local shot_name=$args
             echo >&2 snapshot_cycle "$vm_name" "$shot_name"
-            _autostart_queue "osbash/shutdown.sh"
+            _autostart_queue "shutdown.sh"
             _vm_boot_with_autostart "$vm_name"
             vm_wait_for_shutdown "$vm_name"
             vm_snapshot "$vm_name" "$shot_name"
