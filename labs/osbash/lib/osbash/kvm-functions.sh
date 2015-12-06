@@ -153,7 +153,7 @@ function virsh_define_network {
         local cfg=$LOG_DIR/kvm-net-$net.xml
 
         # FIXME Limit port forwarding to networks that need it.
-        cat << NETCFG > $cfg
+        cat << NETCFG > "$cfg"
 <network>
   <name>$net</name>
   <forward mode='nat'/>
