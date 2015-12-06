@@ -56,9 +56,6 @@ function vm_is_running {
 function vm_wait_for_shutdown {
     local vm_name=$1
 
-    # Return if we are just faking it for wbatch
-    ${OSBASH:+:} return 0
-
     echo -e >&2 -n "${CStatus:-}Machine shutting down${CReset:-}"
     while $VIRSH domstate "$vm_name" | grep -q -e running -e "in shutdown"; do
         echo -n .
