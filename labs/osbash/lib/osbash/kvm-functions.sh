@@ -232,7 +232,7 @@ function disk_create {
     local size=$2
 
     if ! disk_exists "$disk"; then
-        $VIRSH vol-create-as "$KVM_VOL_POOL" "$disk" "${size}M"
+        $VIRSH vol-create-as "$KVM_VOL_POOL" "$disk" "${size}M" --format qcow2
     fi
 }
 
@@ -246,6 +246,33 @@ function disk_delete {
 
 function base_disk_delete {
     disk_delete "$(get_base_disk_name)"
+}
+
+# Use virt-sparsify to compress disk image and make it sparse
+function disk_compress {
+    local disk_name=$1
+    local disk_path=$($VIRSH vol-path --pool $KVM_VOL_POOL $disk_name)
+    local pool_dir=$(dirname $disk_path)
+
+    local spexe
+    if ! spexe=$(which virt-sparsify); then
+        echo -e >&2 "${CError:-}No virt-sparsify executable found." \
+                "Consider installing libguestfs-tools.${CReset:-}"
+        return 0
+    fi
+
+    echo -e >&2 "${CStatus:-}Compressing disk image, input file:${CReset:-}"
+    sudo file "$disk_path"
+    sudo ls -lh "$disk_path"
+    sudo du -sh "$disk_path"
+
+    sudo $spexe --compress "$disk_path" "$pool_dir/.$disk_name"
+    sudo mv -vf "$pool_dir/.$disk_name" "$disk_path"
+
+    echo -e >&2 "${CStatus:-}Output file:${CReset:-}"
+    sudo file "$disk_path"
+    sudo ls -lh "$disk_path"
+    sudo du -sh "$disk_path"
 }
 
 #-------------------------------------------------------------------------------
