@@ -55,6 +55,7 @@ function vm_init_node {
 
     vm_delete "$vm_name"
 
+    echo -e "${CStatus:-}Cloning node VM disk. This will take a while.${CReset:-}"
     $VIRSH vol-clone --pool "$KVM_VOL_POOL" "$base_disk_name" "$vm_name"
 
     local console_type
