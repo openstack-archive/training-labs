@@ -106,13 +106,13 @@ Demo User Login:
 You can ssh to each of the nodes by::
 
     # Controller node
-    $ ssh osbash@10.10.10.51
+    $ ssh osbash@10.0.0.11
 
     # Network node
-    $ ssh osbash@10.10.10.52
+    $ ssh osbash@10.0.0.21
 
     # Compute node
-    $ ssh osbash@10.10.10.53
+    $ ssh osbash@10.0.0.31
 
 Credentials for all nodes:
 
