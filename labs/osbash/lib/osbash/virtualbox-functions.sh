@@ -133,20 +133,31 @@ function create_hostonlyif {
     fi
 }
 
+function fake_hostif {
+    local numifs
+    if [ "${NET_IFNAME[0]:-""}" = "" ]; then
+        numifs=0
+    else
+        numifs=${#NET_IFNAME[@]}
+    fi
+    NET_IFNAME[index]="vboxnet${numifs}"
+}
+
 function create_network {
-    # From variable name (e.g. "API_NET"), get its content (content of $API_NET)
-    local ip=${!1}
+    local index=$1
+    # The host-side interface is the default gateway of the network
+    local if_ip=${NET_GW[index]}
 
     # If we are here only for wbatch, ignore actual network interfaces; just
-    # return a unique identifier (so it can be replaced with the interface
+    # return a vboxnetX identifier (so it can be replaced with the interface
     # name used by Windows).
-    ${OSBASH:+:} mktemp -u XXXXXXXX
+    ${OSBASH:+:} fake_hostif
     ${OSBASH:+:} return 0
 
-    local if_name=$(ip_to_hostonlyif "$ip")
+    local if_name=$(ip_to_hostonlyif "$if_ip")
     if [ -n "$if_name" ]; then
         if hostonlyif_in_use "$if_name"; then
-            echo >&2 "Host-only interface $if_name ($ip) is in use." \
+            echo >&2 "Host-only interface $if_name ($if_ip) is in use." \
                         "Using it, too."
         fi
     else
@@ -154,11 +165,11 @@ function create_network {
         if_name=$(create_hostonlyif)
     fi
 
-    echo -e >&2 "${CStatus:-}Configuring host-only network ${CData:-}$ip ($if_name)${CReset:-}"
+    echo -e >&2 "${CStatus:-}Configuring host-only network ${CData:-}$if_ip ($if_name)${CReset:-}"
     $VBM hostonlyif ipconfig "$if_name" \
-        --ip "$ip" \
+        --ip "$if_ip" \
         --netmask 255.255.255.0 >/dev/null
-    echo "$if_name"
+    NET_IFNAME[index]=$if_name
 }
 
 #-------------------------------------------------------------------------------
@@ -347,23 +358,39 @@ function vm_port {
         --natpf1 "$desc,tcp,127.0.0.1,$hostport,,$guestport"
 }
 
-function vm_nic_hostonly {
-    local vm_name=$1
-    # We start counting interfaces at 0, but VirtualBox starts NICs at 1
-    local nic=$(($2 + 1))
-    local net_name=$3
-    $VBM modifyvm "$vm_name" \
-        "--nictype$nic" "$NICTYPE" \
-        "--nic$nic" hostonly \
-        "--hostonlyadapter$nic" "$net_name" \
-        "--nicpromisc$nic" allow-all
+function netname_to_hostif {
+    local netname=$1
+
+    for index in "${!NET_NAME[@]}"; do
+        if [ "$netname" = "${NET_NAME[index]}" ]; then
+            echo "${NET_IFNAME[index]}"
+            return 0
+        fi
+    done
+
+    echo >&2 "ERROR: No host interface for network $netname. Exiting."
+    exit 1
 }
 
-function vm_nic_nat {
+function vm_nic_base {
     local vm_name=$1
     # We start counting interfaces at 0, but VirtualBox starts NICs at 1
     local nic=$(($2 + 1))
     $VBM modifyvm "$vm_name" "--nictype$nic" "$NICTYPE" "--nic$nic" nat
+}
+
+function vm_nic_std {
+    local vm_name=$1
+    local index=$2
+    # We start counting interfaces at 0, but VirtualBox starts NICs at 1
+    local nic=$((index + 1))
+    local netname=$(ip_to_netname "${NODE_IF_IP[index]}")
+    local hostif=$(netname_to_hostif "$netname")
+    $VBM modifyvm "$vm_name" \
+        "--nictype$nic" "$NICTYPE" \
+        "--nic$nic" hostonly \
+        "--hostonlyadapter$nic" "$hostif" \
+        "--nicpromisc$nic" allow-all
 }
 
 function vm_create {

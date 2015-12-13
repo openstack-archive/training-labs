@@ -169,11 +169,21 @@ function wbatch_create_hostnet {
     wbatch_elevate_privileges
     wbatch_find_vbm
 
-    sed -e "
-        s,%APINET%,$API_NET,g;
-        s,%TUNNELNET%,$TUNNEL_NET,g;
-        s,%MGMTNET%,$MGMT_NET,g;
-        " "$WBATCH_TEMPLATE_DIR/template-create_hostnet_bat" | wbatch_write_stdin
+    local index
+    local if_name
+    local win_adapter
+    for index in "${!NET_NAME[@]}"; do
+        if_name=${NET_IFNAME[index]}
+        # The host-side interface is the default gateway of the network
+        if_ip=${NET_GW[index]}
+        # Translate if_name to Windows-type interface name
+        win_adapter=$(vboxnet_to_win_adapter_num "$if_name")
+        sed -e "
+            s,%IFNAME%,${win_adapter},g;
+            s,%IFIP%,${if_ip},g;
+            " "$WBATCH_TEMPLATE_DIR/template-create_hostnet_bat" | wbatch_write_stdin
+        echo | wbatch_write_stdin
+    done
 
     wbatch_end_file
 }
@@ -215,31 +225,13 @@ function wbatch_begin_node {
 # VBoxManage call handling
 #-------------------------------------------------------------------------------
 
-function wbatch_get_hostif_subst {
-    local hostif=$1
-    case "$hostif" in
-        ${MGMT_NET_IF:-""})
-            echo 'VirtualBox Host-Only Ethernet Adapter'
-            ;;
-        ${TUNNEL_NET_IF:-""})
-            echo 'VirtualBox Host-Only Ethernet Adapter #2'
-            ;;
-        ${API_NET_IF:-""})
-            echo 'VirtualBox Host-Only Ethernet Adapter #3'
-            ;;
-        *)
-            return 1
-            ;;
-    esac
-}
-
 function wbatch_log_vbm {
     ARGS=( "$@" )
     for i in "${!ARGS[@]}"; do
         case "${ARGS[i]}" in
             --hostonlyadapter*)
                 # The next arg is the host-only interface name -> change it
-                ARGS[i+1]=\"$(wbatch_get_hostif_subst "${ARGS[i+1]}")\"
+                ARGS[i+1]=\"$(vboxnet_to_win_adapter_num "${ARGS[i+1]}")\"
                 ;;
             --hostpath)
                 # The next arg is the shared dir -> change it
@@ -272,6 +264,20 @@ function wbatch_log_vbm {
 #-------------------------------------------------------------------------------
 # Windows path name helpers
 #-------------------------------------------------------------------------------
+
+# Translate Unix-style vboxnetX to Windows-type interface name
+function vboxnet_to_win_adapter_num {
+    local vboxname=$1
+    local win_if="VirtualBox Host-Only Ethernet Adapter"
+
+    # Remove leading "vboxnet" to get interface number
+    local ifnum=${vboxname#vboxnet}
+
+    if [ "$ifnum" -ne 0 ]; then
+        win_if+=" #$((ifnum + 1))"
+    fi
+    echo "$win_if"
+}
 
 # On Windows, all paths are relative to TOP_DIR
 function wbatch_path_to_windows {

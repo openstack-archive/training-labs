@@ -3,14 +3,14 @@
 # Port forwarding
 VM_SSH_PORT=2231
 
-# Last octet of IP addresses
-FOURTH_OCTET=21
-
 # Assign network interfaces to networks
-NET_IF_0=nat
-NET_IF_1=MGMT_NET
-NET_IF_2=TUNNEL_NET
-NET_IF_3=API_NET
+NET_IF_0=dhcp
+# Mgmt network
+NET_IF_1="static 10.0.0.21"
+# Tunnel network
+NET_IF_2="static 10.0.1.21"
+# API/external network
+NET_IF_3="static 203.0.113.21"
 
 # A default instance within network uses 512 MB RAM
 # VM_MEM=512

@@ -45,6 +45,39 @@ function get_distro_name {
 }
 
 #-------------------------------------------------------------------------------
+# Networking
+#-------------------------------------------------------------------------------
+
+function create_host_networks {
+    get_host_network_config
+
+    local index
+    for index in "${!NET_NAME[@]}"; do
+        create_network $index
+    done
+}
+
+function configure_node_netifs {
+    local vm_name=$1
+
+    get_node_netif_config "$vm_name"
+
+    local index
+    local type
+    for index in "${!NODE_IF_TYPE[@]}"; do
+        type=${NODE_IF_TYPE[index]}
+        if [ "$type" = "dhcp" ]; then
+            vm_nic_base "$vm_name" $index
+        elif [ "$type" = "static" ]; then
+            vm_nic_std "$vm_name" $index
+        else
+            echo >&2 "ERROR Unknown interface type: $type."
+            exit 1
+        fi
+    done
+}
+
+#-------------------------------------------------------------------------------
 # ssh
 #-------------------------------------------------------------------------------
 
