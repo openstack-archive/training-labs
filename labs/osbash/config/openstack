@@ -12,14 +12,12 @@ CIRROS_URL="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 #------------------------------------------------------------------------------
 
 # Networks used by OpenStack training-labs setup
-: ${MGMT_NET:=10.0.0.1}
-: ${TUNNEL_NET:=10.0.1.1}
-: ${API_NET:=203.0.113.1}
-# FIXME API_NET and EXT_NET should be different networks as soon as our
-#       setup allows it.
-: ${EXT_NET:=203.0.113.1}
+NETWORK_1="mgmt 10.0.0.0"
+NETWORK_2="tunnel 10.0.1.0"
+# API/external network
+NETWORK_3="api 203.0.113.0"
 
-# EXT_NET
+# External network
 : ${FLOATING_IP_START:=203.0.113.101}
 : ${FLOATING_IP_END:=203.0.113.200}
 : ${EXTERNAL_NETWORK_GATEWAY:=203.0.113.1}

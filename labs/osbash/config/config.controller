@@ -4,13 +4,12 @@
 VM_SSH_PORT=2230
 VM_WWW_PORT=8888
 
-# Last octet of IP addresses
-FOURTH_OCTET=11
-
 # Assign network interfaces to networks
-NET_IF_0=nat
-NET_IF_1=MGMT_NET
-NET_IF_2=API_NET
+NET_IF_0=dhcp
+# Mgmt network
+NET_IF_1="static 10.0.0.11"
+# API/external network
+NET_IF_2="static 203.0.113.11"
 
 # Controller node is running many services. For Kilo, 2GB RAM
 # is required for expected performance.

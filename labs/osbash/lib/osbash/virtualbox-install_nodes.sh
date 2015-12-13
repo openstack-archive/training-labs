@@ -1,26 +1,5 @@
 # This bash library contains the main function that creates a node VM.
 
-# Configure VirtualBox network interfaces
-function _vbox_configure_ifs {
-    local vm_name=$1
-    # Iterate over all NET_IF_? variables
-    local net_ifs=( "${!NET_IF_@}" )
-    local net_if=""
-    for net_if in "${net_ifs[@]}"; do
-        local if_num=${net_if##*_}
-        if [ "${!net_if}" = "nat" ]; then
-            echo "interface $if_num: NAT"
-            vm_nic_nat "$vm_name" "$if_num"
-        else
-            # Host-only network: net_if is net name (e.g. API_NET)
-            # Use corresponding VirtualBox interface (e.g. API_NET_IF)
-            local host_if="${!net_if}_IF"
-            echo "interface $if_num: host-only ${!host_if}"
-            vm_nic_hostonly "$vm_name" "$if_num" "${!host_if}"
-        fi
-    done
-}
-
 # Boot node VM; wait until autostart files are processed and VM is shut down
 function _vm_boot_with_autostart {
     local vm_name=$1
@@ -52,7 +31,7 @@ function vm_init_node {
     # Set VM_CPUS in config/config.NODE_NAME to override
     vm_cpus "$vm_name" "${VM_CPUS:-1}"
 
-    _vbox_configure_ifs "$vm_name"
+    configure_node_netifs "$vm_name"
 
     # Port forwarding
     if [ -n "${VM_SSH_PORT:-}" ]; then

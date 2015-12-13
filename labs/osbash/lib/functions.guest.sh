@@ -328,112 +328,6 @@ function service_to_user_password {
 # Network configuration
 #-------------------------------------------------------------------------------
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Fedora /etc/sysconfig/network-scripts/ifcfg-* configuration
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-function _ifnum_to_ifname_fedora {
-    local if_num=$1
-    local -a if_names=('p2p1' 'p7p1' 'p8p1' 'p9p1')
-
-    echo "${if_names[$if_num]}"
-}
-
-function _config_sysconfig_nat {
-    local if_num=$1
-
-    local if_name="$(_ifnum_to_ifname_fedora "$if_num")"
-
-    local if_file=/etc/sysconfig/network-scripts/ifcfg-$if_name
-
-    sed -e "
-        s,%IF_NAME%,$if_name,g;
-    " "$TEMPLATE_DIR/template-fedora-ifcfg-nat" | sudo tee "$if_file"
-}
-
-function _config_sysconfig_hostonly {
-    local if_num=$1
-    local ip_address=$2
-
-    local if_name="$(_ifnum_to_ifname_fedora "$if_num")"
-
-    local if_file=/etc/sysconfig/network-scripts/ifcfg-$if_name
-
-    sed -e "
-        s,%IF_NAME%,$if_name,g;
-        s,%IP_ADDRESS%,$ip_address,g;
-    " "$TEMPLATE_DIR/template-fedora-ifcfg-hostonly" | sudo tee "$if_file"
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Ubuntu /etc/network/interfaces configuration
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-readonly UBUNTU_IF_FILE=/etc/network/interfaces
-
-function _ifnum_to_ifname_ubuntu {
-    local if_num=$1
-    local -a if_names=('eth0' 'eth1' 'eth2' 'eth3')
-
-    echo "${if_names[$if_num]}"
-}
-
-
-function _config_interfaces_nat {
-    local if_num=$1
-
-    local if_name="$(_ifnum_to_ifname_ubuntu "$if_num")"
-
-    # Empty line before this entry
-    echo | sudo tee -a "$UBUNTU_IF_FILE"
-
-    sed -e "
-        s,%IF_NAME%,$if_name,g;
-    " "$TEMPLATE_DIR/template-ubuntu-interfaces-nat" | sudo tee -a "$UBUNTU_IF_FILE"
-}
-
-function _config_interfaces_hostonly {
-    local if_num=$1
-    local ip_address=$2
-
-    local if_name="$(_ifnum_to_ifname_ubuntu "$if_num")"
-
-    # Empty line before this entry
-    echo | sudo tee -a "$UBUNTU_IF_FILE"
-
-    sed -e "
-        s,%IF_NAME%,$if_name,g;
-        s,%IP_ADDRESS%,$ip_address,g;
-    " "$TEMPLATE_DIR/template-ubuntu-interfaces-hostonly" | sudo tee -a "$UBUNTU_IF_FILE"
-}
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-function config_nat {
-    local if_num=$1
-
-    init_os_ident
-    if is_fedora; then
-        echo _config_sysconfig_nat "$if_num"
-        _config_sysconfig_nat "$if_num"
-    else
-        echo _config_interfaces_nat "$if_num"
-        _config_interfaces_nat "$if_num"
-    fi
-}
-
-function config_hostonly {
-    local if_num=$1
-    local ip_address=$2
-
-    init_os_ident
-    if is_fedora; then
-        echo _config_sysconfig_hostonly "$if_num" "$ip_address"
-        _config_sysconfig_hostonly "$if_num" "$ip_address"
-    else
-        echo _config_interfaces_hostonly "$if_num" "$ip_address"
-        _config_interfaces_hostonly "$if_num" "$ip_address"
-    fi
-}
-
 function hostname_to_ip {
     local host_name=$1
     getent hosts "$host_name"|awk '{print $1}'
@@ -442,35 +336,22 @@ function hostname_to_ip {
 function config_network {
     init_os_ident
     if is_ubuntu; then
-        # Configuration functions will append to this file
-        sudo cp -v  "$TEMPLATE_DIR/template-ubuntu-interfaces-loopback" \
-                    "$UBUNTU_IF_FILE"
+        source "$LIB_DIR/functions.ubuntu.sh"
+    else
+        source "$LIB_DIR/functions.fedora.sh"
     fi
 
-    # Get FOURTH_OCTET and network interfaces (NET_IF_?) for this node
+    netcfg_init
+
+    # Get network interface configuration (NET_IF_?) for this node
     unset -v NET_IF_0 NET_IF_1 NET_IF_2 NET_IF_3
-    source "$CONFIG_DIR/config.$(hostname)"
+    get_node_netif_config "$(hostname)"
 
-    # Get API_NET, TUNNEL_NET, MGMT_NET
-    source "$CONFIG_DIR/openstack"
-
-    # Iterate over all NET_IF_? variables
-    local net_ifs=( "${!NET_IF_@}" )
-    local net_if=""
-    for net_if in "${net_ifs[@]}"; do
-        echo >&2 -n "${net_if} ${!net_if}"
-        local if_num=${net_if##*_}
-        if [ "${!net_if}" = "nat" ]; then
-            echo >&2
-            config_nat "$if_num"
-        else
-            # Host-only network: net_if is net name (e.g. API_NET)
-            # Use corresponding value (e.g. 192.168.100.1)
-            IP="$(get_ip_from_net_and_fourth "${!net_if}" "$FOURTH_OCTET")"
-            echo >&2 " $IP"
-
-            config_hostonly "$if_num" "$IP"
-        fi
+    local index
+    local iftype
+    for index in "${!NODE_IF_TYPE[@]}"; do
+        iftype=${NODE_IF_TYPE[index]}
+        config_netif "$iftype" "$index" "${NODE_IF_IP[index]}"
     done
 }
 
