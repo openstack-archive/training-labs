@@ -127,8 +127,8 @@ function ssh_env_for_node {
 
     # IP address in management network
     local mgmt_ip="$(source "$CONFIG_DIR/config.$node"; \
-                    get_ip_from_net_and_fourth "MGMT_NET" "$FOURTH_OCTET")"
-    echo >&2 "Target node is at $mgmt_ip:$VM_SSH_PORT (MGMT_NET)."
+                    get_node_ip_in_network "$node" "mgmt")"
+    echo >&2 "Target node is at $mgmt_ip:$VM_SSH_PORT (mgmt network)."
 
     # Wait for VM to respond on management network
     SSH_IP=$mgmt_ip
@@ -142,10 +142,10 @@ function ssh_env_for_node {
 }
 
 function virsh_define_network {
-    local net=$1
-    local ip=$2
+    local net=labs-$1
+    local if_ip=$2
 
-    echo >&2 "Defining network $net ($ip)."
+    echo >&2 "Defining network $net ($if_ip)."
     if ! $VIRSH net-info "$net" >/dev/null 2>&1; then
         local cfg=$LOG_DIR/kvm-net-$net.xml
 
@@ -154,7 +154,7 @@ function virsh_define_network {
 <network>
   <name>$net</name>
   <forward mode='nat'/>
-  <ip address='$ip' netmask='255.255.255.0'>
+  <ip address='$if_ip' netmask='255.255.255.0'>
   </ip>
 </network>
 NETCFG
@@ -164,7 +164,7 @@ NETCFG
 }
 
 function virsh_start_network {
-    local net=$1
+    local net=labs-$1
 
     if $VIRSH net-info "$net" 2>/dev/null|grep -q "Active:.*no"; then
         echo >&2 "Starting network $net."
@@ -173,7 +173,7 @@ function virsh_start_network {
 }
 
 function virsh_stop_network {
-    local net=$1
+    local net=labs-$1
 
     if $VIRSH net-info "$net" 2>/dev/null|grep -q "Active:.*yes"; then
         echo >&2 "Stopping network $net."
@@ -182,7 +182,7 @@ function virsh_stop_network {
 }
 
 function virsh_undefine_network {
-    local net=$1
+    local net=labs-$1
 
     if $VIRSH net-info "$net" >/dev/null 2>&1; then
         echo >&2 "Undefining network $net."
@@ -190,26 +190,30 @@ function virsh_undefine_network {
     fi
 }
 
-function net_name_to_kvm_net {
-    local net_name=$1
+function vm_nic_base {
+    KVM_NET_OPTIONS="${KVM_NET_OPTIONS:-} --network bridge=virbr0"
+}
 
-    # e.g. MGMT_NET -> mgmt
-    echo labs-"${net_name%%_NET}" | tr "[:upper:]" "[:lower:]"
+function vm_nic_std {
+    local vm_name=$1
+    local index=$2
+    local netname=labs-$(ip_to_netname "${NODE_IF_IP[index]}")
+
+    KVM_NET_OPTIONS="${KVM_NET_OPTIONS:-} --network network=$netname"
 }
 
 function create_network {
-    local net_name=$1
-    local ip=${!1}
+    local index=$1
+    local net_name=${NET_NAME[index]}
+    local if_ip=${NET_GW[index]}
 
-    net=$(net_name_to_kvm_net "$net_name")
+    virsh_stop_network "$net_name"
 
-    virsh_stop_network "$net"
+    virsh_undefine_network "$net_name"
 
-    virsh_undefine_network "$net"
+    virsh_define_network "$net_name" "$if_ip"
 
-    virsh_define_network "$net" "$ip"
-
-    virsh_start_network "$net"
+    virsh_start_network "$net_name"
 }
 
 #-------------------------------------------------------------------------------

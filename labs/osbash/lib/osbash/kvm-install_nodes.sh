@@ -1,27 +1,5 @@
 # This bash library contains the main function that creates a node VM.
 
-# Configure KVM networks
-function _kvm_configure_ifs {
-    local vm_name=$1
-    # Iterate over all NET_IF_? variables
-    local net_ifs=( "${!NET_IF_@}" )
-    local net_if=""
-    local network_string=""
-    for net_if in "${net_ifs[@]}"; do
-        local if_num=${net_if##*_}
-        if [ "${!net_if}" = "nat" ]; then
-            echo >&2 "interface $if_num: NAT"
-            network_string="$network_string --network bridge=virbr0"
-        else
-            # Network: net_if is net name (e.g. API_NET)
-            local net_name=${!net_if}
-            local net=$(net_name_to_kvm_net "$net_name")
-            network_string="$network_string --network network=$net"
-        fi
-    done
-    echo "$network_string"
-}
-
 # Boot node VM; wait until autostart files are processed and VM is shut down
 function _vm_boot_with_autostart {
     local vm_name=$1
@@ -51,7 +29,7 @@ function vm_init_node {
 
     local base_disk_name=$(get_base_disk_name)
 
-    local network_string=$(_kvm_configure_ifs "$vm_name")
+    configure_node_netifs "$vm_name"
 
     vm_delete "$vm_name"
 
@@ -74,7 +52,7 @@ function vm_init_node {
         --vcpus "${VM_CPUS:-1}" \
         --os-type=linux \
         --disk vol="$KVM_VOL_POOL/${vm_name},cache=none" \
-        $network_string \
+        ${KVM_NET_OPTIONS:-""} \
         --import \
         $console_type \
         &

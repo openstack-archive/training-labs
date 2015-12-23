@@ -3,7 +3,6 @@ set -o errexit -o nounset
 TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/credentials"
-source "$CONFIG_DIR/openstack"
 source "$LIB_DIR/functions.guest.sh"
 source "$CONFIG_DIR/admin-openstackrc.sh"
 exec_logfile
@@ -15,10 +14,7 @@ indicate_current_auto
 # http://docs.openstack.org/kilo/install-guide/install/apt/content/cinder-install-storage-node.html
 #------------------------------------------------------------------------------
 
-# Get FOURTH_OCTET for this node
-source "$CONFIG_DIR/config.$(hostname)"
-
-MY_MGMT_IP=$(get_ip_from_net_and_fourth "MGMT_NET" "$FOURTH_OCTET")
+MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
 echo "IP address of this node's interface in management network: $MY_MGMT_IP."
 
 echo "Installing qemu support package for non-raw image types."

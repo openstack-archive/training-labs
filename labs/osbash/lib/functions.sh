@@ -60,12 +60,80 @@ function yes_or_no {
 # Network helpers
 #-------------------------------------------------------------------------------
 
-function get_ip_from_net_and_fourth {
-    local net_name=$1
-    local net="${!net_name}"
-    local fourth_octet=$2
+function get_host_network_config {
+    source "$CONFIG_DIR/openstack"
 
-    echo "${net%.*}.$fourth_octet"
+    local line
+    # Iterate over all NETWORK_? variables
+    for hostnet in "${!NETWORK_@}"; do
+        line=(${!hostnet})
+        NET_NAME+=(${line[0]})
+        NET_IP+=(${line[1]})
+        # Set .1 (e.g., 203.0.113.1) as the default gateway address
+        NET_GW+=($(remove_last_octet ${line[1]}).1)
+    done
+}
+
+function get_node_netif_config {
+    local vm_name=$1
+    source "$CONFIG_DIR/config.$vm_name"
+
+    local net_if=""
+    local line
+    # Iterate over all NET_IF_? variables
+    for net_if in "${!NET_IF_@}"; do
+        local if_num=${net_if##*_}
+        line=(${!net_if})
+        NODE_IF_TYPE[$if_num]=${line[0]}
+        NODE_IF_IP[$if_num]=${line[1]:-""}
+    done
+}
+
+function remove_last_octet {
+    # Remove last period and everything after it
+    echo "${1%.*}"
+}
+
+function ip_to_netname {
+    local ip=$1
+    local ip_net=$(remove_last_octet "$ip")
+    local host_net
+    local index
+
+    for index in "${!NET_IP[@]}"; do
+        # Remove last octet
+        host_net=$(remove_last_octet ${NET_IP[index]})
+        if [ "$ip_net" = "$host_net" ]; then
+            echo "${NET_NAME[index]}"
+            return 0
+        fi
+    done
+
+    echo >&2 "ERROR: No network for IP address $ip. Exiting."
+    exit 1
+}
+
+function get_node_ip_in_network {
+    local vm_name=$1
+    local netname=$2
+    local ip
+
+    get_host_network_config
+    get_node_netif_config "$vm_name"
+
+    for ip in "${NODE_IF_IP[@]}"; do
+        if [ -z "$ip" ]; then
+            # This interface has no IP address. Next.
+            continue
+        elif [ "$(ip_to_netname "$ip")" = "$netname" ]; then
+            echo >&2 "Success. Node $vm_name in $netname: $ip."
+            echo "$ip"
+            return 0
+        fi
+    done
+
+    echo >&2 "ERROR: Node $vm_name not in network $netname. Exiting."
+    exit 1
 }
 
 #-------------------------------------------------------------------------------

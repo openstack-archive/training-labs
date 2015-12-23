@@ -12,13 +12,7 @@ indicate_current_auto
 #-------------------------------------------------------------------------------
 # Controller setup
 
-# Get FOURTH_OCTET for this node
-source "$CONFIG_DIR/config.$(hostname)"
-
-# Get MGMT_NET
-source "$CONFIG_DIR/openstack"
-
-DB_IP=$(get_ip_from_net_and_fourth "MGMT_NET" "$FOURTH_OCTET")
+DB_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
 echo "Will bind MySQL server to $DB_IP."
 
 #------------------------------------------------------------------------------
