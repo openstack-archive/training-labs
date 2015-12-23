@@ -156,6 +156,7 @@ function iniset_sudo {
     local tmpfile=$(mktemp)
     # Create a temporary copy, work on it, and copy it back into place
     sudo cp -fv "$file" "$tmpfile"
+    echo >&2 iniset "$tmpfile" "$@"
     iniset "$tmpfile" "$@"
     cat "$tmpfile" | sudo tee "$file" >/dev/null
 }
@@ -168,6 +169,7 @@ function inicomment_sudo {
     local tmpfile=$(mktemp)
     # Create a temporary copy, work on it, and copy it back into place
     sudo cp -fv "$file" "$tmpfile"
+    echo >&2 inicomment "$tmpfile" "$@"
     inicomment "$tmpfile" "$@"
     cat "$tmpfile" | sudo tee "$file" >/dev/null
 }
@@ -180,6 +182,7 @@ function ini_has_option_sudo {
     local tmpfile=$(mktemp)
     # Create a temporary copy, work on it
     sudo cp -fv "$file" "$tmpfile"
+    echo >&2 ini_has_option "$tmpfile" "$@"
     ini_has_option "$tmpfile" "$@"
 }
 
