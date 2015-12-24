@@ -33,8 +33,12 @@ function vm_init_node {
 
     vm_delete "$vm_name"
 
-    echo -e "${CStatus:-}Cloning node VM disk. This will take a while.${CReset:-}"
-    $VIRSH vol-clone --pool "$KVM_VOL_POOL" "$base_disk_name" "$vm_name"
+    echo -e "${CStatus:-}Creating copy-on-write VM disk.${CReset:-}"
+    $VIRSH vol-create-as "$KVM_VOL_POOL" "$vm_name" \
+        "${BASE_DISK_SIZE:=10000}M" \
+        --format qcow2 \
+        --backing-vol "$base_disk_name" \
+        --backing-vol-format qcow2
 
     local console_type
     if [ "$VM_UI" = "headless" ]; then

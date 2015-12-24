@@ -84,6 +84,8 @@ function vm_install_base {
 
     vm_wait_for_shutdown "$vm_name"
 
+    disk_compress "$base_disk_name"
+
     vm_delete "$vm_name"
 
     echo -e >&2 "${CStatus:-}Base disk created${CReset:-}"
