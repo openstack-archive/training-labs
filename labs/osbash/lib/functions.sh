@@ -96,14 +96,17 @@ function remove_last_octet {
 
 function ip_to_netname {
     local ip=$1
-    local ip_net=$(remove_last_octet "$ip")
-    local host_net
+    local ip_net=$(remove_last_octet "$ip").0
     local index
+
+    if [ -z "${NET_NAME+1}" ]; then
+        # NET_NAME array is undefined
+        get_host_network_config
+    fi
 
     for index in "${!NET_IP[@]}"; do
         # Remove last octet
-        host_net=$(remove_last_octet ${NET_IP[index]})
-        if [ "$ip_net" = "$host_net" ]; then
+        if [ "$ip_net" = "${NET_IP[index]}" ]; then
             echo "${NET_NAME[index]}"
             return 0
         fi
@@ -118,7 +121,11 @@ function get_node_ip_in_network {
     local netname=$2
     local ip
 
-    get_host_network_config
+    if [ -z "${NET_NAME+1}" ]; then
+        # NET_NAME array is undefined
+        get_host_network_config
+    fi
+
     get_node_netif_config "$vm_name"
 
     for ip in "${NODE_IF_IP[@]}"; do
