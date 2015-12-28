@@ -22,8 +22,10 @@ function set_yum_proxy {
 set_yum_proxy
 
 # Enable RDO repo
-if [[ ${OPENSTACK_RELEASE:-} = icehouse ]]; then
-    sudo yum install "http://repos.fedorapeople.org/repos/openstack/openstack-$OPENSTACK_RELEASE/rdo-release-$OPENSTACK_RELEASE-3.noarch.rpm"
+if [[ ${OPENSTACK_RELEASE:-} = kilo ]]; then
+    sudo yum install -y "https://repos.fedorapeople.org/repos/openstack/openstack-kilo/rdo-release-kilo-1.noarch.rpm"
+elif [[ ${OPENSTACK_RELEASE:-} = liberty ]]; then
+    sudo yum install -y "https://repos.fedorapeople.org/repos/openstack/openstack-liberty/rdo-release-liberty-2.noarch.rpm"
 else
     echo 2>&1 "ERROR Unknown OpenStack release."
     return 1
