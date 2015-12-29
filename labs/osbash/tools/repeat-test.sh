@@ -138,14 +138,10 @@ until [ $cnt -eq $REP ]; do
     )
 
     echo "Moving osbash and test log files into $dir."
-    # Check if there is at least one file that needs moving
-    if test -n "$(shopt -s nullglob; echo *.auto *.log *.xml)"; then
-        (
-        # Remove glob args (e.g. *.auto) if no matching file exists
-        shopt -s nullglob
-        mv "$LOG_DIR/"*.auto "$LOG_DIR/"*.log "$LOG_DIR/"*.xml "$dir"
-        )
-    fi
+    (
+    cd "$LOG_DIR"
+    mv *.auto *.log *.xml "$dir" || rc=$?
+    )
 
     echo "Copying upstart log files into $dir."
     "$TOP_DIR/tools/get_upstart_logs.sh" "$dir"
