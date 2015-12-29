@@ -5,6 +5,9 @@
 : ${VIRSH_CALL:=sudo virsh --connect=$LIBVIRT_CONNECT_URI}
 : ${VIRT_INSTALL_CALL:=sudo virt-install --connect=$LIBVIRT_CONNECT_URI}
 
+# KVM VM group (stored in VM description)
+: ${VM_GROUP:=OpenStack training-labs}
+
 # VM GUI type (one of headless, gui, vnc)
 : ${VM_UI:=vnc}
 
