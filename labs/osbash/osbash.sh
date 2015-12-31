@@ -62,6 +62,9 @@ function print_config {
         echo -e "${CInfo:-}Distribution name: ${CData:-} $(get_distro_name "$DISTRO")${CReset:-}"
     fi
 
+    echo -e "${CInfo:-}Virtualization provider:${CReset:-}" \
+            "${CData:-}$PROVIDER${CReset:-}"
+
     if [ "${SNAP_CYCLE:-}" = "no" ]; then
         echo -e "${CInfo:-}Skipping snapshot cycles.${CReset:-}"
     fi
