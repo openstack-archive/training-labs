@@ -72,6 +72,9 @@ function vm_init_node {
         echo -n .
     done
 
+    # Set VM group in description so we know which VMs are ours.
+    set_vm_group "$vm_name"
+
     # The SSH_IP needs to get out, so it can't be set in a sub-shell
     local mac=$(node_to_mac "$vm_name")
     echo -e "${CInfo:-}MAC address for node $vm_name: ${CData:-}$mac${CReset:-}"

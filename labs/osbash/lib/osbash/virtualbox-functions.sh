@@ -81,6 +81,31 @@ function vm_power_off {
     vbox_sleep 1
 }
 
+function vm_acpi_shutdown {
+    local vm_name=$1
+    if vm_is_running "$vm_name"; then
+        echo -e >&2 "${CStatus:-}ACPI shutdown for VM ${CData:-}\"$vm_name\"${CReset:-}"
+        $VBM controlvm "$vm_name" acpipowerbutton
+    fi
+    # VirtualBox VM needs a break before taking new commands
+    vbox_sleep 1
+}
+
+# Shut down all VMs in group VM_GROUP
+function stop_running_cluster_vms {
+    local vm_id
+
+    # Get VM ID from a line looking like this:
+    # "My VM" {0a13e26d-9543-460d-82d6-625fa657b7c4}
+    $VBM list runningvms | sed 's/.* {\(.*\)}/\1/' | while read vm_id; do
+        if $VBM showvminfo --machinereadable $vm_id |
+                grep -qe '^groups="/'$VM_GROUP; then
+            # vm_id instead of vm_name works just as well
+            vm_acpi_shutdown $vm_id
+        fi
+    done
+}
+
 function vm_snapshot {
     local vm_name=$1
     local shot_name=$2

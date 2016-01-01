@@ -41,6 +41,20 @@ function virsh_uses_kvm {
 # VM status
 #-------------------------------------------------------------------------------
 
+function set_vm_group {
+    local vm_name=$1
+
+    $VIRSH desc "$vm_name" --title --new-desc "$VM_GROUP"
+    $VIRSH desc "$vm_name" --new-desc "All VMs with description title" \
+            "'$VM_GROUP' get shut down when a new cluster build starts."
+}
+
+function get_vm_group {
+    local vm_name=$1
+
+    $VIRSH desc "$vm_name" --title
+}
+
 function vm_exists {
     local vm_name=$1
 
@@ -70,6 +84,27 @@ function vm_power_off {
         echo -e >&2 "${CStatus:-}Powering off VM ${CData:-}\"$vm_name\"${CReset:-}"
         $VIRSH destroy "$vm_name"
     fi
+}
+
+function vm_acpi_shutdown {
+    local vm_name=$1
+    if vm_is_running "$vm_name"; then
+        echo -e >&2 "${CStatus:-}ACPI shutdown for VM ${CData:-}\"$vm_name\"${CReset:-}"
+        $VIRSH shutdown "$vm_name"
+    fi
+}
+
+function stop_running_cluster_vms {
+    local vm_id
+
+    $VIRSH list --uuid | while read vm_id; do
+        if [ -z "$vm_id" ]; then
+            continue
+        elif [ "$(get_vm_group "$vm_id")" = "$VM_GROUP" ]; then
+            # vm_id instead of vm_name works just as well
+            vm_acpi_shutdown "$vm_id"
+        fi
+    done
 }
 
 function vm_snapshot {

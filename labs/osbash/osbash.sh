@@ -235,6 +235,8 @@ if [ "$CMD" = basedisk ]; then
     exit
 fi
 
+stop_running_cluster_vms
+
 echo "Building nodes using base disk $(get_base_disk_name)"
 
 create_host_networks
