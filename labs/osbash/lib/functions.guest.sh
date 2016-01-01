@@ -228,9 +228,7 @@ $option = $value
     else
         local sep=$(echo -ne "\x01")
         # Replace it
-        sed -i -e "/$option/ c\
-$option = $value
-" "$file"
+        sed -i -e '/^'${option}'/ s'${sep}'^\('${option}'[ \t]*=[ \t]*\).*$'${sep}'\1'"${value}"${sep} "$file"
     fi
     $xtrace
 }
