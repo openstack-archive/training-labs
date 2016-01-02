@@ -82,3 +82,10 @@ echo "Deleting the test stack."
 heat_stack_id=$(node_ssh controller-mgmt "$AUTH; heat stack-list" | awk '/ testStack / {print $2}')
 
 node_ssh controller-mgmt "$AUTH; heat stack-delete $heat_stack_id"
+
+echo -n "Waiting for test stack to disappear."
+while node_ssh controller-mgmt "$AUTH; heat stack-list|grep $heat_stack_id" >/dev/null 2>&1; do
+    sleep 1
+    echo -n .
+done
+echo
