@@ -419,12 +419,12 @@ function vm_create {
         $VBM createvm \
             --name "$vm_name" \
             --register \
-            --ostype Ubuntu_64 >/dev/null
+            --ostype "$VBOX_OSTYPE" >/dev/null
     else
         $VBM createvm \
             --name "$vm_name" \
             --register \
-            --ostype Ubuntu_64 \
+            --ostype "$VBOX_OSTYPE" \
             --groups "/$VM_GROUP"  >/dev/null
     fi
 

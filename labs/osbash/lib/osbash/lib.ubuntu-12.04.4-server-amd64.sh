@@ -27,6 +27,9 @@ readonly _BOOT_ARGS="/install/vmlinuz
     initrd=/install/initrd.gz
     console-setup/ask_detect=false"
 
+# ostype used by VirtualBox to choose icon and flags (64-bit, IOAPIC)
+VBOX_OSTYPE=Ubuntu_64
+
 function vbox_distro_start_installer {
     local vm_name=$1
 
