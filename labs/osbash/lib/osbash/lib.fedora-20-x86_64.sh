@@ -19,6 +19,9 @@ readonly _KS_all=http://git.openstack.org/cgit/openstack/training-labs/plain/lab
 
 readonly _BOOT_ARGS="linux ks=%s"
 
+# ostype used by VirtualBox to choose icon and flags (64-bit, IOAPIC)
+VBOX_OSTYPE=Fedora_64
+
 function vbox_distro_start_installer {
     local vm_name=$1
 

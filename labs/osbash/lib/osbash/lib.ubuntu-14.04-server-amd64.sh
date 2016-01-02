@@ -50,6 +50,9 @@ function update_iso_variables {
     echo -e >&2 "${CStatus:-}New ISO_URL: ${CData:-}$ISO_URL${CReset:-}"
 }
 
+# ostype used by VirtualBox to choose icon and flags (64-bit, IOAPIC)
+VBOX_OSTYPE=Ubuntu_64
+
 # Boot the ISO image operating system installer
 function vbox_distro_start_installer {
     local vm_name=$1
