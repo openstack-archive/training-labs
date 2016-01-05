@@ -75,14 +75,7 @@ function vm_init_node {
     # Set VM group in description so we know which VMs are ours.
     set_vm_group "$vm_name"
 
-    # The SSH_IP needs to get out, so it can't be set in a sub-shell
-    local mac=$(node_to_mac "$vm_name")
-    echo -e "${CInfo:-}MAC address for node $vm_name: ${CData:-}$mac${CReset:-}"
-
-    SSH_IP=$(mac_to_ip "$mac")
-    echo -e "${CInfo:-}IP address for node $vm_name:  ${CData:-}$SSH_IP${CReset:-}"
-
-    echo "Node: $vm_name MAC: $mac IP: $SSH_IP" | tee -a "$LOG_DIR/ip.log"
+    SSH_IP=$(node_to_ip "$vm_name")
 
     echo >&2 "Waiting for ping returning from $SSH_IP."
     while ! ping -c1 "$SSH_IP" > /dev/null; do

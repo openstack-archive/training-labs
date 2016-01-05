@@ -61,14 +61,7 @@ function vm_install_base {
         echo -n .
     done
 
-    local mac=$(node_to_mac "$vm_name")
-    echo "MAC address for node $vm_name: $mac"
-    echo -e "${CInfo:-}MAC address for node $vm_name: ${CData:-}$mac${CReset:-}"
-
-    SSH_IP=$(mac_to_ip "$mac")
-    echo -e "${CInfo:-}IP address for node $vm_name:  ${CData:-}$SSH_IP${CReset:-}"
-
-    echo "Node: $vm_name MAC: $mac IP: $SSH_IP" | tee -a "$LOG_DIR/ip.log"
+    SSH_IP=$(node_to_ip "$vm_name")
 
     echo >&2 "Waiting for ping returning from $SSH_IP."
     while ! ping -c1 "$SSH_IP" > /dev/null; do
