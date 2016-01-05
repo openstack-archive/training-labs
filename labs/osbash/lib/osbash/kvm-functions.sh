@@ -153,6 +153,8 @@ function mac_to_ip {
     done
 }
 
+NODE_IP_DB=$LOG_DIR/node_ip.db
+
 function node_to_ip {
     local node=$1
 
@@ -162,7 +164,8 @@ function node_to_ip {
     local ip=$(mac_to_ip "$mac")
     echo -e >&2 "${CInfo:-}IP address for $node:  ${CData:-}$ip${CReset:-}"
 
-    echo "$mac $ip $node" >> "$LOG_DIR/log.ip"
+    # Store node name, IP address, and MAC address in text file for later use
+    echo "$mac $ip $node" >> "$NODE_IP_DB"
 
     # Return IP address to caller
     echo "$ip"
@@ -175,20 +178,13 @@ function ssh_env_for_node {
     # No port forwarding with KVM; ignore VM_SSH_PORT from config.<node>
     VM_SSH_PORT=22
 
-    # IP address in management network
-    local mgmt_ip="$(source "$CONFIG_DIR/config.$node"; \
-                    get_node_ip_in_network "$node" "mgmt")"
-    echo >&2 "Target node is at $mgmt_ip:$VM_SSH_PORT (mgmt network)."
+    if grep "$node" "$NODE_IP_DB"; then
+        SSH_IP=$(grep " $node$" "$NODE_IP_DB"|awk '{print $2}')
+        return 0
+    fi
 
-    # Wait for VM to respond on management network
-    SSH_IP=$mgmt_ip
-    wait_for_ssh "$VM_SSH_PORT"
-
-    # Get external IP address from a line like
-    # "    inet 192.168.122.232/24 brd [...]"
-    SSH_IP=$(vm_ssh $VM_SSH_PORT "ip addr show eth0" | \
-                awk -F'[/ ]+' '/inet / { print $3 }')
-    echo >&2 "Target node is at $SSH_IP:$VM_SSH_PORT."
+    echo -e >&2 "${CError:-}ERROR: IP address for $node not found.${CReset:-}"
+    exit 1
 }
 
 function virsh_define_network {

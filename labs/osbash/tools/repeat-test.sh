@@ -140,7 +140,7 @@ until [ $cnt -eq $REP ]; do
     echo "Copying osbash and test log files into $dir."
     (
     cd "$LOG_DIR"
-    cp -a *.auto *.log *.xml "$dir" || rc=$?
+    cp -a *.auto *.log *.xml *.db "$dir" || rc=$?
     )
 
     echo "Copying upstart log files into $dir."
