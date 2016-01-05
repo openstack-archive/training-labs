@@ -31,7 +31,7 @@ function list_snapshots {
         fi
 
         echo -e "Snapshot list for $vm_name node:"
-        vboxmanage snapshot "$vm_name" list
+        "$VBM_EXE" snapshot "$vm_name" list
         echo
     done
     exit 0
@@ -128,13 +128,13 @@ function set_snapshot_vars {
 
 function restore_current_snapshot {
     local vm_name=$1
-    vboxmanage snapshot "$vm_name" restorecurrent
+    "$VBM_EXE" snapshot "$vm_name" restorecurrent
 }
 
 function restore_named_snapshot {
     local vm_name=$1
     local snapshot=$2
-    vboxmanage snapshot "$vm_name" restore "$snapshot"
+    "$VBM_EXE" snapshot "$vm_name" restore "$snapshot"
 }
 
 if [ -n "${TARGET_SNAPSHOT:-}" ]; then
