@@ -1,2 +1,2 @@
-# Scripts for Fedora installations
+# Scripts for CentOS installations
 cmd queue yum_init.sh

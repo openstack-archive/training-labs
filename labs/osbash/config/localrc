@@ -10,9 +10,9 @@
 
 # Options:  ubuntu-12.04.4-server-amd64
 #           ubuntu-14.04-server-amd64 (default)
-#           fedora-20-x86_64
+#           centos-7-x86_64
 #DISTRO=ubuntu-12.04.4-server-amd64
-#DISTRO=fedora-20-x86_64
+#DISTRO=centos-7-x86_64
 
 # PROVIDER: virtualbox or kvm (defaults to virtualbox)
 # KVM tends to give better performance (on Linux), but may be harder to set up
