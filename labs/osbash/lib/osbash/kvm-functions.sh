@@ -153,6 +153,21 @@ function mac_to_ip {
     done
 }
 
+function node_to_ip {
+    local node=$1
+
+    local mac=$(node_to_mac "$node")
+    echo -e >&2 "${CInfo:-}MAC address for $node: ${CData:-}$mac${CReset:-}"
+
+    local ip=$(mac_to_ip "$mac")
+    echo -e >&2 "${CInfo:-}IP address for $node:  ${CData:-}$ip${CReset:-}"
+
+    echo "$mac $ip $node" >> "$LOG_DIR/log.ip"
+
+    # Return IP address to caller
+    echo "$ip"
+}
+
 # Get ssh IP address and port from node name (non-default networks)
 function ssh_env_for_node {
     local node=$1
