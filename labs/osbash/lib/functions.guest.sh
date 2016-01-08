@@ -148,6 +148,26 @@ function as_root_exec_script {
 # Root wrapper around devstack functions for manipulating config files
 #-------------------------------------------------------------------------------
 
+# Return predictable temporary path for configuration file editing.
+# Used to simplify debugging.
+function get_iniset_tmpfile {
+    local file=$1
+
+    # Set tmpdir="$LOG_DIR" if you want the temporary files to survive reboots.
+    local tmpdir="/tmp"
+    local ext="iniset"
+
+    local prefix=$(get_next_prefix "$tmpdir" "$ext")
+
+    # Typical tmpfile path: /tmp/000_etc_keystone_keystone.conf.iniset
+    local tmpfile=$tmpdir/$prefix$(echo $file | tr '/' '_').$ext
+
+    # Create file owned by regular user so it can be edited without privileges
+    touch "$tmpfile"
+
+    echo "$tmpfile"
+}
+
 # Set an option in an INI file
 # iniset config-file section option value
 function iniset_sudo {
@@ -158,7 +178,7 @@ function iniset_sudo {
 
     local file=$1
     shift
-    local tmpfile=$(mktemp)
+    local tmpfile=$(get_iniset_tmpfile "$file")
     # Create a temporary copy, work on it, and copy it back into place
     sudo cp -fv "$file" "$tmpfile"
     echo >&2 iniset "$tmpfile" "$@"
@@ -171,7 +191,7 @@ function iniset_sudo {
 function inicomment_sudo {
     local file=$1
     shift
-    local tmpfile=$(mktemp)
+    local tmpfile=$(get_iniset_tmpfile "$file")
     # Create a temporary copy, work on it, and copy it back into place
     sudo cp -fv "$file" "$tmpfile"
     echo >&2 inicomment "$tmpfile" "$@"
@@ -184,7 +204,7 @@ function inicomment_sudo {
 function ini_has_option_sudo {
     local file=$1
     shift
-    local tmpfile=$(mktemp)
+    local tmpfile=$(get_iniset_tmpfile "$file")
     # Create a temporary copy, work on it
     sudo cp -fv "$file" "$tmpfile"
     echo >&2 ini_has_option "$tmpfile" "$@"
@@ -198,7 +218,7 @@ function ini_has_option_sudo {
 function iniset_sudo_no_section {
     local file=$1
     shift
-    local tmpfile=$(mktemp)
+    local tmpfile=$(get_iniset_tmpfile "$file")
     # Create a temporary copy, work on it, and copy it back into place
     sudo cp -fv "$file" "$tmpfile"
     iniset_no_section "$tmpfile" "$@"
