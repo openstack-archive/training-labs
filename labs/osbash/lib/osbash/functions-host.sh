@@ -192,6 +192,7 @@ function ssh_process_autostart {
     # (which might be _our_ enviroment if we get called again)
     (
     source "$CONFIG_DIR/config.$vm_name"
+    ssh_env_for_node "$vm_name"
 
     local ssh_port
     if [ ${PROVIDER:-""} = virtualbox ]; then
