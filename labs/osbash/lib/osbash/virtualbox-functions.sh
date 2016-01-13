@@ -119,6 +119,20 @@ function vm_snapshot_list_tree {
     $VBM snapshot "$vm_name" list 2>/dev/null || rc=$?
 }
 
+function vm_snapshot_list {
+    local vm_name=$1
+
+    # Hide VBM error on stderr if no snapshots exist
+    $VBM snapshot "$vm_name" list --machinereadable 2>/dev/null
+}
+
+function vm_snapshot_exists {
+    local vm_name=$1
+    local shot_name=$2
+
+    vm_snapshot_list "$vm_name" | grep -q "SnapshotName.*=\"$shot_name\""
+}
+
 function vm_snapshot {
     local vm_name=$1
     local shot_name=$2

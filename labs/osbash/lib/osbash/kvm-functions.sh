@@ -108,6 +108,10 @@ function stop_running_cluster_vms {
     done
 }
 
+function vm_snapshot_exists {
+    : # Not implemented
+}
+
 function vm_snapshot {
     : # Not implemented
 }

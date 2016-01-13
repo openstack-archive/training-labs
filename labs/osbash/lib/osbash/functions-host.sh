@@ -44,6 +44,18 @@ function get_distro_name {
     fi
 }
 
+# Wrapper around vm_snapshot to deal with collisions with cluster rebuilds
+# starting from snapshot. We could delete the existing snapshot first,
+# rename the new one, or just skip the snapshot.
+function vm_conditional_snapshot {
+    local vm_name=$1
+    local shot_name=$2
+
+    if ! vm_snapshot_exists "$vm_name" "$shot_name"; then
+        vm_snapshot "$vm_name" "$shot_name"
+    fi
+}
+
 #-------------------------------------------------------------------------------
 # Networking
 #-------------------------------------------------------------------------------
@@ -377,8 +389,8 @@ function command_from_config {
             # Format: snapshot [-n <node_name>] <snapshot_name>
             get_cmd_options $args
             local shot_name=$args
-            echo >&2 vm_snapshot "$vm_name" "$shot_name"
-            vm_snapshot "$vm_name" "$shot_name"
+            echo >&2 vm_conditional_snapshot "$vm_name" "$shot_name"
+            vm_conditional_snapshot "$vm_name" "$shot_name"
             ;;
         wait_for_shutdown)
             # Format: wait_for_shutdown [-n <node_name>]
@@ -399,7 +411,7 @@ function command_from_config {
             _autostart_queue "shutdown.sh"
             _vm_boot_with_autostart "$vm_name"
             vm_wait_for_shutdown "$vm_name"
-            vm_snapshot "$vm_name" "$shot_name"
+            vm_conditional_snapshot "$vm_name" "$shot_name"
             ;;
         init_node)
             # Format: init_node [-n <node_name>]
