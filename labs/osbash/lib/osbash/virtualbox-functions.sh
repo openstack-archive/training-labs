@@ -106,11 +106,32 @@ function stop_running_cluster_vms {
     done
 }
 
+#-------------------------------------------------------------------------------
+# Snapshots
+#-------------------------------------------------------------------------------
+
 function vm_snapshot {
     local vm_name=$1
     local shot_name=$2
 
     $VBM snapshot "$vm_name" take "$shot_name"
+    # VirtualBox VM needs a break before taking new commands
+    vbox_sleep 1
+}
+
+function vm_snapshot_restore {
+    local vm_name=$1
+    local shot_name=$2
+
+    $VBM snapshot "$vm_name" restore "$shot_name"
+    # VirtualBox VM needs a break before taking new commands
+    vbox_sleep 1
+}
+
+function vm_snapshot_restore_current {
+    local vm_name=$1
+
+    $VBM snapshot "$vm_name" restorecurrent
     # VirtualBox VM needs a break before taking new commands
     vbox_sleep 1
 }

@@ -130,17 +130,6 @@ function set_snapshot_vars {
     fi
 }
 
-function restore_current_snapshot {
-    local vm_name=$1
-    "$VBM_EXE" snapshot "$vm_name" restorecurrent
-}
-
-function restore_named_snapshot {
-    local vm_name=$1
-    local snapshot=$2
-    "$VBM_EXE" snapshot "$vm_name" restore "$snapshot"
-}
-
 if [ -n "${TARGET_SNAPSHOT:-}" ]; then
     set_snapshot_vars "$TARGET_SNAPSHOT"
 fi
@@ -155,7 +144,7 @@ for vm_name in $VM_LIST; do
     vm_wait_for_shutdown "$vm_name"
 
     if [ "${CURRENT:-""}" = "yes" ]; then
-        restore_current_snapshot "$vm_name"
+        vm_snapshot_restore_current "$vm_name"
         if [ "${START:-""}" = "yes" ]; then
             vm_boot "$vm_name"
         fi
@@ -166,7 +155,7 @@ for vm_name in $VM_LIST; do
         if [ -z "${!var_name:=""}" ]; then
             vm_delete "$vm_name"
         else
-            restore_named_snapshot "$vm_name" "${!var_name}"
+            vm_snapshot_restore "$vm_name" "${!var_name}"
             if [ "${START:-""}" = "yes" ]; then
                 vm_boot "$vm_name"
             fi
