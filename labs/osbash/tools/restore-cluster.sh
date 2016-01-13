@@ -11,9 +11,6 @@ source "$OSBASH_LIB_DIR/$PROVIDER-functions.sh"
 
 OSBASH=exec_cmd
 
-# TODO Add better method for getting VM_LIST
-VM_LIST="controller compute1"
-
 function usage {
     # Setting to empty string selects latest (current snapshot)
     echo "Usage: $0 {-l|-c|-t <SNAP>} [-s]"
@@ -27,7 +24,7 @@ function usage {
 }
 
 function list_snapshots {
-    for vm_name in $VM_LIST; do
+    for vm_name in $(script_cfg_get_nodenames); do
         if ! vm_exists "$vm_name"; then
             echo "VM $vm_name does not exist. Skipping..."
             continue
@@ -134,7 +131,7 @@ if [ -n "${TARGET_SNAPSHOT:-}" ]; then
     set_snapshot_vars "$TARGET_SNAPSHOT"
 fi
 
-for vm_name in $VM_LIST; do
+for vm_name in $(script_cfg_get_nodenames); do
     if ! vm_exists "$vm_name"; then
         echo "VM $vm_name does not exist. Skipping..."
         continue
