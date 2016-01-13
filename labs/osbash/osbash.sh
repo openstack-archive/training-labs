@@ -8,9 +8,6 @@ trap 'kill -- -$$' SIGINT
 
 TOP_DIR=$(cd "$(dirname "$0")" && pwd)
 
-: ${DISTRO:=ubuntu-14.04-server-amd64}
-: ${PROVIDER:=virtualbox}
-
 source "$TOP_DIR/config/localrc"
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/openstack"

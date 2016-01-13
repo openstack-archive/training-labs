@@ -13,10 +13,12 @@
 #           centos-7-x86_64
 #DISTRO=ubuntu-12.04.4-server-amd64
 #DISTRO=centos-7-x86_64
+: ${DISTRO:=ubuntu-14.04-server-amd64}
 
 # PROVIDER: virtualbox or kvm (defaults to virtualbox)
 # KVM tends to give better performance (on Linux), but may be harder to set up
 # and osbash does not (yet) support all features with a KVM backend.
 #PROVIDER=kvm
+: ${PROVIDER:=virtualbox}
 
 # vim: set ai ts=4 sw=4 et ft=sh:

@@ -1,6 +1,8 @@
 #!/bin/bash
 set -o errexit -o nounset
 TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
+source "$TOP_DIR/config/localrc"
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/deploy.osbash"
 source "$CONFIG_DIR/provider.$PROVIDER"
@@ -96,7 +98,8 @@ function set_snapshot_vars {
     local target_snapshot=$1
 
     local found=0
-    local scripts_cfg="$TOP_DIR/config/scripts.ubuntu_cluster"
+    local config_name=$(get_distro_name "$DISTRO")_cluster
+    local scripts_cfg="$CONFIG_DIR/scripts.$config_name"
 
     while read -r line; do
         if [[ $line =~ ^cmd\ snapshot.*-n\ ([^ ]*)\ (.*) ]]; then
