@@ -216,10 +216,22 @@ function virsh_start_network {
         echo >&2 "Starting network $net."
         $VIRSH net-start "$net"
     fi
+
+    # Save, update, and restore iptables configuration made by libvirt
+    sudo iptables-save > "$LOG_DIR/iptables"
+    # Forward new connections, too (except on virbr0); this allows our
+    # NAT networks to talk to each other
+    sed -i -e '/FORWARD.*virbr[^0]/ s/ RELATED/ NEW,RELATED/' "$LOG_DIR/iptables"
+    sudo iptables-restore "$LOG_DIR/iptables"
 }
 
 function virsh_stop_network {
     local net=labs-$1
+
+    # Undo our changes to iptables before letting libvirt deal with it
+    sudo iptables-save > "$LOG_DIR/iptables"
+    sed -i -e '/FORWARD.*virbr/ s/ NEW,RELATED/ RELATED/' "$LOG_DIR/iptables"
+    sudo iptables-restore "$LOG_DIR/iptables"
 
     if $VIRSH net-info "$net" 2>/dev/null|grep -q "Active:.*yes"; then
         echo >&2 "Stopping network $net."
