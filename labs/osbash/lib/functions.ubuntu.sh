@@ -19,6 +19,8 @@ function config_netif {
 
     if [ "$if_type" = "dhcp" ]; then
         template="template-ubuntu-interfaces-dhcp"
+    elif [ "$if_type" = "manual" ]; then
+        template="template-ubuntu-interfaces-manual"
     else
         template="template-ubuntu-interfaces-static"
     fi

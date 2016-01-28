@@ -68,6 +68,8 @@ function configure_node_netifs {
         type=${NODE_IF_TYPE[index]}
         if [ "$type" = "dhcp" ]; then
             vm_nic_base "$vm_name" $index
+        elif [ "$type" = "manual" ]; then
+            vm_nic_std "$vm_name" $index
         elif [ "$type" = "static" ]; then
             vm_nic_std "$vm_name" $index
         else
