@@ -66,8 +66,8 @@ function vm_init_node {
     # VIRT_INSTALL (background) above and VIRSH below
     sleep 1
 
-    echo >&2 "Waiting for VM to be defined."
-    while ! $VIRSH list|grep -q "$vm_name"; do
+    echo >&2 "Waiting for VM to come up."
+    until vm_is_running "$vm_name"; do
         sleep 1
         echo -n .
     done
