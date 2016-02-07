@@ -153,6 +153,9 @@ until [ $cnt -eq $REP ]; do
         fi
     fi
 
+    # Log information about current state of source tree (ignore failure)
+    "$TOP_DIR/tools/git_info.sh" > "$LOG_DIR/git_info.log" || rc=$?
+
     rc=0
     if [ -n "${REBUILD:-}" ]; then
         if [ -n "${TARGET_SNAPSHOT:-}" ]; then

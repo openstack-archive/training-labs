@@ -4,14 +4,33 @@ from __future__ import print_function
 
 import logging
 import sys
+import subprocess
 import time
 
 from urlparse import urlparse, urlunparse
 
 import stacktrain.config.general as conf
 import stacktrain.core.download as dl
+import stacktrain.core.helpers as hf
 
 logger = logging.getLogger(__name__)
+
+
+def get_git_info():
+    git_exe = "git"
+    if not hf.test_exe("git"):
+        logger.debug("No git executable found. Unable to log git status.")
+        return None
+
+    summary_args = [ "git", "describe", "--all", "--long", "--dirty" ]
+    diff_args = [ "git", "--no-pager", "diff", "HEAD", "-p", "--stat" ]
+    try:
+        result = "git status: "
+        result += subprocess.check_output(summary_args)
+        result += subprocess.check_output(diff_args).rstrip()
+    except subprocess.CalledProcessError:
+        result = None
+    return result
 
 
 def print_summary():

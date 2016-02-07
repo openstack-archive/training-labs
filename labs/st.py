@@ -182,6 +182,7 @@ def main():
     logger = logging.getLogger(__name__)
 
     logger.debug("Call args: %s", sys.argv)
+    logger.debug(report.get_git_info())
     args = parse_args()
     set_conf_vars(args)
 
