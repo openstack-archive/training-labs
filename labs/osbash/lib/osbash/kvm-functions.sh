@@ -357,6 +357,8 @@ function vm_delete {
     if vm_exists "$vm_name"; then
         echo >&2 "(found)"
         vm_power_off "$vm_name"
+        # Take a break before undefining the VM
+        sleep 1
         $VIRSH undefine "$vm_name"
     else
         echo >&2 "(not found)"
