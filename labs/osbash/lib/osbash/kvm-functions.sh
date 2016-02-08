@@ -44,9 +44,10 @@ function virsh_uses_kvm {
 function set_vm_group {
     local vm_name=$1
 
-    $VIRSH desc "$vm_name" --title --new-desc "$VM_GROUP"
-    $VIRSH desc "$vm_name" --new-desc "All VMs with description title" \
-            "'$VM_GROUP' get shut down when a new cluster build starts."
+    $VIRSH desc "$vm_name" --config --live --title --new-desc "$VM_GROUP"
+    $VIRSH desc "$vm_name" --config --live --new-desc "All VMs with" \
+            "description title '$VM_GROUP' get shut down when a new cluster" \
+            "build starts."
 }
 
 function get_vm_group {
