@@ -389,7 +389,7 @@ function command_from_config {
         snapshot_cycle)
             # Skip command if user disabled snapshot cycles
             if [ "${SNAP_CYCLE:-}" = "no" ]; then
-                continue
+                return
             fi
             # Format: snapshot_cycle [-g <gui_type>] [-n <node_name>]
             # comprises shutdown, boot, wait_for_shutdown, snapshot
