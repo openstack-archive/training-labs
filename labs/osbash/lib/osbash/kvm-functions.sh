@@ -329,7 +329,14 @@ function disk_compress {
     sudo ls -lh "$disk_path"
     sudo du -sh "$disk_path"
 
+    # Sparsify and compress basedisk image
     sudo $spexe --compress "$disk_path" "$pool_dir/.$disk_name"
+
+    # Copy owner and file modes from original file
+    sudo chown -v --reference="$disk_path" "$pool_dir/.$disk_name"
+    sudo chmod -v --reference="$disk_path" "$pool_dir/.$disk_name"
+
+    # Replace original with compressed file
     sudo mv -vf "$pool_dir/.$disk_name" "$disk_path"
 
     echo -e >&2 "${CStatus:-}Output file:${CReset:-}"
