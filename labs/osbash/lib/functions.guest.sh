@@ -62,6 +62,7 @@ function wait_for_file {
     local msg=${1-""}
     local wait_file=remove_to_continue
     [ -n "$msg" ] && wait_file=${wait_file}_${msg}
+    echo >&2 "DEBUG wait_for_file pause; remove /tmp/$wait_file to continue."
     touch "/tmp/$wait_file"
     while [ -e "/tmp/$wait_file" ]; do
         sleep 1
