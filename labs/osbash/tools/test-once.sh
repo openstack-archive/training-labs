@@ -1,6 +1,7 @@
 #!/bin/bash
 set -o errexit -o nounset
 TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
+source "$TOP_DIR/config/localrc"
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/localrc"
 source "$CONFIG_DIR/deploy.osbash"
