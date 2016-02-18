@@ -1,0 +1,23 @@
+#==============================================================================
+# Only create VMs (don't install any software)
+#==============================================================================
+
+# Scripts for controller node
+cmd init_node -n controller
+
+cmd queue etc_hosts.sh
+cmd queue osbash/enable_osbash_ssh_keys.sh
+cmd snapshot_cycle -n controller controller_node_init
+
+#==============================================================================
+# Scripts for compute1 node
+cmd init_node -n compute1
+
+cmd queue etc_hosts.sh
+cmd queue osbash/enable_osbash_ssh_keys.sh
+cmd snapshot_cycle -n compute1 compute1_node_init
+
+#==============================================================================
+# Both nodes are built, boot them
+cmd boot -n controller
+cmd boot -n compute1
