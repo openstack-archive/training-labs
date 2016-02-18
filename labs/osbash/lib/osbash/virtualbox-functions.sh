@@ -110,6 +110,15 @@ function stop_running_cluster_vms {
 # Snapshots
 #-------------------------------------------------------------------------------
 
+function vm_snapshot_list_tree {
+    local vm_name=$1
+
+    local rc
+    # Hide VBM error message on stderr if no snapshots exist and proceed even
+    # if exit status indicates error
+    $VBM snapshot "$vm_name" list 2>/dev/null || rc=$?
+}
+
 function vm_snapshot {
     local vm_name=$1
     local shot_name=$2

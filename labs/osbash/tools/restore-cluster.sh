@@ -34,7 +34,7 @@ function list_snapshots {
         fi
 
         echo -e "Snapshot list for $vm_name node:"
-        "$VBM_EXE" snapshot "$vm_name" list
+        vm_snapshot_list_tree "$vm_name"
         echo
     done
     exit 0
