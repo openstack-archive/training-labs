@@ -101,18 +101,25 @@ wait_for_service compute1 nova-compute
 echo
 
 function wait_for_nova_compute {
+    (
+    source "$CONFIG_DIR/admin-openstackrc.sh"
     if openstack compute service list --service nova-compute | \
             grep -q "up"; then
         return 0
     fi
+    )
+
     echo "  Waiting for nova-compute service in state 'up'."
     if ssh_no_chk_node compute1 service nova-compute status | \
             grep -q "start/running"; then
         echo -n "  Service is up, waiting (may take a few minutes)."
     fi
+
     local cnt=0
     local start=$(date +%s)
-    while openstack compute service list --service nova-compute | grep -q down; do
+    (
+    source "$CONFIG_DIR/admin-openstackrc.sh"
+    while openstack compute service list --service nova-compute | grep -q "| up "; do
         cnt=$((cnt + 1))
         sleep 5
         if ssh_no_chk_node compute1 service nova-compute status | \
@@ -133,6 +140,7 @@ function wait_for_nova_compute {
             NOVA_COMPUTE_RESTART=$((${NOVA_COMPUTE_RESTART:-0} + 1))
         fi
     done
+    )
     echo
 }
 
