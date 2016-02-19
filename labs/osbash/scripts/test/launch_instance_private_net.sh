@@ -330,8 +330,18 @@ while nova list|grep -q "$DEMO_INSTANCE_NAME"; do
 done
 echo
 
-echo "There should be no $DEMO_INSTANCE_NAME instances left:"
-nova list
+function check_for_other_vms {
+    echo "Verifying that no other instance VMs are left."
+    (
+    source "$CONFIG_DIR/admin-openstackrc.sh"
+    if [ "$(nova list --all-tenants --minimal | wc -l)" -gt 4 ]; then
+        echo "SUM ERROR Unexpected VMs found. Aborting..."
+        nova list --all-tenants
+        exit 1
+    fi
+    )
+}
+check_for_other_vms
 
 NOVA_SCHED_LOG=/var/log/upstart/nova-scheduler.log
 NOVA_API_LOG=/var/log/upstart/nova-api.log
