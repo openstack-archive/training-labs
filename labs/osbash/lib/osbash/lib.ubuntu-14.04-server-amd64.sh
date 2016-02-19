@@ -9,8 +9,8 @@
 
 readonly ISO_URL_BASE=http://releases.ubuntu.com/14.04/
 
-ISO_URL=$ISO_URL_BASE/ubuntu-14.04.3-server-amd64.iso
-ISO_MD5=9e5fecc94b3925bededed0fdca1bd417
+ISO_URL=$ISO_URL_BASE/ubuntu-14.04.4-server-amd64.iso
+ISO_MD5=2ac1f3e0de626e54d05065d6f549fa3a
 
 readonly _PS_ssh=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-ssh-v2.cfg
 readonly _PS_vbadd=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-vbadd.cfg
