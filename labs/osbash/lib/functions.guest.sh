@@ -53,6 +53,7 @@ function indicate_current_auto {
         mkdir -p "$STATUS_DIR"
         touch "$fpath"
     fi
+    log_point "script begin"
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Debug function to make a script halt execution until a tmp file is removed
@@ -380,6 +381,32 @@ function config_network {
         iftype=${NODE_IF_TYPE[index]}
         config_netif "$iftype" "$index" "${NODE_IF_IP[index]}"
     done
+}
+
+#-------------------------------------------------------------------------------
+# Log points
+#------------------------------------------------------------------------------
+
+# Record current size of log files of interest so we can later split them
+# accordingly.
+# Log points can be set anywhere in a client script simply by adding a
+# line: log_point "log point name"
+
+function log_point {
+    local caller=$(basename "$0" .sh)
+    local commit_msg=$1
+    local logdir=${2:-/var/log}
+    local ext=lsl
+    local prefix=$(get_next_prefix "$logdir" "$ext")
+
+    local fname
+    fname=${prefix}_$(echo "${caller}_-_$commit_msg"|tr ' ' '_').$ext
+
+    (
+    cd "$logdir"
+    sudo bash -c "shopt -s nullglob; ls -l auth.log keystone/* upstart/*.log mysql/* neutron/*" | \
+        sudo tee "$logdir/$fname" > /dev/null
+    )
 }
 
 #-------------------------------------------------------------------------------
