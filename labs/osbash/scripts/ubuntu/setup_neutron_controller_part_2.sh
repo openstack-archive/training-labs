@@ -41,7 +41,7 @@ iniset_sudo $conf DEFAULT nova_metadata_ip controller
 
 iniset_sudo $conf DEFAULT metadata_proxy_shared_secret "$METADATA_SECRET"
 
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Configuring Compute to use Networking."
 conf=/etc/nova/nova.conf

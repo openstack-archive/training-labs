@@ -88,7 +88,7 @@ iniset_sudo $conf nova project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf nova username "$nova_admin_user"
 iniset_sudo $conf nova password "$nova_admin_password"
 
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Configuring the Modular Layer 2 (ML2) plug-in."
 conf=/etc/neutron/plugins/ml2/ml2_conf.ini
@@ -136,14 +136,14 @@ iniset_sudo $conf DEFAULT interface_driver neutron.agent.linux.interface.BridgeI
 # The external_network_bridge option intentionally lacks a value to enable
 # multiple external networks on a single agent.
 iniset_sudo $conf DEFAULT external_network_bridge ""
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Configuring the DHCP agent."
 conf=/etc/neutron/dhcp_agent.ini
 iniset_sudo $conf DEFAULT interface_driver neutron.agent.linux.interface.BridgeInterfaceDriver
 iniset_sudo $conf DEFAULT dhcp_driver neutron.agent.linux.dhcp.Dnsmasq
 iniset_sudo $conf DEFAULT enable_isolated_metadata True
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 iniset_sudo $conf DEFAULT dnsmasq_config_file /etc/neutron/dnsmasq-neutron.conf
 
 cat << DNSMASQ | sudo tee /etc/neutron/dnsmasq-neutron.conf

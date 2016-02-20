@@ -72,7 +72,7 @@ iniset_sudo $conf glance host controller
 iniset_sudo $conf glance oslo_concurrency /var/lib/nova/tmp
 
 # Configure [DEFAULT] section.
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 # Configure nova-compute.conf
 conf=/etc/nova/nova-compute.conf

@@ -52,7 +52,7 @@ iniset_sudo $conf service_credentials os_password "$ceilometer_admin_password"
 iniset_sudo $conf service_credentials os_endpoint_type internalURL
 iniset_sudo $conf service_credentials os_region_name "$REGION"
 
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Configuring nova.conf."
 conf=/etc/ceilometer/ceilometer.conf

@@ -112,7 +112,7 @@ iniset_sudo $conf DEFAULT glance_host controller
 
 iniset_sudo $conf oslo_concurrency lock_path /var/lib/cinder/tmp
 
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 # Finalize installation
 echo "Restarting cinder service."

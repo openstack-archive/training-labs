@@ -103,7 +103,7 @@ iniset_sudo $conf glance_store filesystem_store_datadir /var/lib/glance/images/
 
 # Default section
 iniset_sudo $conf DEFAULT notification_driver noop
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Configuring glance-registry.conf."
 conf=/etc/glance/glance-registry.conf
@@ -126,7 +126,7 @@ iniset_sudo $conf paste_deploy flavor "keystone"
 
 # Default section
 iniset_sudo $conf DEFAULT notification_driver noop
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Creating the database tables for glance."
 sudo glance-manage db_sync

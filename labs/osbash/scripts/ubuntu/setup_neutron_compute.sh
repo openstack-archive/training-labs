@@ -49,4 +49,4 @@ iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$neutron_admin_user"
 iniset_sudo $conf keystone_authtoken password "$neutron_admin_password"
 
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"

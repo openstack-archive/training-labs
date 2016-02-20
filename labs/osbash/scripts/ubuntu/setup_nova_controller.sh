@@ -124,7 +124,7 @@ iniset_sudo $conf oslo_concurrency lock_path /var/lib/nova/tmp
 
 # Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT enabled_apis osapi_compute,metadata
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Creating the database tables for nova."
 sudo nova-manage db sync

@@ -125,7 +125,7 @@ iniset_sudo $conf DEFAULT my_ip "$(hostname_to_ip controller)"
 
 iniset_sudo $conf oslo_concurrency lock_path /var/lib/cinder/tmp
 
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Creating the database tables for cinder."
 sudo cinder-manage db sync
