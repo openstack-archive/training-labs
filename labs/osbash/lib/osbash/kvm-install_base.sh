@@ -28,7 +28,7 @@ function vm_install_base {
 
     local console_type
     if [ "$VM_UI" = "headless" ]; then
-        console_type="--noautoconsole --wait=-1"
+        console_type="--noautoconsole"
     elif [ "$VM_UI" = "vnc" ]; then
         console_type="--graphics vnc,listen=0.0.0.0"
     else
@@ -47,6 +47,7 @@ function vm_install_base {
         --vcpus 1 \
         --virt-type kvm \
         $console_type \
+        --wait=-1 \
         &
 
     echo -e >&2 "${CStatus:-}Installing operating system; waiting for reboot.${CReset:-}"
