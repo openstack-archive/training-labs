@@ -153,5 +153,5 @@ until [ $cnt -eq $REP ]; do
     )
 
     echo "Copying upstart log files into $dir."
-    "$TOP_DIR/tools/get_upstart_logs.sh" "$dir"
+    "$TOP_DIR/tools/get_node_logs.sh" "$dir"
 done
