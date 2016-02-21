@@ -14,6 +14,20 @@ function vm_install_base {
 
     vm_delete "$vm_name"
 
+    if [ -z "${INSTALL_ISO-}" ]; then
+
+        if [  -z "$ISO_URL" ]; then
+            echo -e >&2 "${CMissing:-}Either ISO URL or name needed (ISO_URL, INSTALL_ISO).${CReset:-}"
+            exit 1
+        fi
+
+        INSTALL_ISO=$ISO_DIR/$(get_iso_name)
+    fi
+
+    echo >&2 -e "${CInfo:-}Install ISO:\n\t${CData:-}$INSTALL_ISO${CReset:-}"
+
+    ${OSBASH:-:} check_md5 "$INSTALL_ISO" "$ISO_MD5"
+
     # Configure autostart
     autostart_reset
 
@@ -39,8 +53,7 @@ function vm_install_base {
     # Boot VM into distribution installer
     $VIRT_INSTALL \
         --disk "vol=$KVM_VOL_POOL/$base_disk_name,cache=none" \
-        --extra-args "$EXTRA_ARGS" \
-        --location "$DISTRO_URL" \
+        --cdrom "$INSTALL_ISO" \
         --name $vm_name \
         --os-type linux \
         --ram "${VM_BASE_MEM:=512}" \
@@ -49,6 +62,12 @@ function vm_install_base {
         $console_type \
         --wait=-1 \
         &
+
+    local delay=5
+    echo >&2 "Waiting $delay seconds for VM \"$vm_name\" to come up"
+    conditional_sleep "$delay"
+
+    distro_start_installer "$vm_name"
 
     echo -e >&2 "${CStatus:-}Installing operating system; waiting for reboot.${CReset:-}"
 

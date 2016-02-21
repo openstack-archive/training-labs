@@ -381,8 +381,20 @@ function vm_delete {
 }
 
 #-------------------------------------------------------------------------------
-# Booting a VM
+# Booting a VM and passing boot parameters
 #-------------------------------------------------------------------------------
+
+source "$OSBASH_LIB_DIR/kvm-keycodes.sh"
+
+function _keyboard_push_scancode {
+    local vm_name=$1
+    shift
+    # Split string (e.g. '01 81') into arguments (works also if we
+    # get each hexbyte as a separate argument)
+    # Not quoting $@ is intentional -- we want to split on blanks
+    local scan_code=( $@ )
+    $VIRSH send-key "$vm_name" --codeset linux "${scan_code[@]}" >/dev/null
+}
 
 function vm_boot {
     local vm_name=$1
