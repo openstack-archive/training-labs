@@ -22,7 +22,7 @@ readonly _BOOT_ARGS="linux ks=%s"
 # ostype used by VirtualBox to choose icon and flags (64-bit, IOAPIC)
 VBOX_OSTYPE=RedHat_64
 
-function vbox_distro_start_installer {
+function distro_start_installer {
     local vm_name=$1
 
     # pick a _KS_* file
@@ -32,15 +32,15 @@ function vbox_distro_start_installer {
 
     local boot_args=$(printf "$_BOOT_ARGS" "${!kickstart}")
 
-    vbox_kbd_escape_key "$vm_name"
+    keyboard_send_escape "$vm_name"
 
-    vbox_sleep 1
+    conditional_sleep 1
 
     echo -e "${CStatus:-}Pushing boot command line${CReset:-}"
-    vbox_kbd_string_input "$vm_name" "$boot_args"
+    keyboard_send_string "$vm_name" "$boot_args"
 
     echo "Initiating boot sequence"
-    vbox_kbd_enter_key "$vm_name"
+    keyboard_send_enter "$vm_name"
 }
 
 # vim: set ai ts=4 sw=4 et ft=sh:

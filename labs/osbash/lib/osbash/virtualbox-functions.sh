@@ -78,7 +78,7 @@ function vm_power_off {
         $VBM controlvm "$vm_name" poweroff
     fi
     # VirtualBox VM needs a break before taking new commands
-    vbox_sleep 1
+    conditional_sleep 1
 }
 
 function vm_acpi_shutdown {
@@ -88,7 +88,7 @@ function vm_acpi_shutdown {
         $VBM controlvm "$vm_name" acpipowerbutton
     fi
     # VirtualBox VM needs a break before taking new commands
-    vbox_sleep 1
+    conditional_sleep 1
 }
 
 # Shut down all VMs in group VM_GROUP
@@ -139,7 +139,7 @@ function vm_snapshot {
 
     $VBM snapshot "$vm_name" take "$shot_name"
     # VirtualBox VM needs a break before taking new commands
-    vbox_sleep 1
+    conditional_sleep 1
 }
 
 function vm_snapshot_restore {
@@ -148,7 +148,7 @@ function vm_snapshot_restore {
 
     $VBM snapshot "$vm_name" restore "$shot_name"
     # VirtualBox VM needs a break before taking new commands
-    vbox_sleep 1
+    conditional_sleep 1
 }
 
 function vm_snapshot_restore_current {
@@ -156,7 +156,7 @@ function vm_snapshot_restore_current {
 
     $VBM snapshot "$vm_name" restorecurrent
     # VirtualBox VM needs a break before taking new commands
-    vbox_sleep 1
+    conditional_sleep 1
 }
 
 #-------------------------------------------------------------------------------
@@ -354,7 +354,7 @@ function vm_detach_disk {
         --type hdd \
         --medium none
     # VirtualBox VM needs a break before taking new commands
-    vbox_sleep 1
+    conditional_sleep 1
 }
 
 # disk can be either a path or a disk UUID
@@ -796,24 +796,12 @@ function vm_attach_guestadd-iso {
 }
 
 #-------------------------------------------------------------------------------
-# Sleep
-#-------------------------------------------------------------------------------
-
-function vbox_sleep {
-    sec=$1
-
-    # Don't sleep if we are just faking it for wbatch
-    ${OSBASH:-:} sleep "$sec"
-    ${WBATCH:-:} wbatch_sleep "$sec"
-}
-
-#-------------------------------------------------------------------------------
 # Booting a VM and passing boot parameters
 #-------------------------------------------------------------------------------
 
-source "$OSBASH_LIB_DIR/scanlib.sh"
+source "$OSBASH_LIB_DIR/virtualbox-keycodes.sh"
 
-function _vbox_push_scancode {
+function _keyboard_push_scancode {
     local vm_name=$1
     shift
     # Split string (e.g. '01 81') into arguments (works also if we
@@ -821,34 +809,6 @@ function _vbox_push_scancode {
     # Not quoting $@ is intentional -- we want to split on blanks
     local scan_code=( $@ )
     $VBM controlvm "$vm_name" keyboardputscancode "${scan_code[@]}"
-}
-
-function vbox_kbd_escape_key {
-    local vm_name=$1
-    _vbox_push_scancode "$vm_name" "$(esc2scancode)"
-}
-
-function vbox_kbd_enter_key {
-    local vm_name=$1
-    _vbox_push_scancode "$vm_name" "$(enter2scancode)"
-}
-
-function vbox_kbd_string_input {
-    local vm_name=$1
-    local str=$2
-
-    # This loop is inefficient enough that we don't overrun the keyboard input
-    # buffer when pushing scancodes to the VirtualBox.
-    while IFS=  read -r -n1 char; do
-        if [ -n "$char" ]; then
-            SC=$(char2scancode "$char")
-            if [ -n "$SC" ]; then
-                _vbox_push_scancode "$vm_name" "$SC"
-            else
-                echo >&2 "not found: $char"
-            fi
-        fi
-    done <<< "$str"
 }
 
 function vm_boot {

@@ -83,9 +83,9 @@ function vm_install_base {
 
     local delay=5
     echo >&2 "Waiting $delay seconds for VM \"$vm_name\" to come up"
-    vbox_sleep "$delay"
+    conditional_sleep "$delay"
 
-    vbox_distro_start_installer "$vm_name"
+    distro_start_installer "$vm_name"
 
     echo -e >&2 "${CStatus:-}Installing operating system; waiting for reboot${CReset:-}"
 

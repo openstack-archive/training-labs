@@ -54,7 +54,7 @@ function update_iso_variables {
 VBOX_OSTYPE=Ubuntu_64
 
 # Boot the ISO image operating system installer
-function vbox_distro_start_installer {
+function distro_start_installer {
     local vm_name=$1
 
     # pick a _PS_* file
@@ -64,17 +64,17 @@ function vbox_distro_start_installer {
 
     local boot_args=$(printf "$_BOOT_ARGS" "${!preseed}")
 
-    vbox_kbd_escape_key "$vm_name"
-    vbox_kbd_escape_key "$vm_name"
-    vbox_kbd_enter_key "$vm_name"
+    keyboard_send_escape "$vm_name"
+    keyboard_send_escape "$vm_name"
+    keyboard_send_enter "$vm_name"
 
-    vbox_sleep 1
+    conditional_sleep 1
 
     echo -e "${CStatus:-}Pushing boot command line${CReset:-}"
-    vbox_kbd_string_input "$vm_name" "$boot_args"
+    keyboard_send_string "$vm_name" "$boot_args"
 
     echo "Initiating boot sequence"
-    vbox_kbd_enter_key "$vm_name"
+    keyboard_send_enter "$vm_name"
 }
 
 #-------------------------------------------------------------------------------
