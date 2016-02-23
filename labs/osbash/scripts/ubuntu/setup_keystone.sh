@@ -70,7 +70,7 @@ echo "Configuring the SQL revocation driver."
 iniset_sudo $conf revoke driver sql
 
 echo "Enabling verbose logging."
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Creating the database tables for keystone."
 sudo keystone-manage db_sync

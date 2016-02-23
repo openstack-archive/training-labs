@@ -170,7 +170,7 @@ iniset_sudo $conf DEFAULT heat_waitcondition_server_url http://controller:8000/v
 iniset_sudo $conf DEFAULT stack_domain_admin heat_domain_admin
 iniset_sudo $conf DEFAULT stack_domain_admin_password "$HEAT_DOMAIN_PASS"
 iniset_sudo $conf DEFAULT stack_user_domain_name heat
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Creating the database tables for heat."
 sudo heat-manage db_sync

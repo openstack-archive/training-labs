@@ -40,4 +40,7 @@ NETWORK_2="public 203.0.113.0"
 
 : ${REGION:=RegionOne}
 
+# Should OpenStack services use verbose logging? (True, False)
+: ${OPENSTACK_VERBOSE:=True}
+
 # vim: set ai ts=4 sw=4 et ft=sh:

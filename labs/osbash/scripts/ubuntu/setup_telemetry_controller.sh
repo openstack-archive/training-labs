@@ -107,7 +107,7 @@ iniset_sudo $conf service_credentials os_region_name "$REGION"
 # Configure [publisher] section.
 iniset_sudo $conf publisher telemetry_secret "$TELEMETRY_SECRET"
 
-iniset_sudo $conf DEFAULT verbose True
+iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Restarting telemetry service."
 sudo service ceilometer-agent-central restart
