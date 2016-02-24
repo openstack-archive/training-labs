@@ -50,10 +50,17 @@ while getopts :bchr:s:t: opt; do
             START_VMS=$OPTARG
             ;;
         t)
-            TARGET_SNAPSHOT=$OPTARG
-            if ! "$TOP_DIR/tools/restore-cluster.sh" -l |
-                    grep -q "Name: $TARGET_SNAPSHOT "; then
-                echo >&2 "No snapshot named $TARGET_SNAPSHOT found."
+            arg=$OPTARG
+            for node in $(script_cfg_get_nodenames); do
+                if vm_exists "$node"; then
+                    if vm_snapshot_exists "$node" "$arg"; then
+                        TARGET_SNAPSHOT=$arg
+                        break
+                    fi
+                fi
+            done
+            if [ -z "${TARGET_SNAPSHOT:-""}" ]; then
+                echo >&2 "No snapshot named $arg found."
                 exit 1
             fi
             ;;

@@ -474,6 +474,28 @@ function autostart_from_config {
     done
 }
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Get node names from scripts config file
+function script_cfg_get_nodenames {
+    local config_name=$(get_distro_name "$DISTRO")_cluster
+    local scripts_cfg="$CONFIG_DIR/scripts.$config_name"
+    local node
+
+    node_names=""
+
+    while read -r line; do
+        if [[ $line =~ ^cmd\ .*\ -n\ ([^ ]*)\ .* ]]; then
+            node=${BASH_REMATCH[1]}
+            if ! [[ $node_names =~ $node ]]; then
+                node_names="$node_names $node"
+            fi
+        fi
+    done < "$scripts_cfg"
+    echo $node_names
+    echo >&2 $node_names
+}
+
 #-------------------------------------------------------------------------------
 # Functions to get install ISO images
 #-------------------------------------------------------------------------------

@@ -24,7 +24,7 @@ else
     fi
 fi
 
-for node in controller compute1; do
+for node in $(script_cfg_get_nodenames); do
     (
     source "$CONFIG_DIR/config.$node"
     node_dir=$RESULTS_DIR/$node
