@@ -5,7 +5,7 @@
 : ${OPENSTACK_RELEASE:=liberty}
 
 # CirrOS image URL
-CIRROS_URL="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
+CIRROS_URL="http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img"
 
 #------------------------------------------------------------------------------
 # http://docs.openstack.org/liberty/install-guide-ubuntu/environment-networking.html
