@@ -108,12 +108,47 @@ function stop_running_cluster_vms {
     done
 }
 
+#-------------------------------------------------------------------------------
+# Snapshots
+#-------------------------------------------------------------------------------
+
+function vm_snapshot_list_tree {
+    local vm_name=$1
+
+    $VIRSH snapshot-list --tree "$vm_name"
+}
+
+function vm_snapshot_list {
+    local vm_name=$1
+
+    $VIRSH snapshot-list "$vm_name"
+}
+
 function vm_snapshot_exists {
-    : # Not implemented
+    local vm_name=$1
+    local shot_name=$2
+
+    vm_snapshot_list "$vm_name" | grep -q "^ $shot_name "
 }
 
 function vm_snapshot {
-    : # Not implemented
+    local vm_name=$1
+    local shot_name=$2
+
+    $VIRSH snapshot-create-as "$vm_name" "$shot_name" "$vm_name: $shot_name"
+}
+
+function vm_snapshot_restore {
+    local vm_name=$1
+    local shot_name=$2
+
+    $VIRSH snapshot-revert "$vm_name" "$shot_name"
+}
+
+function vm_snapshot_restore_current {
+    local $vm_name=$1
+
+    $VIRSH snapshot-revert "$vm_name" --current
 }
 
 #-------------------------------------------------------------------------------
@@ -368,7 +403,7 @@ function vm_delete {
         vm_power_off "$vm_name"
         # Take a break before undefining the VM
         sleep 1
-        $VIRSH undefine "$vm_name"
+        $VIRSH undefine --snapshots-metadata --remove-all-storage "$vm_name"
     else
         echo >&2 "(not found)"
     fi
