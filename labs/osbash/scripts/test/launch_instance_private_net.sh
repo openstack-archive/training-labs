@@ -86,17 +86,17 @@ function wait_for_service {
 
 echo "Running on host: $(hostname)"
 
-echo "Checking network connection to compute node."
+echo "Checking network connection to compute1 node."
 ping -c1 compute1
 echo
 
-echo "Checking services on network node."
+echo "Checking services on controller node."
 wait_for_service controller neutron-l3-agent
 wait_for_service controller neutron-dhcp-agent
 wait_for_service controller neutron-metadata-agent
 echo
 
-echo "Checking services on compute node."
+echo "Checking services on compute1 node."
 wait_for_service compute1 nova-compute
 echo
 
