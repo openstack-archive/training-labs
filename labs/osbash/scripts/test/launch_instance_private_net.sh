@@ -104,7 +104,7 @@ function wait_for_nova_compute {
     (
     source "$CONFIG_DIR/admin-openstackrc.sh"
     if openstack compute service list --service nova-compute | \
-            grep -q "up"; then
+            grep -q "| up "; then
         return 0
     fi
     )
@@ -119,7 +119,7 @@ function wait_for_nova_compute {
     local start=$(date +%s)
     (
     source "$CONFIG_DIR/admin-openstackrc.sh"
-    while openstack compute service list --service nova-compute | grep -q "| up "; do
+    until openstack compute service list --service nova-compute | grep -q "| up "; do
         cnt=$((cnt + 1))
         sleep 5
         if ssh_no_chk_node compute1 service nova-compute status | \
@@ -152,8 +152,8 @@ function wait_for_nova_services {
     echo "Checking services in sudo nova-manage service list."
     echo -n "  Waiting for controller services to switch from XXX to :-)."
     # Ignore nova-compute for now, even if a custom config has it on controller
-    while sudo nova-manage service list --host controller | \
-        grep -v nova-compute | grep -q XXX; do
+    until sudo nova-manage service list --host controller | \
+        grep -v nova-compute | grep -q ':-)'; do
         sleep 2
         echo -n .
     done
