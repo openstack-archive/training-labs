@@ -57,6 +57,51 @@ function vm_conditional_snapshot {
 }
 
 #-------------------------------------------------------------------------------
+# Virtual VM keyboard using keycodes
+#-------------------------------------------------------------------------------
+
+function keyboard_send_escape {
+    local vm_name=$1
+    _keyboard_push_scancode "$vm_name" "$(esc2scancode)"
+}
+
+function keyboard_send_enter {
+    local vm_name=$1
+    _keyboard_push_scancode "$vm_name" "$(enter2scancode)"
+}
+
+# Turn strings into keycodes and send them to target VM
+function keyboard_send_string {
+    local vm_name=$1
+    local str=$2
+
+    # This loop is inefficient enough that we don't overrun the keyboard input
+    # buffer when pushing scancodes to the VM.
+    while IFS=  read -r -n1 char; do
+        if [ -n "$char" ]; then
+            SC=$(char2scancode "$char")
+            if [ -n "$SC" ]; then
+                _keyboard_push_scancode "$vm_name" "$SC"
+            else
+                echo >&2 "not found: $char"
+            fi
+        fi
+    done <<< "$str"
+}
+
+#-------------------------------------------------------------------------------
+# Conditional sleeping
+#-------------------------------------------------------------------------------
+
+function conditional_sleep {
+    sec=$1
+
+    # Don't sleep if we are just faking it for wbatch
+    ${OSBASH:-:} sleep "$sec"
+    ${WBATCH:-:} wbatch_sleep "$sec"
+}
+
+#-------------------------------------------------------------------------------
 # Networking
 #-------------------------------------------------------------------------------
 
