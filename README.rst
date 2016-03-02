@@ -30,9 +30,17 @@ Pre-requisite
 How to run the scripts
 ----------------------
 
-Clone the training-labs repository::
+Clone the training-labs repository:
 
     $ git clone git://git.openstack.org/openstack/training-labs.git
+
+Change directory:
+
+    $ cd training-labs/labs/osbash/
+
+Run the script by:
+
+    $ ./osbash.sh -g gui -b cluster
 
 What the script installs
 ------------------------
