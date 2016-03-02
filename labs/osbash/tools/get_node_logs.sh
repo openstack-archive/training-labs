@@ -31,9 +31,9 @@ for node in $(script_cfg_get_nodenames); do
 
     ssh_env_for_node $node
     if vm_ssh "$VM_SSH_PORT" exit; then
-        echo "Getting upstart log files from $node node."
+        echo "Getting server log files from $node node."
         mkdir "$node_dir"
-        vm_ssh "$VM_SSH_PORT" "sudo tar cf - -C /var/log upstart" | tar xf - -C "$node_dir"
+        vm_ssh "$VM_SSH_PORT" "sudo tar cf - -C /var log --exclude=installer" | tar xf - -C "$node_dir"
     fi
     )
 done
