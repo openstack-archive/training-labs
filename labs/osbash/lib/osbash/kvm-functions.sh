@@ -183,13 +183,18 @@ function ssh_env_for_node {
     # No port forwarding with KVM; ignore VM_SSH_PORT from config.<node>
     VM_SSH_PORT=22
 
-    if grep "$node" "$NODE_IP_DB"; then
-        SSH_IP=$(grep " $node$" "$NODE_IP_DB"|awk '{print $2}')
-        return 0
+    if [ -f "$NODE_IP_DB" ]; then
+        if grep "$node" "$NODE_IP_DB"; then
+            SSH_IP=$(grep " $node$" "$NODE_IP_DB"|awk '{print $2}')
+            return 0
+        else
+            echo >&2 "Node $node not found in $NODE_IP_DB."
+        fi
+    else
+        echo >&2 "$NODE_IP_DB missing."
     fi
-
-    echo -e >&2 "${CError:-}ERROR: IP address for $node not found.${CReset:-}"
-    exit 1
+    echo >&2 "Getting IP address through arp."
+    SSH_IP=$(node_to_ip "$node")
 }
 
 function virsh_define_network {
