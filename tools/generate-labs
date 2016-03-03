@@ -12,13 +12,20 @@ set -o nounset  # Treat unset variables as an error
 
 # This variable is fed by openstack-ci post job as a trigger.
 # The value here will be stable/<release-name>
-release=$1
+if [ $# -eq 0 ]; then
+    release="current"
+else
+    release=$1
+fi
 # Replace '/' with '-' for renaming stable/<release-name> to
 # stalbe-<release-name>
 release=${release////-}
 
 # Create required folders
 mkdir -p ./build/dist/
+
+# Generate windows batch scripts
+labs/osbash/osbash.sh -w cluster
 
 # Create tarball of labs scripts for Linux/OS X users
 tar --exclude=*.iso \
@@ -28,8 +35,9 @@ tar --exclude=*.iso \
     -czf build/dist/labs-${release}.tgz labs/osbash
 
 
+# TODO (dbite): Fix issue with missing zip dep. in openstack ci.
 # Generate Windows batch scripts
-labs/osbash/osbash.sh -w cluster
+#labs/osbash/osbash.sh -w cluster
 # Create zip file of labs scripts for Windows users
-zip -r build/dist/labs-${release}.zip labs/osbash \
-    -x *.iso \*.vdi \*.log \*.auto
+#zip -r build/dist/labs-${release}.zip labs/osbash \
+#    -x *.iso \*.vdi \*.log \*.auto
