@@ -22,7 +22,6 @@ echo "Installing ceilometer."
 sudo apt-get install -y ceilometer-agent-compute
 
 ceilometer_admin_user=$(service_to_user_name ceilometer)
-ceilometer_admin_password=$(service_to_user_password ceilometer)
 
 echo "Configuring ceilometer.conf."
 conf=/etc/ceilometer/ceilometer.conf
@@ -35,20 +34,20 @@ iniset_sudo $conf DEFAULT rpc_backend rabbit
 # Configure [oslo_messaging_rabbit] section.
 iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
 iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
-iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 
 # Configure [ketstone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000/v2.0
 iniset_sudo $conf keystone_authtoken identity_uri http://controller:35357
 iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken admin_user "$ceilometer_admin_user"
-iniset_sudo $conf keystone_authtoken admin_password "$ceilometer_admin_password"
+iniset_sudo $conf keystone_authtoken admin_password "$CEILOMETER_PASS"
 
 # Configure [service_credentials] section.
 iniset_sudo $conf service_credentials os_auth_url http://controller:5000/v2.0
 iniset_sudo $conf service_credentials os_username "$ceilometer_admin_user"
 iniset_sudo $conf service_credentials os_tenant_name "$SERVICE_PROJECT_NAME"
-iniset_sudo $conf service_credentials os_password "$ceilometer_admin_password"
+iniset_sudo $conf service_credentials os_password "$CEILOMETER_PASS"
 iniset_sudo $conf service_credentials os_endpoint_type internalURL
 iniset_sudo $conf service_credentials os_region_name "$REGION"
 

@@ -20,7 +20,6 @@ indicate_current_auto
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
 neutron_admin_user=$(service_to_user_name neutron)
-neutron_admin_password=$(service_to_user_password neutron)
 
 # Wait for keystone to come up
 wait_for_keystone
@@ -35,7 +34,7 @@ iniset_sudo $conf DEFAULT project_domain_id default
 iniset_sudo $conf DEFAULT user_domain_id default
 iniset_sudo $conf DEFAULT project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf DEFAULT username "$neutron_admin_user"
-iniset_sudo $conf DEFAULT password "$neutron_admin_password"
+iniset_sudo $conf DEFAULT password "$NEUTRON_PASS"
 
 iniset_sudo $conf DEFAULT nova_metadata_ip controller
 
@@ -53,7 +52,7 @@ iniset_sudo $conf neutron user_domain_id default
 iniset_sudo $conf neutron region_name "$REGION"
 iniset_sudo $conf neutron project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf neutron username "$neutron_admin_user"
-iniset_sudo $conf neutron password "$neutron_admin_password"
+iniset_sudo $conf neutron password "$NEUTRON_PASS"
 
 iniset_sudo $conf neutron service_metadata_proxy True
 iniset_sudo $conf neutron metadata_proxy_shared_secret "$METADATA_SECRET"

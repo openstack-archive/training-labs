@@ -23,21 +23,19 @@ source "$CONFIG_DIR/admin-openstackrc.sh"
 
 # Create Ceilometer user and database.
 ceilometer_admin_user=$(service_to_user_name ceilometer)
-ceilometer_admin_password=$(service_to_user_password ceilometer)
 
 mongodb_user=$(service_to_db_user ceilometer)
-mongodb_password=$(service_to_db_password ceilometer)
 
 echo "Creating the ceilometer database."
 mongo --host "$(hostname_to_ip controller)" --eval "
     db = db.getSiblingDB(\"ceilometer\");
     db.addUser({user: \"${mongodb_user}\",
-    pwd: \"${mongodb_password}\",
+    pwd: \"${CEILOMETER_DBPASS}\",
     roles: [ \"readWrite\", \"dbAdmin\" ]})"
 
 echo "Creating ceilometer user and giving it admin role under service tenant."
 openstack user create \
-    --password "$ceilometer_admin_password" \
+    --password "$CEILOMETER_PASS" \
     "$ceilometer_admin_user"
 
 openstack role add \
@@ -69,7 +67,7 @@ sudo apt-get install -y ceilometer-api ceilometer-collector \
 function get_database_url {
     local database_host=controller
 
-    echo "mongodb://$mongodb_user:$mongodb_password@$database_host:27017/ceilometer"
+    echo "mongodb://$mongodb_user:$CEILOMETER_DBPASS@$database_host:27017/ceilometer"
 }
 
 database_url=$(get_database_url)
@@ -84,7 +82,7 @@ iniset_sudo $conf DEFAULT rpc_backend rabbit
 
 iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
 iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
-iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 
 # Configure the [DEFAULT] section
 iniset_sudo $conf DEFAULT auth_strategy keystone
@@ -94,13 +92,13 @@ iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000/v2.0
 iniset_sudo $conf keystone_authtoken identity_uri http://controller:35357
 iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken admin_user "$ceilometer_admin_user"
-iniset_sudo $conf keystone_authtoken admin_password "$ceilometer_admin_password"
+iniset_sudo $conf keystone_authtoken admin_password "$CEILOMETER_PASS"
 
 # Configure [service_credentials] section.
 iniset_sudo $conf service_credentials os_auth_url http://controller:5000/v2.0
 iniset_sudo $conf service_credentials os_username "$ceilometer_admin_user"
 iniset_sudo $conf service_credentials os_tenant_name "$SERVICE_PROJECT_NAME"
-iniset_sudo $conf service_credentials os_password "$ceilometer_admin_password"
+iniset_sudo $conf service_credentials os_password "$CEILOMETER_PASS"
 iniset_sudo $conf service_credentials os_endpoint_type internalURL
 iniset_sudo $conf service_credentials os_region_name "$REGION"
 
@@ -132,7 +130,7 @@ iniset_sudo $conf DEFAULT notification_driver messagingv2
 iniset_sudo $conf DEFAULT rpc_backend rabbit
 iniset_sudo $conf DEFAULT rabbit_host controller
 iniset_sudo $conf DEFAULT rabbit_userid openstack
-iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
+iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASS"
 
 echo "Configuring glance-registry.conf."
 conf=/etc/glance/glance-registry.conf
@@ -142,7 +140,7 @@ iniset_sudo $conf DEFAULT notification_driver messagingv2
 iniset_sudo $conf DEFAULT rpc_backend rabbit
 iniset_sudo $conf DEFAULT rabbit_host controller
 iniset_sudo $conf DEFAULT rabbit_userid openstack
-iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASSWORD"
+iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASS"
 
 sudo service glance-registry restart
 sudo service glance-api restart

@@ -68,15 +68,13 @@ echo "Configuring $conf."
 
 function get_database_url {
     local db_user=$(service_to_db_user cinder)
-    local db_password=$(service_to_db_password cinder)
     local database_host=controller
 
-    echo "mysql+pymysql://$db_user:$db_password@$database_host/cinder"
+    echo "mysql+pymysql://$db_user:$CINDER_DBPASS@$database_host/cinder"
 }
 
 database_url=$(get_database_url)
 cinder_admin_user=$(service_to_user_name cinder)
-cinder_admin_password=$(service_to_user_password cinder)
 
 echo "Setting database connection: $database_url."
 iniset_sudo $conf database connection "$database_url"
@@ -86,7 +84,7 @@ iniset_sudo $conf DEFAULT rpc_backend rabbit
 
 iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
 iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
-iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
@@ -98,7 +96,7 @@ iniset_sudo $conf keystone_authtoken project_domain_id default
 iniset_sudo $conf keystone_authtoken user_domain_id default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$cinder_admin_user"
-iniset_sudo $conf keystone_authtoken password "$cinder_admin_password"
+iniset_sudo $conf keystone_authtoken password "$CINDER_PASS"
 
 iniset_sudo $conf DEFAULT my_ip "$MY_MGMT_IP"
 

@@ -27,21 +27,18 @@ sudo apt-get install -y \
 echo "Configuring neutron for controller node."
 function get_database_url {
     local db_user=$(service_to_db_user neutron)
-    local db_password=$(service_to_db_password neutron)
     local database_host=controller
 
-    echo "mysql+pymysql://$db_user:$db_password@$database_host/neutron"
+    echo "mysql+pymysql://$db_user:$NEUTRON_DBPASS@$database_host/neutron"
 }
 
 database_url=$(get_database_url)
 
 # Get neutron service info.
 neutron_admin_user=$(service_to_user_name neutron)
-neutron_admin_password=$(service_to_user_password neutron)
 
 # Get nova service info.
 nova_admin_user=$(service_to_user_name nova)
-nova_admin_password=$(service_to_user_password nova)
 
 echo "Setting database connection: $database_url."
 conf=/etc/neutron/neutron.conf
@@ -58,7 +55,7 @@ iniset_sudo $conf DEFAULT rpc_backend rabbit
 # Configure [oslo_messaging_rabbit] section.
 iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
 iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
-iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 
 # Configuring [DEFAULT] section.
 iniset_sudo $conf DEFAULT auth_strategy keystone
@@ -71,7 +68,7 @@ iniset_sudo $conf keystone_authtoken project_domain_id default
 iniset_sudo $conf keystone_authtoken user_domain_id default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$neutron_admin_user"
-iniset_sudo $conf keystone_authtoken password "$neutron_admin_password"
+iniset_sudo $conf keystone_authtoken password "$NEUTRON_PASS"
 
 # Configure nova related parameters
 iniset_sudo $conf DEFAULT notify_nova_on_port_status_changes True
@@ -86,7 +83,7 @@ iniset_sudo $conf nova user_domain_id default
 iniset_sudo $conf nova region_name "$REGION"
 iniset_sudo $conf nova project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf nova username "$nova_admin_user"
-iniset_sudo $conf nova password "$nova_admin_password"
+iniset_sudo $conf nova password "$NOVA_PASS"
 
 iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 

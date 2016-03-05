@@ -18,12 +18,11 @@ indicate_current_auto
 #------------------------------------------------------------------------------
 
 echo "Setting up database for neutron."
-setup_database neutron
+setup_database neutron "$NEUTRON_DBPASS"
 
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
 neutron_admin_user=$(service_to_user_name neutron)
-neutron_admin_password=$(service_to_user_password neutron)
 
 # Wait for keystone to come up
 wait_for_keystone
@@ -31,7 +30,7 @@ wait_for_keystone
 echo "Creating neutron user and giving it admin role under service tenant."
 openstack user create \
     --domain default  \
-    --password "$neutron_admin_password" \
+    --password "$NEUTRON_PASS" \
     "$neutron_admin_user"
 
 openstack role add \

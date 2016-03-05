@@ -22,13 +22,12 @@ indicate_current_auto
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Setting up database for glance."
-setup_database glance
+setup_database glance "$GLANCE_DBPASS"
 
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
 glance_admin_user=$(service_to_user_name glance)
-glance_admin_password=$(service_to_user_password glance)
 
 # Wait for keystone to come up
 wait_for_keystone
@@ -36,7 +35,7 @@ wait_for_keystone
 echo "Creating glance user and giving it admin role under service tenant."
 openstack user create \
     --domain default \
-    --password "$glance_admin_password" \
+    --password "$GLANCE_PASS" \
     "$glance_admin_user"
 
 openstack role add \
@@ -69,10 +68,9 @@ sudo apt-get install -y glance python-glanceclient
 
 function get_database_url {
     local db_user=$(service_to_db_user glance)
-    local db_password=$(service_to_db_password glance)
     local database_host=controller
 
-    echo "mysql+pymysql://$db_user:$db_password@$database_host/glance"
+    echo "mysql+pymysql://$db_user:$GLANCE_DBPASS@$database_host/glance"
 }
 
 database_url=$(get_database_url)
@@ -92,7 +90,7 @@ iniset_sudo $conf keystone_authtoken project_domain_id default
 iniset_sudo $conf keystone_authtoken user_domain_id default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$glance_admin_user"
-iniset_sudo $conf keystone_authtoken password "$glance_admin_password"
+iniset_sudo $conf keystone_authtoken password "$GLANCE_PASS"
 
 # Paste_deploy
 iniset_sudo $conf paste_deploy flavor "keystone"
@@ -119,7 +117,7 @@ iniset_sudo $conf keystone_authtoken project_domain_id default
 iniset_sudo $conf keystone_authtoken user_domain_id default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$glance_admin_user"
-iniset_sudo $conf keystone_authtoken password "$glance_admin_password"
+iniset_sudo $conf keystone_authtoken password "$GLANCE_PASS"
 
 # Paste deploy section
 iniset_sudo $conf paste_deploy flavor "keystone"

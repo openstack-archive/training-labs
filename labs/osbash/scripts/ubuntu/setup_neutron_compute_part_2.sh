@@ -19,7 +19,6 @@ indicate_current_auto
 #------------------------------------------------------------------------------
 
 neutron_admin_user=$(service_to_user_name neutron)
-neutron_admin_password=$(service_to_user_password neutron)
 
 echo "Configuring Compute to use Networking."
 conf=/etc/nova/nova.conf
@@ -31,7 +30,7 @@ iniset_sudo $conf neutron user_domain_id default
 iniset_sudo $conf neutron region_name "$REGION"
 iniset_sudo $conf neutron project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf neutron username "$neutron_admin_user"
-iniset_sudo $conf neutron password "$neutron_admin_password"
+iniset_sudo $conf neutron password "$NEUTRON_PASS"
 
 echo "Restarting the Compute service."
 sudo service nova-compute restart

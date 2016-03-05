@@ -19,7 +19,7 @@ indicate_current_auto
 #------------------------------------------------------------------------------
 
 echo "Setting up database for keystone."
-setup_database keystone
+setup_database keystone "$KEYSTONE_DBPASS"
 
 # Create a "shared secret" used as OS_TOKEN, together with OS_URL, before
 # keystone can be used for authentication
@@ -46,10 +46,9 @@ iniset_sudo $conf DEFAULT admin_token "$ADMIN_TOKEN"
 
 function get_database_url {
     local db_user=$(service_to_db_user keystone)
-    local db_password=$(service_to_db_password keystone)
     local database_host=controller
 
-    echo "mysql+pymysql://$db_user:$db_password@$database_host/keystone"
+    echo "mysql+pymysql://$db_user:$KEYSTONE_DBPASS@$database_host/keystone"
 }
 
 database_url=$(get_database_url)
@@ -183,7 +182,7 @@ openstack project create --domain default \
 
 echo "Creating admin user."
 openstack user create --domain default \
-    --password "$ADMIN_PASSWORD" \
+    --password "$ADMIN_PASS" \
     "$ADMIN_USER_NAME"
 
 echo "Creating admin role."
@@ -207,7 +206,7 @@ openstack project create --domain default \
 
 echo "Creating demo user."
 openstack user create --domain default \
-    --password "$DEMO_PASSWORD" \
+    --password "$DEMO_PASS" \
     "$DEMO_USER_NAME"
 
 echo "Creating the user role."
@@ -248,7 +247,7 @@ openstack \
     --os-project-name "$ADMIN_PROJECT_NAME" \
     --os-username "$ADMIN_USER_NAME" \
     --os-auth-type password \
-    --os-password "$ADMIN_PASSWORD" \
+    --os-password "$ADMIN_PASS" \
     token issue
 
 echo "Requesting project list."
@@ -257,7 +256,7 @@ openstack \
     --os-project-name "$ADMIN_PROJECT_NAME" \
     --os-username "$ADMIN_USER_NAME" \
     --os-auth-type password \
-    --os-password "$ADMIN_PASSWORD" \
+    --os-password "$ADMIN_PASS" \
     project list
 
 echo "Requesting user list."
@@ -266,7 +265,7 @@ openstack \
     --os-project-name "$ADMIN_PROJECT_NAME" \
     --os-username "$ADMIN_USER_NAME" \
     --os-auth-type password \
-    --os-password "$ADMIN_PASSWORD" \
+    --os-password "$ADMIN_PASS" \
     user list
 
 echo "Requesting role list."
@@ -275,7 +274,7 @@ openstack \
     --os-project-name "$ADMIN_PROJECT_NAME" \
     --os-username "$ADMIN_USER_NAME" \
     --os-auth-type password \
-    --os-password "$ADMIN_PASSWORD" \
+    --os-password "$ADMIN_PASS" \
     role list
 
 echo "Requesting an authentication token for the demo user."
@@ -286,7 +285,7 @@ openstack \
     --os-project-name "$DEMO_PROJECT_NAME" \
     --os-username "$DEMO_USER_NAME" \
     --os-auth-type password \
-    --os-password "$DEMO_PASSWORD" \
+    --os-password "$DEMO_PASS" \
     token issue
 
 echo "Verifying that an admin-only request by the demo user is denied."
@@ -297,7 +296,7 @@ openstack \
     --os-project-name "$DEMO_PROJECT_NAME" \
     --os-username "$DEMO_USER_NAME" \
     --os-auth-type password \
-    --os-password "$DEMO_PASSWORD" \
+    --os-password "$DEMO_PASS" \
     user list || rc=$?
 
 echo rc=$rc

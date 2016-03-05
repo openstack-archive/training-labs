@@ -34,13 +34,12 @@ iniset_sudo $conf DEFAULT rpc_backend rabbit
 # Configure [oslo_messaging_rabbit] section.
 iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
 iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
-iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 
 # Configuring [DEFAULT] section.
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
 nova_admin_user=$(service_to_user_name nova)
-nova_admin_password=$(service_to_user_password nova)
 
 MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
 
@@ -52,7 +51,7 @@ iniset_sudo $conf keystone_authtoken project_domain_id default
 iniset_sudo $conf keystone_authtoken user_domain_id default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$nova_admin_user"
-iniset_sudo $conf keystone_authtoken password "$nova_admin_password"
+iniset_sudo $conf keystone_authtoken password "$NOVA_PASS"
 
 # Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT my_ip "$MY_MGMT_IP"

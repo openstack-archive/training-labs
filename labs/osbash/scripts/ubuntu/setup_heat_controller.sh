@@ -22,13 +22,12 @@ indicate_current_auto
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Setting up database for heat."
-setup_database heat
+setup_database heat "$HEAT_DBPASS"
 
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
 heat_admin_user=$(service_to_user_name heat)
-heat_admin_password=$(service_to_user_password heat)
 
 # Wait for keystone to come up
 wait_for_keystone
@@ -36,7 +35,7 @@ wait_for_keystone
 echo "Creating heat user and giving it admin role under service tenant."
 openstack user create \
     --domain default \
-    --password "$heat_admin_password" \
+    --password "$HEAT_PASS" \
     "$heat_admin_user"
 
 openstack role add \
@@ -116,10 +115,9 @@ sudo apt-get install -y heat-api heat-api-cfn heat-engine python-heatclient
 
 function get_database_url {
     local db_user=$(service_to_db_user heat)
-    local db_password=$(service_to_db_password heat)
     local database_host=controller
 
-    echo "mysql+pymysql://$db_user:$db_password@$database_host/heat"
+    echo "mysql+pymysql://$db_user:$HEAT_DBPASS@$database_host/heat"
 }
 
 database_url=$(get_database_url)
@@ -137,7 +135,7 @@ iniset_sudo $conf DEFAULT rpc_backend rabbit
 # Configure [oslo_messaging_rabbit] section.
 iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
 iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
-iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASSWORD"
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
@@ -147,13 +145,13 @@ iniset_sudo $conf keystone_authtoken project_domain_id default
 iniset_sudo $conf keystone_authtoken user_domain_id default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$heat_admin_user"
-iniset_sudo $conf keystone_authtoken password "$heat_admin_password"
+iniset_sudo $conf keystone_authtoken password "$HEAT_PASS"
 
 # Configure [trustee] section.
 iniset_sudo $conf trustee auth_plugin password
 iniset_sudo $conf trustee auth_url http://controller:35357
 iniset_sudo $conf trustee username "$heat_admin_user"
-iniset_sudo $conf trustee password "$heat_admin_password"
+iniset_sudo $conf trustee password "$HEAT_PASS"
 iniset_sudo $conf trustee user_domain_id default
 
 # Configure [clients_keystone] section.
