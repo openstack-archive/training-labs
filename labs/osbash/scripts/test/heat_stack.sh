@@ -26,6 +26,20 @@ until node_ssh controller "$AUTH; heat stack-list" >/dev/null 2>&1; do
     sleep 1
 done
 
+function check_for_other_vms {
+    echo "Verifying that no other instance VMs are left."
+    (
+    source "$CONFIG_DIR/admin-openstackrc.sh"
+    if [ "$(nova list --all-tenants --minimal | wc -l)" -gt 4 ]; then
+        echo "ERROR Unexpected VMs found. There may not be enough resources" \
+             "for this test. Aborting..."
+        nova list --all-tenants
+        exit 1
+    fi
+    )
+}
+check_for_other_vms
+
 echo "Creating a test heat template."
 
 node_ssh controller "cat > demo-template.yml" << HEAT
