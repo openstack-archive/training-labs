@@ -153,7 +153,7 @@ function get_router_ip_address {
     local network_part=$(remove_last_octet "$public_network")
     local line
 
-    while [ : ]; do
+    while : ; do
         line=$(neutron router-port-list -F fixed_ips router|grep "$network_part")
         if [ -z "$line" ]; then
             # Wait for the network_part to appear in the list

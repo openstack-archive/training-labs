@@ -645,7 +645,7 @@ function disk_delete_child_vms {
         return 0
     fi
 
-    while [ : ]; do
+    while : ; do
         local child_uuid=$(get_next_child_uuid "$disk")
         if [ -n "$child_uuid" ]; then
             local child_disk=$(disk_to_path "$child_uuid")

@@ -127,7 +127,7 @@ function node_to_mac {
     local mac=""
 
     echo >&2 "Waiting for MAC address."
-    while [ : ]; do
+    while : ; do
         mac=$($VIRSH dumpxml "$node"|grep -Po '[a-z0-9:]{17}'|head -n1) || rc=$?
         if [ -n "$mac" ]; then
             echo "$mac"
@@ -146,7 +146,7 @@ function mac_to_ip {
     local ip=""
 
     echo >&2 "Waiting for IP address."
-    while [ : ]; do
+    while : ; do
         ip=$(sudo arp -n|grep "$mac"|awk '{print $1}') || rc=$?
         if [ -n "$ip" ]; then
             echo >&2
