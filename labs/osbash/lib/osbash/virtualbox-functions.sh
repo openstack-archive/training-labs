@@ -497,6 +497,13 @@ function vm_create {
             --groups "/$VM_GROUP"  >/dev/null
     fi
 
+    if WBATCH= $VBM showvminfo --machinereadable "$vm_name" | \
+            grep -q 'longmode="off"'; then
+        echo -e >&2 "${CStatus:-}Nodes run 32-bit OS, enabling PAE.${CReset:-}"
+        # Ubuntu 14.04 LTS i386 needs PAE
+        $VBM modifyvm "$vm_name" --pae on
+    fi
+
     $VBM modifyvm "$vm_name" --rtcuseutc on
     $VBM modifyvm "$vm_name" --biosbootmenu disabled
     $VBM modifyvm "$vm_name" --largepages on

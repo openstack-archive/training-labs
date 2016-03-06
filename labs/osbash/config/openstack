@@ -5,7 +5,13 @@
 : ${OPENSTACK_RELEASE:=liberty}
 
 # CirrOS image URL
-CIRROS_URL="http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img"
+if [ "$(uname -m)" = "x86_64" ]; then
+    arch=x86_64
+else
+    arch=i386
+fi
+CIRROS_URL="http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-$arch-disk.img"
+unset arch
 
 #------------------------------------------------------------------------------
 # http://docs.openstack.org/liberty/install-guide-ubuntu/environment-networking.html
