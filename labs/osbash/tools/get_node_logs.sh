@@ -35,6 +35,12 @@ for node in $(script_cfg_get_nodenames); do
         mkdir "$node_dir"
         vm_ssh "$VM_SSH_PORT" "sudo tar cf - -C /var log --exclude=installer" | tar xf - -C "$node_dir"
     fi
+
+    echo -e "Splitting log files into:\n\t$node_dir/split_logs"
+    "$TOP_DIR/tools/log_snapshot_split.py" \
+        --logdir "$node_dir/log" \
+        --resultdir "$node_dir/split_logs" \
+        "$node_dir/log"
     )
 done
 
