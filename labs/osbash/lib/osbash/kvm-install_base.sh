@@ -21,6 +21,8 @@ function vm_install_base {
             exit 1
         fi
 
+        ${OSBASH:-:} find_install-iso
+
         INSTALL_ISO=$ISO_DIR/$(get_iso_name)
     fi
 
