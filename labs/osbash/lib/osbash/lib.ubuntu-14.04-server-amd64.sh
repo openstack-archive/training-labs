@@ -77,26 +77,4 @@ function distro_start_installer {
     keyboard_send_enter "$vm_name"
 }
 
-#-------------------------------------------------------------------------------
-# Installation from Internet server (if ISO image cannot be used, e.g. with KVM)
-#-------------------------------------------------------------------------------
-
-readonly DISTRO_URL=http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/
-
-# Extra arguments for virt-install
-readonly EXTRA_ARGS="locale=en_US.UTF-8
-    console-keymaps-at/keymap=us
-    console-setup/ask_detect=false
-    console-setup/layoutcode=us
-    keyboard-configuration/layout=USA
-    keyboard-configuration/variant=US
-    netcfg/get_hostname=osbash
-    netcfg/get_domainname=local
-    mirror/country=CH
-    mirror/http/directory=/ubuntu
-    mirror/http/mirror=ch.archive.ubuntu.com
-    mirror/protocol=http
-    mirror/http/proxy=
-    preseed/url=${_PS_ssh}"
-
 # vim: set ai ts=4 sw=4 et ft=sh:
