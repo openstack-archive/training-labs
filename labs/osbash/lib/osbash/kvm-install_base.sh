@@ -21,14 +21,14 @@ function vm_install_base {
             exit 1
         fi
 
-        ${OSBASH:-:} find_install-iso
+        find_install-iso
 
         INSTALL_ISO=$ISO_DIR/$(get_iso_name)
     fi
 
     echo >&2 -e "${CInfo:-}Install ISO:\n\t${CData:-}$INSTALL_ISO${CReset:-}"
 
-    ${OSBASH:-:} check_md5 "$INSTALL_ISO" "$ISO_MD5"
+    check_md5 "$INSTALL_ISO" "$ISO_MD5"
 
     # Configure autostart
     autostart_reset
