@@ -24,7 +24,7 @@ source "$CONFIG_DIR/admin-openstackrc.sh"
 # Create Ceilometer user and database.
 ceilometer_admin_user=$(service_to_user_name ceilometer)
 
-mongodb_user=$(service_to_db_user ceilometer)
+mongodb_user=$CEILOMETER_DB_USER
 
 echo "Creating the ceilometer database."
 mongo --host "$(hostname_to_ip controller)" --eval "

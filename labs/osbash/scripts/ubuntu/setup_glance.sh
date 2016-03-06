@@ -22,7 +22,7 @@ indicate_current_auto
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Setting up database for glance."
-setup_database glance "$GLANCE_DBPASS"
+setup_database glance "$GLANCE_DB_USER" "$GLANCE_DBPASS"
 
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
@@ -67,7 +67,7 @@ echo "Installing glance."
 sudo apt-get install -y glance python-glanceclient
 
 function get_database_url {
-    local db_user=$(service_to_db_user glance)
+    local db_user=$GLANCE_DB_USER
     local database_host=controller
 
     echo "mysql+pymysql://$db_user:$GLANCE_DBPASS@$database_host/glance"

@@ -18,7 +18,7 @@ indicate_current_auto
 #------------------------------------------------------------------------------
 
 echo "Setting up database for nova."
-setup_database nova "$NOVA_DBPASS"
+setup_database nova "$NOVA_DB_USER" "$NOVA_DBPASS"
 
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
@@ -64,7 +64,7 @@ sudo apt-get install -y \
     nova-novncproxy nova-scheduler python-novaclient
 
 function get_database_url {
-    local db_user=$(service_to_db_user nova)
+    local db_user=$NOVA_DB_USER
     local database_host=controller
 
     echo "mysql+pymysql://$db_user:$NOVA_DBPASS@$database_host/nova"

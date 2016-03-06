@@ -276,8 +276,8 @@ function mysql_exe {
 
 function setup_database {
     local service=$1
-    local db_password=$2
-    local db_user=$(service_to_db_user $service)
+    local db_user=$2
+    local db_password=$3
 
     echo -n "Waiting for database server to come up."
     until mysql_exe quit >/dev/null 2>&1; do
@@ -324,14 +324,6 @@ function wait_for_keystone {
         sleep 1
     done
     echo
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Users for service-specific MySQL databases
-
-function service_to_db_user {
-    local service_name=$1
-    echo "${service_name}User"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

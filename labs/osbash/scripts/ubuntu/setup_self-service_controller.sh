@@ -26,7 +26,7 @@ sudo apt-get install -y \
 
 echo "Configuring neutron for controller node."
 function get_database_url {
-    local db_user=$(service_to_db_user neutron)
+    local db_user=$NEUTRON_DB_USER
     local database_host=controller
 
     echo "mysql+pymysql://$db_user:$NEUTRON_DBPASS@$database_host/neutron"

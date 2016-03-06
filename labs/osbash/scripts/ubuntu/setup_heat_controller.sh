@@ -22,7 +22,7 @@ indicate_current_auto
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Setting up database for heat."
-setup_database heat "$HEAT_DBPASS"
+setup_database heat "$HEAT_DB_USER" "$HEAT_DBPASS"
 
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
@@ -114,7 +114,7 @@ echo "Installing heat."
 sudo apt-get install -y heat-api heat-api-cfn heat-engine python-heatclient
 
 function get_database_url {
-    local db_user=$(service_to_db_user heat)
+    local db_user=$HEAT_DB_USER
     local database_host=controller
 
     echo "mysql+pymysql://$db_user:$HEAT_DBPASS@$database_host/heat"

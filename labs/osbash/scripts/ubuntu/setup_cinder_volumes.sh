@@ -67,7 +67,7 @@ conf=/etc/cinder/cinder.conf
 echo "Configuring $conf."
 
 function get_database_url {
-    local db_user=$(service_to_db_user cinder)
+    local db_user=$CINDER_DB_USER
     local database_host=controller
 
     echo "mysql+pymysql://$db_user:$CINDER_DBPASS@$database_host/cinder"

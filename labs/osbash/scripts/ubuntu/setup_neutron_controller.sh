@@ -18,7 +18,7 @@ indicate_current_auto
 #------------------------------------------------------------------------------
 
 echo "Setting up database for neutron."
-setup_database neutron "$NEUTRON_DBPASS"
+setup_database neutron "$NEUTRON_DB_USER" "$NEUTRON_DBPASS"
 
 source "$CONFIG_DIR/admin-openstackrc.sh"
 

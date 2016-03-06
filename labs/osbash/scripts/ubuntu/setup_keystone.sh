@@ -19,7 +19,7 @@ indicate_current_auto
 #------------------------------------------------------------------------------
 
 echo "Setting up database for keystone."
-setup_database keystone "$KEYSTONE_DBPASS"
+setup_database keystone "$KEYSTONE_DB_USER" "$KEYSTONE_DBPASS"
 
 # Create a "shared secret" used as OS_TOKEN, together with OS_URL, before
 # keystone can be used for authentication
@@ -45,7 +45,7 @@ echo "Setting admin_token to bootstrap authentication."
 iniset_sudo $conf DEFAULT admin_token "$ADMIN_TOKEN"
 
 function get_database_url {
-    local db_user=$(service_to_db_user keystone)
+    local db_user=$KEYSTONE_DB_USER
     local database_host=controller
 
     echo "mysql+pymysql://$db_user:$KEYSTONE_DBPASS@$database_host/keystone"

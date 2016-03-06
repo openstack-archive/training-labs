@@ -18,7 +18,7 @@ indicate_current_auto
 #------------------------------------------------------------------------------
 
 echo "Setting up database for cinder."
-setup_database cinder "$CINDER_DBPASS"
+setup_database cinder "$CINDER_DB_USER" "$CINDER_DBPASS"
 
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
@@ -86,7 +86,7 @@ sudo apt-get install -y cinder-api cinder-scheduler python-cinderclient \
 #       raw images can be converted.
 
 function get_database_url {
-    local db_user=$(service_to_db_user cinder)
+    local db_user=$CINDER_DB_USER
     local database_host=controller
 
     echo "mysql+pymysql://$db_user:$CINDER_DBPASS@$database_host/cinder"
