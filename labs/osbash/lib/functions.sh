@@ -40,7 +40,7 @@ function is_root {
 function yes_or_no {
     local prompt=$1
     local input=""
-    while [ : ]; do
+    while : ; do
         read -p "$prompt (Y/n): " input
         case "$input" in
             N|n)

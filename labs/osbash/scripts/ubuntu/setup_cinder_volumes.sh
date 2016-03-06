@@ -152,7 +152,7 @@ function check_cinder_services {
     # status. This method will wait for 20 seconds to get the status of the
     # Cinder services.
     local i=1
-    while [ : ]; do
+    while : ; do
         if [[ -z  $(node_ssh controller "$AUTH; cinder service-list" | grep down) ]] > /dev/null 2>&1; then
             echo "Cinder services seem to be up and running!"
             return 0
@@ -190,7 +190,7 @@ function wait_for_cinder_volume {
     # Wait for cinder volume to be created
     echo -n 'Waiting for cinder volume to be created.'
     local i=1
-    while [ : ]; do
+    while : ; do
         if [[ -z  $(node_ssh controller "$AUTH;cinder list" | grep creating) ]] > /dev/null 2>&1; then
             # Proceed if the state of cinder-volumes is error or created.
             # Cinder volumes cannot be deleted when it is in creating state.

@@ -203,7 +203,7 @@ function wait_for_ssh {
     local ssh_port=$1
 
     echo -e -n "${CStatus:-}Waiting for ssh server to respond on ${CData:-}${SSH_IP:-127.0.0.1}:$ssh_port${CReset:-}."
-    while [ : ]; do
+    while : ; do
         if vm_ssh "$ssh_port" exit ; then
             break
         else

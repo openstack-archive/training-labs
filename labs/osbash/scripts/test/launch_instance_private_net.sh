@@ -207,7 +207,7 @@ function wait_for_neutron_agents {
         echo
         echo "$out"
     fi
-    while [ : ]; do
+    while : ; do
         neutron agent-list | sort > "$agent_list.new"
         out=$(comm -13 "$agent_list" "$agent_list.new")
         if [ -n "$out" ]; then
@@ -482,7 +482,7 @@ function instance_status_is {
     nova list | grep "$DEMO_INSTANCE_NAME" | grep -q "$status"
 }
 
-while [ : ]; do
+while : ; do
     echo "###################################################################"
     echo "Launching an instance VM ($VM_LAUNCHES)."
     request_instance > /dev/null
@@ -503,7 +503,7 @@ while [ : ]; do
 
             echo -n "Requesting new instance VMs until it works."
             cnt=0
-            while [ : ]; do
+            while : ; do
                 request_instance >/dev/null
                 if console_status_409; then
                     nova delete "$DEMO_INSTANCE_NAME"
@@ -655,7 +655,7 @@ function patient_ping {
     local ip=$1
     local cnt=0
 
-    while [ : ]; do
+    while : ; do
         echo -n .
         sleep 1
 
