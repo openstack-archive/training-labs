@@ -46,15 +46,15 @@ openstack service create \
 
 openstack endpoint create \
     --region "$REGION" \
-    "$neutron_admin_user" \
+    network \
     public http://controller:9696
 
 openstack endpoint create \
     --region "$REGION" \
-    "$neutron_admin_user" \
+    network \
     internal http://controller:9696
 
 openstack endpoint create \
     --region "$REGION" \
-    "$neutron_admin_user" \
+    network \
     public http://controller:9696
