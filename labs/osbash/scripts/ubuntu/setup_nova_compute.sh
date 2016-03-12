@@ -68,7 +68,8 @@ iniset_sudo $conf vnc novncproxy_base_url http://"$(hostname_to_ip controller)":
 
 # Configure [glance] section.
 iniset_sudo $conf glance host controller
-iniset_sudo $conf glance oslo_concurrency /var/lib/nova/tmp
+
+iniset_sudo $conf oslo_concurrency lock_path /var/lib/nova/tmp
 
 # Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
