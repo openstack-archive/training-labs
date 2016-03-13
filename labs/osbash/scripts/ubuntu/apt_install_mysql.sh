@@ -21,21 +21,21 @@ echo "Will bind MySQL server to $DB_IP."
 
 #------------------------------------------------------------------------------
 # Install and configure the database server
-# http://docs.openstack.org/liberty/install-guide-ubuntu/environment-sql-database.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-sql-database.html
 #------------------------------------------------------------------------------
 
 echo "Sourced MySQL password from credentials: $DATABASE_PASSWORD"
 sudo debconf-set-selections  <<< 'mysql-server mysql-server/root_password password '$DATABASE_PASSWORD''
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password '$DATABASE_PASSWORD''
 
-echo "Installing MySQL."
+echo "Installing MySQL (MariaDB)."
 sudo apt-get install -y mariadb-server python-mysqldb
 
-echo "Creating /etc/mysql/conf.d/mysqld_openstack.cnf."
-echo '[mysqld]' | sudo tee /etc/mysql/conf.d/mysqld_openstack.cnf
-
-
 conf=/etc/mysql/conf.d/mysqld_openstack.cnf
+
+echo "Creating $conf."
+echo '[mysqld]' | sudo tee $conf
+
 echo "Configuring MySQL to accept requests from management network."
 iniset_sudo $conf mysqld bind-address "$DB_IP"
 

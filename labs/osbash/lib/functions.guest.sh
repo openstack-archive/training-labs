@@ -298,7 +298,7 @@ function wait_for_neutron {
     echo -n "Waiting for neutron to come up."
     local cnt=0
     local auth="source $CONFIG_DIR/demo-openstackrc.sh"
-    until neutron net-list >/dev/null 2>&1; do
+    until openstack network list >/dev/null 2>&1; do
         if [ "$cnt" -eq 10 ]; then
             echo
             echo "ERROR No response from neutron. Restarting neutron-server."

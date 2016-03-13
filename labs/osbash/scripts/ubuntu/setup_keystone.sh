@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up keystone for controller node
-# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-install.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/keystone-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for keystone."
@@ -31,12 +31,8 @@ echo "$ADMIN_TOKEN"
 echo "Disabling the keystone service from starting automatically after installation."
 echo "manual" | sudo tee /etc/init/keystone.override
 
-echo "Installing python openstack client"
-sudo apt-get install -y python-openstackclient
-
-echo "Installing keystone."
-sudo apt-get install -y keystone  apache2 \
-    libapache2-mod-wsgi memcached python-memcache
+echo "Installing keystone packages."
+sudo apt-get install -y keystone apache2 libapache2-mod-wsgi
 
 conf=/etc/keystone/keystone.conf
 echo "Configuring [DEFAULT] section in $conf."
@@ -58,26 +54,22 @@ echo "Configuring [database] section in /etc/keystone/keystone.conf."
 echo "Setting database connection: $database_url."
 iniset_sudo $conf database connection "$database_url"
 
-echo "Configuring the Memcache service."
-iniset_sudo $conf memcache servers localhost:11211
-
-echo "Configuring the UUID token provider and SQL driver."
-iniset_sudo $conf token provider uuid
-iniset_sudo $conf token driver memcache
-
-echo "Configuring the SQL revocation driver."
-iniset_sudo $conf revoke driver sql
-
-echo "Enabling verbose logging."
-iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
+echo "Configuring the Fernet token provider."
+iniset_sudo $conf token provider fernet
 
 echo "Creating the database tables for keystone."
 sudo keystone-manage db_sync
 
+echo "Initializing Fernet keys."
+sudo keystone-manage fernet_setup \
+    --keystone-user keystone \
+    --keystone-group keystone
+
 # Configure Apache HTTP server.
 
-echo "Configuring ServerName option in /etc/apache2/apache2.conf to reference controller node."
-echo "ServerName controller" | sudo tee -a /etc/apache2/apache2.conf
+conf=/etc/apache2/apache2.conf
+echo "Configuring ServerName option in $conf to reference controller node."
+echo "ServerName controller" | sudo tee -a $conf
 
 echo "Creating /etc/apache2/sites-available/wsgi-keystone.conf."
 cat << WSGI | sudo tee -a /etc/apache2/sites-available/wsgi-keystone.conf
@@ -143,13 +135,21 @@ sudo rm -f /var/lib/keystone/keystone.db
 
 #------------------------------------------------------------------------------
 # Create the service entity and API endpoints
-# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-services.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/keystone-services.html
 #------------------------------------------------------------------------------
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Prerequisites
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Using OS_TOKEN, OS_URL for authentication."
 export OS_TOKEN=$ADMIN_TOKEN
 export OS_URL=http://controller:35357/v3
 export OS_IDENTITY_API_VERSION=3
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Create the service entity and API endpoints
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Creating keystone service."
 openstack service create \
@@ -159,21 +159,26 @@ openstack service create \
 
 echo "Creating endpoints for keystone."
 openstack endpoint create --region "$REGION" \
-    identity public http://controller:5000/v2.0
+    identity public http://controller:5000/v3
 
 openstack endpoint create --region "$REGION" \
-    identity internal http://controller:5000/v2.0
+    identity internal http://controller:5000/v3
 
 openstack endpoint create --region "$REGION" \
-    identity admin http://controller:35357/v2.0
+    identity admin http://controller:35357/v3
 
 #------------------------------------------------------------------------------
 # Create projects, users, and roles
-# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-users.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/keystone-users.html
 #------------------------------------------------------------------------------
 
 # Wait for keystone to come up
 wait_for_keystone
+
+echo "Creating default domain."
+openstack domain create \
+    --description "Default Domain" \
+    default
 
 echo "Creating admin project."
 openstack project create --domain default \
@@ -221,7 +226,7 @@ openstack role add \
 
 #------------------------------------------------------------------------------
 # Verify operation
-# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-verify.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/keystone-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying keystone installation."
@@ -242,67 +247,73 @@ unset OS_TOKEN OS_URL
 echo "Requesting an authentication token as an admin user."
 openstack \
     --os-auth-url http://controller:35357/v3 \
-    --os-project-domain-id default \
-    --os-user-domain-id default \
+    --os-project-domain-name default \
+    --os-user-domain-name default \
     --os-project-name "$ADMIN_PROJECT_NAME" \
     --os-username "$ADMIN_USER_NAME" \
     --os-auth-type password \
     --os-password "$ADMIN_PASS" \
     token issue
 
-echo "Requesting project list."
-openstack \
-    --os-auth-url http://controller:35357 \
-    --os-project-name "$ADMIN_PROJECT_NAME" \
-    --os-username "$ADMIN_USER_NAME" \
-    --os-auth-type password \
-    --os-password "$ADMIN_PASS" \
-    project list
-
-echo "Requesting user list."
-openstack \
-    --os-auth-url http://controller:35357 \
-    --os-project-name "$ADMIN_PROJECT_NAME" \
-    --os-username "$ADMIN_USER_NAME" \
-    --os-auth-type password \
-    --os-password "$ADMIN_PASS" \
-    user list
-
-echo "Requesting role list."
-openstack \
-    --os-auth-url http://controller:35357 \
-    --os-project-name "$ADMIN_PROJECT_NAME" \
-    --os-username "$ADMIN_USER_NAME" \
-    --os-auth-type password \
-    --os-password "$ADMIN_PASS" \
-    role list
+#echo "Requesting project list."
+#openstack \
+#    --os-auth-url http://controller:35357 \
+#    --os-project-domain-name default \
+#    --os-user-domain-name default \
+#    --os-project-name "$ADMIN_PROJECT_NAME" \
+#    --os-username "$ADMIN_USER_NAME" \
+#    --os-auth-type password \
+#    --os-password "$ADMIN_PASS" \
+#    project list
+#
+#echo "Requesting user list."
+#openstack \
+#    --os-auth-url http://controller:35357/v3 \
+#    --os-project-domain-name default \
+#    --os-user-domain-name default \
+#    --os-project-name "$ADMIN_PROJECT_NAME" \
+#    --os-username "$ADMIN_USER_NAME" \
+#    --os-auth-type password \
+#    --os-password "$ADMIN_PASS" \
+#    user list
+#
+#echo "Requesting role list."
+#openstack \
+#    --os-auth-url http://controller:35357/v3 \
+#    --os-project-domain-name default \
+#    --os-user-domain-name default \
+#    --os-project-name "$ADMIN_PROJECT_NAME" \
+#    --os-username "$ADMIN_USER_NAME" \
+#    --os-auth-type password \
+#    --os-password "$ADMIN_PASS" \
+#    role list
 
 echo "Requesting an authentication token for the demo user."
 openstack \
     --os-auth-url http://controller:5000/v3 \
-    --os-project-domain-id default \
-    --os-user-domain-id default \
+    --os-project-domain-name default \
+    --os-user-domain-name default \
     --os-project-name "$DEMO_PROJECT_NAME" \
     --os-username "$DEMO_USER_NAME" \
     --os-auth-type password \
     --os-password "$DEMO_PASS" \
     token issue
 
-echo "Verifying that an admin-only request by the demo user is denied."
-openstack \
-    --os-auth-url http://controller:5000 \
-    --os-project-domain-id default \
-    --os-user-domain-id default \
-    --os-project-name "$DEMO_PROJECT_NAME" \
-    --os-username "$DEMO_USER_NAME" \
-    --os-auth-type password \
-    --os-password "$DEMO_PASS" \
-    user list || rc=$?
-
-echo rc=$rc
-if [ $rc -eq 0 ]; then
-    echo "The request was not denied. This is an error. Exiting."
-    exit 1
-else
-    echo "The request was correctly denied."
-fi
+#echo "Verifying that an admin-only request by the demo user is denied."
+#openstack \
+#    --os-auth-url http://controller:5000/v3 \
+#    --os-project-domain-name default \
+#    --os-user-domain-name default \
+#    --os-project-name "$DEMO_PROJECT_NAME" \
+#    --os-username "$DEMO_USER_NAME" \
+#    --os-auth-type password \
+#    --os-password "$DEMO_PASS" \
+#    user list || rc=$?
+#
+#echo rc=$rc
+#if [ $rc -eq 0 ]; then
+#    echo "The request was not denied. This is an error. Exiting."
+#    exit 1
+#else
+#    echo "The request was correctly denied."
+#fi

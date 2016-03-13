@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for controller node.
-# http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-controller-install.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/neutron-controller-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for neutron."

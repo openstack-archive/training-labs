@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the Orchestration Service (heat).
-# http://docs.openstack.org/liberty/install-guide-ubuntu/heat-install.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/heat-install.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -93,9 +93,9 @@ openstack user create \
 openstack role add \
     --domain heat \
     --user heat_domain_admin \
-    admin
+    "$ADMIN_ROLE_NAME"
 
-echo "Creating the heat stack owner role."
+echo "Creating the heat_stack_owner role."
 openstack role create "heat_stack_owner"
 
 openstack role add \
@@ -103,7 +103,7 @@ openstack role add \
     --user "$DEMO_USER_NAME" \
     "heat_stack_owner"
 
-echo "Creating the heat stack user role."
+echo "Creating the heat_stack_user role."
 openstack role create "heat_stack_user"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -111,7 +111,15 @@ openstack role create "heat_stack_user"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing heat."
-sudo apt-get install -y heat-api heat-api-cfn heat-engine python-heatclient
+
+# Prevent start of heat services here so they don't get confused by the default
+# configuration files. Otherwise, it takes up to 3 minutes for the heat
+# stack-list to appear after the heat services restart below.
+echo "manual" | sudo tee /etc/init/heat-api.override
+echo "manual" | sudo tee /etc/init/heat-api-cfn.override
+echo "manual" | sudo tee /etc/init/heat-engine.override
+
+sudo apt-get install -y heat-api heat-api-cfn heat-engine
 
 function get_database_url {
     local db_user=$HEAT_DB_USER
@@ -140,9 +148,10 @@ iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
-iniset_sudo $conf keystone_authtoken auth_plugin password
-iniset_sudo $conf keystone_authtoken project_domain_id default
-iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
+iniset_sudo $conf keystone_authtoken auth_type password
+iniset_sudo $conf keystone_authtoken project_domain_name default
+iniset_sudo $conf keystone_authtoken user_domain_name default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$heat_admin_user"
 iniset_sudo $conf keystone_authtoken password "$HEAT_PASS"
@@ -152,10 +161,10 @@ iniset_sudo $conf trustee auth_plugin password
 iniset_sudo $conf trustee auth_url http://controller:35357
 iniset_sudo $conf trustee username "$heat_admin_user"
 iniset_sudo $conf trustee password "$HEAT_PASS"
-iniset_sudo $conf trustee user_domain_id default
+iniset_sudo $conf trustee user_domain_name default
 
 # Configure [clients_keystone] section.
-iniset_sudo $conf clients_keystone auth_uri http://controller:5000
+iniset_sudo $conf clients_keystone auth_uri http://controller:35357
 
 # Configure [ec2authtoken] section.
 iniset_sudo $conf ec2authtoken auth_uri http://controller:5000
@@ -168,27 +177,39 @@ iniset_sudo $conf DEFAULT heat_waitcondition_server_url http://controller:8000/v
 iniset_sudo $conf DEFAULT stack_domain_admin heat_domain_admin
 iniset_sudo $conf DEFAULT stack_domain_admin_password "$HEAT_DOMAIN_PASS"
 iniset_sudo $conf DEFAULT stack_user_domain_name heat
-iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Creating the database tables for heat."
 sudo heat-manage db_sync
 
-echo "Restarting heat service."
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Finalize installation
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Re-enable automatic start of heat services
+sudo rm /etc/init/heat-api.override
+sudo rm /etc/init/heat-api-cfn.override
+sudo rm /etc/init/heat-engine.override
+
+echo "Restarting heat services."
+STARTTIME=$(date +%s)
 sudo service heat-api restart
 sudo service heat-api-cfn restart
 sudo service heat-engine restart
 
-echo "Waiting for heat stack-list."
+echo -n "Waiting for heat stack-list."
 until heat stack-list; do
     sleep 1
+    echo -n .
 done
+ENDTIME=$(date +%s)
+echo "Restarting heat servies took $((ENDTIME - STARTTIME)) seconds."
 
 echo "Removing default SQLite database."
 sudo rm -f /var/lib/heat/heat.sqlite
 
 #------------------------------------------------------------------------------
 # Verify operation of Orchestration Service (heat).
-# http://docs.openstack.org/liberty/install-guide-ubuntu/heat-verify.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/heat-verify.html
 #------------------------------------------------------------------------------
 
 echo "Listing service components."

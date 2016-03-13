@@ -15,11 +15,12 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the Telemetry service
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-controller-install.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/ceilometer-install.html
 #------------------------------------------------------------------------------
 
-echo "Sourcing the admin credentials."
-source "$CONFIG_DIR/admin-openstackrc.sh"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Prerequisites
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Create Ceilometer user and database.
 ceilometer_admin_user=$(service_to_user_name ceilometer)
@@ -27,14 +28,18 @@ ceilometer_admin_user=$(service_to_user_name ceilometer)
 mongodb_user=$CEILOMETER_DB_USER
 
 echo "Creating the ceilometer database."
-mongo --host "$(hostname_to_ip controller)" --eval "
+mongo --host controller --eval "
     db = db.getSiblingDB(\"ceilometer\");
     db.addUser({user: \"${mongodb_user}\",
     pwd: \"${CEILOMETER_DBPASS}\",
     roles: [ \"readWrite\", \"dbAdmin\" ]})"
 
+echo "Sourcing the admin credentials."
+source "$CONFIG_DIR/admin-openstackrc.sh"
+
 echo "Creating ceilometer user and giving it admin role under service tenant."
 openstack user create \
+    --domain default \
     --password "$CEILOMETER_PASS" \
     "$ceilometer_admin_user"
 
@@ -50,18 +55,28 @@ openstack service create \
     metering
 
 openstack endpoint create \
-    --publicurl http://controller:8777 \
-    --internalurl http://controller:8777 \
-    --adminurl http://controller:8777 \
     --region "$REGION" \
-    metering
+    metering \
+    public http://controller:8777
+
+openstack endpoint create \
+    --region "$REGION" \
+    metering \
+    internal http://controller:8777
+
+openstack endpoint create \
+    --region "$REGION" \
+    metering \
+    admin http://controller:8777
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Install and configure components
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing ceilometer."
 sudo apt-get install -y ceilometer-api ceilometer-collector \
                         ceilometer-agent-central \
                         ceilometer-agent-notification \
-                        ceilometer-alarm-evaluator \
-                        ceilometer-alarm-notifier \
                         python-ceilometerclient
 
 function get_database_url {
@@ -88,76 +103,86 @@ iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
 # Configure [keystone_authtoken] section.
-iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000/v2.0
-iniset_sudo $conf keystone_authtoken identity_uri http://controller:35357
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_PROJECT_NAME"
-iniset_sudo $conf keystone_authtoken admin_user "$ceilometer_admin_user"
-iniset_sudo $conf keystone_authtoken admin_password "$CEILOMETER_PASS"
+iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
+iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
+iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
+iniset_sudo $conf keystone_authtoken auth_type password
+iniset_sudo $conf keystone_authtoken project_domain_name default
+iniset_sudo $conf keystone_authtoken user_domain_name default
+iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf keystone_authtoken username "$ceilometer_admin_user"
+iniset_sudo $conf keystone_authtoken password "$CEILOMETER_PASS"
 
 # Configure [service_credentials] section.
 iniset_sudo $conf service_credentials os_auth_url http://controller:5000/v2.0
 iniset_sudo $conf service_credentials os_username "$ceilometer_admin_user"
 iniset_sudo $conf service_credentials os_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf service_credentials os_password "$CEILOMETER_PASS"
-iniset_sudo $conf service_credentials os_endpoint_type internalURL
-iniset_sudo $conf service_credentials os_region_name "$REGION"
+iniset_sudo $conf service_credentials interface internalURL
+iniset_sudo $conf service_credentials region_name "$REGION"
 
-# Configure [publisher] section.
-iniset_sudo $conf publisher telemetry_secret "$TELEMETRY_SECRET"
-
-iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
+iniset_sudo $conf DEFAULT verbose True
 
 echo "Restarting telemetry service."
 sudo service ceilometer-agent-central restart
 sudo service ceilometer-agent-notification restart
 sudo service ceilometer-api restart
 sudo service ceilometer-collector restart
-sudo service ceilometer-alarm-evaluator restart
-sudo service ceilometer-alarm-notifier restart
 
 #------------------------------------------------------------------------------
-# Configure the Image service
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-glance.html
+# Enable Image service meters
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/ceilometer-glance.html
 #------------------------------------------------------------------------------
 
-# Configure the Image Service to send notifications to the message bus
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Configure the Image service to use Telemetry
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-echo "Configuring glance-api.conf."
 conf=/etc/glance/glance-api.conf
+echo "Configuring $conf."
 
 # Configure [DEFAULT] section.
-iniset_sudo $conf DEFAULT notification_driver messagingv2
 iniset_sudo $conf DEFAULT rpc_backend rabbit
-iniset_sudo $conf DEFAULT rabbit_host controller
-iniset_sudo $conf DEFAULT rabbit_userid openstack
-iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASS"
 
-echo "Configuring glance-registry.conf."
+# Configure [oslo_messaging_notifications] section.
+iniset_sudo $conf oslo_messaging_notifications driver messagingv2
+
+# Configure [oslo_messaging_rabbit] section.
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
+iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
+
 conf=/etc/glance/glance-registry.conf
+echo "Configuring $conf."
 
 # Configure [DEFAULT] section.
-iniset_sudo $conf DEFAULT notification_driver messagingv2
 iniset_sudo $conf DEFAULT rpc_backend rabbit
-iniset_sudo $conf DEFAULT rabbit_host controller
-iniset_sudo $conf DEFAULT rabbit_userid openstack
-iniset_sudo $conf DEFAULT rabbit_password "$RABBIT_PASS"
+
+# Configure [oslo_messaging_notifications] section.
+iniset_sudo $conf oslo_messaging_notifications driver messagingv2
+
+# Configure [oslo_messaging_rabbit] section.
+iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
+iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
+iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 
 sudo service glance-registry restart
 sudo service glance-api restart
 
 #------------------------------------------------------------------------------
-# Configure the Block Storage service
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-cinder.html
+# Enable Block Storage meters
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/ceilometer-cinder.html
 #------------------------------------------------------------------------------
 
-# Configure the Block Storage Service to send notifications to the message bus
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Configure Cinder to use Telemetry
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-echo "Configuring cinder.conf."
 conf=/etc/cinder/cinder.conf
+echo "Configuring $conf."
 
-# Configure [DEFAULT] section.
-iniset_sudo $conf DEFAULT control_exchange cinder
-iniset_sudo $conf DEFAULT notification_driver messagingv2
+# Configure [oslo_messaging_notifications] section.
+iniset_sudo $conf oslo_messaging_notifications notification_driver messagingv2
 
 echo "Restarting cinder services."
 sudo service cinder-api restart

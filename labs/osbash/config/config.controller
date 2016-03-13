@@ -9,7 +9,7 @@ VM_WWW_PORT=8888
 # Assign network interfaces to networks
 NET_IF_0=dhcp
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/liberty/install-guide-ubuntu/environment-networking-controller.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-networking-controller.html
 #------------------------------------------------------------------------------
 # Mgmt network
 NET_IF_1="static 10.0.0.11"
@@ -17,10 +17,10 @@ NET_IF_1="static 10.0.0.11"
 NET_IF_2="manual 203.0.113.0"
 
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/liberty/install-guide-ubuntu/environment.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/environment.html
 #------------------------------------------------------------------------------
 # Controller node is running many services.
-VM_MEM=2560
+VM_MEM=4096
 
 # Override number of virtual CPUs (default is 1)
 # To edit uncomment the line below

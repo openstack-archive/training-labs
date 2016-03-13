@@ -42,9 +42,8 @@ function get_cirros {
 }
 
 function apt_download {
-
+    echo "apt_download: $@"
     sudo apt-get install -y --download-only "$@"
-
 }
 
 # Get cirros image.
@@ -54,6 +53,9 @@ get_cirros
 
 # MySQL, RabbitMQ
 apt_download mariadb-server python-mysqldb rabbitmq-server
+
+# NoSQL database (MongoDB)
+apt_download mongodb-server mongodb-clients python-pymongo
 
 # Other dependencies
 apt_download python-argparse python-dev python-pip
@@ -71,8 +73,8 @@ apt_download nova-api nova-cert nova-conductor nova-consoleauth \
 
 # Neutron Controller
 apt_download neutron-server neutron-plugin-ml2 \
-    neutron-plugin-linuxbridge-agent neutron-dhcp-agent \
-    neutron-metadata-agent neutron-l3-agent python-neutronclient
+    neutron-linuxbridge-agent neutron-dhcp-agent \
+    neutron-metadata-agent neutron-l3-agent python-neutronclient conntrack
 
 # Cinder Controller
 apt_download cinder-api cinder-scheduler python-cinderclient
@@ -87,17 +89,25 @@ apt_download lvm2 cinder-volume
 apt_download nova-compute nova-compute-qemu qemu sysfsutils
 
 # Neutron Compute
-apt_download neutron-plugin-linuxbridge-agent
+apt_download neutron-linuxbridge-agent
 
 # Heat
 apt_download heat-api heat-api-cfn heat-engine python-heatclient
 
-# Ceilometer
-apt_download mongodb-server mongodb-clients python-pymongo \
-    ceilometer-api ceilometer-collector ceilometer-agent-central \
-    ceilometer-agent-notification ceilometer-alarm-evaluator \
-    ceilometer-alarm-notifier ceilometer-agent-compute \
+# ceilometer-install
+apt_download ceilometer-api ceilometer-collector \
+    ceilometer-agent-central ceilometer-agent-notification \
     python-ceilometerclient
+
+# ceilometer-aodh
+apt_download aodh-api aodh-evaluator aodh-notifier \
+    aodh-listener aodh-expirer python-ceilometerclient
+
+# ceilometer-nova
+apt_download ceilometer-agent-compute
+
+# ceilometer-swift
+apt_download python-ceilometermiddleware
 
 # Swift Controller
 apt_download swift swift-proxy python-swiftclient \

@@ -41,20 +41,52 @@ function ubuntu_cloud_archive {
     # cloud-keyring to verify packages from ubuntu-cloud repo
     sudo apt-get install ubuntu-cloud-keyring
 
+    #--------------------------------------------------------------------------
+    # Enable the OpenStack repository
+    # http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-packages.html
+    #--------------------------------------------------------------------------
+
     # Install packages needed for add-apt-repository
     sudo apt-get -y install software-properties-common \
                             python-software-properties
     sudo add-apt-repository -y "cloud-archive:$OPENSTACK_RELEASE"
+}
 
-    # Get index files only for ubuntu-cloud repo but keep standard lists
-    sudo apt-get update \
-        -o Dir::Etc::sourcelist="sources.list.d/cloudarchive-$OPENSTACK_RELEASE.list" \
-        -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+function ubuntu_cloud_staging {
+    #--------------------------------------------------------------------------
+    # Enable the OpenStack repository
+    # https://launchpad.net/~ubuntu-cloud-archive/+archive/ubuntu/mitaka-staging
+    #
+    # NOTE: Using pre-release staging ppa is not documented in install-guide
+    #--------------------------------------------------------------------------
+
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9F68104E
+
+    cat << DEB |sudo tee /etc/apt/sources.list.d/cloudarchive-$OPENSTACK_RELEASE.list
+deb http://ppa.launchpad.net/ubuntu-cloud-archive/$OPENSTACK_RELEASE/ubuntu trusty main
+deb-src http://ppa.launchpad.net/ubuntu-cloud-archive/$OPENSTACK_RELEASE/ubuntu trusty main
+DEB
 }
 
 # precise needs the cloud archive, and so does trusty for non-Icehouse releases
 if grep -qs DISTRIB_CODENAME=precise /etc/lsb-release ||
         [ "$OPENSTACK_RELEASE" != "icehouse" ]; then
-    echo "Enabling the Ubuntu cloud archive."
-    ubuntu_cloud_archive
+    if [[ "$OPENSTACK_RELEASE" =~ staging ]]; then
+        echo "Enabling the Ubuntu cloud staging ppa."
+        ubuntu_cloud_staging
+    else
+        echo "Enabling the Ubuntu cloud archive."
+        ubuntu_cloud_archive
+    fi
+
+    # Get index files only for ubuntu-cloud repo but keep standard lists
+    src_list=cloudarchive-$OPENSTACK_RELEASE.list
+    if [ -f "/etc/apt/sources.list.d/$src_list" ]; then
+        sudo apt-get update \
+            -o Dir::Etc::sourcelist="sources.list.d/$src_list" \
+            -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+    else
+        echo "ERROR: apt source not found: /etc/apt/sources.list.d/$src_list"
+        exit 1
+    fi
 fi

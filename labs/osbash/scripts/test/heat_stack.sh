@@ -15,8 +15,12 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Verify the Orchestration Service installation
-# http://docs.openstack.org/liberty/install-guide-ubuntu/launch-instance-heat.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-heat.html
 #------------------------------------------------------------------------------
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Create a template
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Verifying heat installation."
 echo "Waiting for heat-engine to start."
@@ -30,11 +34,10 @@ function check_for_other_vms {
     echo "Verifying that no other instance VMs are left."
     (
     source "$CONFIG_DIR/admin-openstackrc.sh"
-    if [ "$(nova list --all-tenants --minimal | wc -l)" -gt 4 ]; then
-        echo "ERROR Unexpected VMs found. There may not be enough resources" \
-             "for this test. Aborting..."
-        nova list --all-tenants
-        exit 1
+    if [ "$(openstack server list --all-projects | wc -l)" -gt 4 ]; then
+        echo "WARNING Existing VMs found. There may not be enough resources" \
+             "for this test."
+        openstack server list --all-projects
     fi
     )
 }
@@ -44,12 +47,10 @@ echo "Creating a test heat template."
 
 node_ssh controller "cat > demo-template.yml" << HEAT
 heat_template_version: 2015-10-15
-description: Launch a basic instance using the ``m1.tiny`` flavor and one network.
+description: Launch a basic instance with CirrOS image using the
+             ``m1.tiny`` flavor, ``mykey`` key,  and one network.
 
 parameters:
-  ImageID:
-    type: string
-    description: Image to use for the instance.
   NetID:
     type: string
     description: Network ID to use for the instance.
@@ -58,8 +59,9 @@ resources:
   server:
     type: OS::Nova::Server
     properties:
-      image: { get_param: ImageID }
+      image: cirros
       flavor: m1.tiny
+      key_name: mykey
       networks:
       - network: { get_param: NetID }
 
@@ -72,13 +74,16 @@ outputs:
     value: { get_attr: [ server, first_address ] }
 HEAT
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Create a stack
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 TEST_STACK_NAME=stack
-DEMO_NET=public
-NET_ID=$(node_ssh controller "$AUTH; nova net-list" | awk "/ $DEMO_NET / { print \$2 }")
-img_name=$(basename "$CIRROS_URL" -disk.img)
+DEMO_NET=provider
+NET_ID=$(node_ssh controller "$AUTH; openstack network list" | awk "/ $DEMO_NET / { print \$2 }")
 
 node_ssh controller "$AUTH; heat stack-create -f demo-template.yml \
-    -P 'ImageID=$img_name;NetID=$NET_ID' $TEST_STACK_NAME"
+    -P 'NetID=$NET_ID' $TEST_STACK_NAME"
 
 echo "Verifying successful creation of stack."
 

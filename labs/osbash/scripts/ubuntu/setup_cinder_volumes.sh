@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up Block Storage service (cinder).
-# http://docs.openstack.org/liberty/install-guide-ubuntu/cinder-storage-install.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/cinder-storage-install.html
 #------------------------------------------------------------------------------
 
 MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
@@ -61,7 +61,7 @@ sudo vgcreate cinder-volumes $cinder_loop_dev
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing cinder."
-sudo apt-get install -y cinder-volume python-mysqldb
+sudo apt-get install -y cinder-volume
 
 conf=/etc/cinder/cinder.conf
 echo "Configuring $conf."
@@ -91,9 +91,9 @@ iniset_sudo $conf DEFAULT auth_strategy keystone
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
-iniset_sudo $conf keystone_authtoken auth_plugin password
-iniset_sudo $conf keystone_authtoken project_domain_id default
-iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken auth_type password
+iniset_sudo $conf keystone_authtoken project_domain_name default
+iniset_sudo $conf keystone_authtoken user_domain_name default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$cinder_admin_user"
 iniset_sudo $conf keystone_authtoken password "$CINDER_PASS"
@@ -106,11 +106,9 @@ iniset_sudo $conf lvm iscsi_protocol iscsi
 iniset_sudo $conf lvm iscsi_helper  tgtadm
 
 iniset_sudo $conf DEFAULT enabled_backends lvm
-iniset_sudo $conf DEFAULT glance_host controller
+iniset_sudo $conf DEFAULT glance_api_servers http://controller:9292
 
 iniset_sudo $conf oslo_concurrency lock_path /var/lib/cinder/tmp
-
-iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 # Finalize installation
 echo "Restarting cinder service."
@@ -121,7 +119,7 @@ sudo rm -f /var/lib/cinder/cinder.sqlite
 
 #------------------------------------------------------------------------------
 # Verify the Block Storage installation
-# http://docs.openstack.org/liberty/install-guide-ubuntu/cinder-verify.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/cinder-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying Block Storage installation on controller node."
@@ -174,11 +172,11 @@ check_cinder_services
 echo "Sourcing the demo credentials."
 AUTH="source $CONFIG_DIR/demo-openstackrc.sh"
 
-echo "cinder create --display-name demo-volume1 1"
-node_ssh controller "$AUTH; cinder create --display-name demo-volume1 1;sleep 20"
+echo "openstack volume create --size 1 volume1"
+node_ssh controller "$AUTH; openstack volume create --size 1 volume1;sleep 20"
 
 echo -n "Waiting for cinder to list the new volume."
-until node_ssh controller "$AUTH; cinder list | grep demo-volume1" > /dev/null 2>&1; do
+until node_ssh controller "$AUTH; openstack volume list| grep volume1" > /dev/null 2>&1; do
     echo -n .
     sleep 1
 done
@@ -189,7 +187,7 @@ function wait_for_cinder_volume {
     echo -n 'Waiting for cinder volume to be created.'
     local i=1
     while : ; do
-        if [[ -z  $(node_ssh controller "$AUTH;cinder list" | grep creating) ]] > /dev/null 2>&1; then
+        if [[ -z  $(node_ssh controller "$AUTH;openstack volume list" | grep creating) ]] > /dev/null 2>&1; then
             # Proceed if the state of cinder-volumes is error or created.
             # Cinder volumes cannot be deleted when it is in creating state.
             # Throw an error and stop this script.
@@ -200,7 +198,7 @@ function wait_for_cinder_volume {
         if [[ "$i" -gt "20" ]]; then
             echo "Error creating cinder volume."
             echo "[Warning]: Debug cinder volumes service on the compute node.
-            Delete the cinder-volume demo-volume1. Script could not delete this
+            Delete the cinder-volume volume1. Script could not delete this
             volume."
             exit 0
         fi
@@ -213,8 +211,8 @@ function wait_for_cinder_volume {
 echo "Checking if volume is created."
 wait_for_cinder_volume
 
-echo "cinder delete demo-volume1"
-node_ssh controller "$AUTH; cinder delete demo-volume1"
+echo "openstack volume delete volume1"
+node_ssh controller "$AUTH; openstack volume delete volume1"
 
-echo "cinder list"
-node_ssh controller "$AUTH; cinder list"
+echo "openstack volume list"
+node_ssh controller "$AUTH; openstack volume list"

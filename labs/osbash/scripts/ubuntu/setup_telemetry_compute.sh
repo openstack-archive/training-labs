@@ -14,8 +14,8 @@ exec_logfile
 indicate_current_auto
 
 #------------------------------------------------------------------------------
-# Install the Telemetry service
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-nova.html
+# Enable Compute service meters
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/ceilometer-nova.html
 #------------------------------------------------------------------------------
 
 echo "Installing ceilometer."
@@ -23,12 +23,10 @@ sudo apt-get install -y ceilometer-agent-compute
 
 ceilometer_admin_user=$(service_to_user_name ceilometer)
 
-echo "Configuring ceilometer.conf."
 conf=/etc/ceilometer/ceilometer.conf
+echo "Configuring $conf."
 
-iniset_sudo $conf publisher telemetry_secret "$TELEMETRY_SECRET"
-
-# Configure RabbitMQ variables
+# Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT rpc_backend rabbit
 
 # Configure [oslo_messaging_rabbit] section.
@@ -36,22 +34,30 @@ iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
 iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
 iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 
-# Configure [ketstone_authtoken] section.
-iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000/v2.0
-iniset_sudo $conf keystone_authtoken identity_uri http://controller:35357
-iniset_sudo $conf keystone_authtoken admin_tenant_name "$SERVICE_PROJECT_NAME"
-iniset_sudo $conf keystone_authtoken admin_user "$ceilometer_admin_user"
-iniset_sudo $conf keystone_authtoken admin_password "$CEILOMETER_PASS"
+# Configure [DEFAULT] section.
+iniset_sudo $conf DEFAULT auth_strategy keystone
+
+# Configure [keystone_authtoken] section.
+iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
+iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
+iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
+iniset_sudo $conf keystone_authtoken auth_type password
+iniset_sudo $conf keystone_authtoken project_domain_name default
+iniset_sudo $conf keystone_authtoken user_domain_name default
+iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf keystone_authtoken username "$ceilometer_admin_user"
+iniset_sudo $conf keystone_authtoken password "$CEILOMETER_PASS"
 
 # Configure [service_credentials] section.
 iniset_sudo $conf service_credentials os_auth_url http://controller:5000/v2.0
 iniset_sudo $conf service_credentials os_username "$ceilometer_admin_user"
 iniset_sudo $conf service_credentials os_tenant_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf service_credentials os_password "$CEILOMETER_PASS"
-iniset_sudo $conf service_credentials os_endpoint_type internalURL
-iniset_sudo $conf service_credentials os_region_name "$REGION"
+iniset_sudo $conf service_credentials interface internalURL
+iniset_sudo $conf service_credentials region_name "$REGION"
 
-iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
+# Marked "optional" in install-guide
+iniset_sudo $conf DEFAULT verbose True
 
 echo "Configuring nova.conf."
 conf=/etc/ceilometer/ceilometer.conf
@@ -69,44 +75,51 @@ echo "Restarting compute service."
 sudo service nova-compute restart
 
 #------------------------------------------------------------------------------
-# Configure the Block Storage service(cinder-volume)
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-cinder.html
+# Enable Block Storage meters
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/ceilometer-cinder.html
 #------------------------------------------------------------------------------
 
-# Configure the Block Storage Service to send notifications to the message bus
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Configure Cinder to use Telemetry
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-echo "Configuring cinder.conf."
 conf=/etc/cinder/cinder.conf
+echo "Configuring $conf."
 
-iniset_sudo $conf DEFAULT control_exchange cinder
-iniset_sudo $conf DEFAULT notification_driver messagingv2
+iniset_sudo $conf oslo_messaging_notifications driver messagingv2
 
 echo "Restarting cinder-volumes service."
 sudo service cinder-volume restart
 
 #------------------------------------------------------------------------------
-# Verify the Telemetry installation
-# http://docs.openstack.org/kilo/install-guide/install/apt/content/ceilometer-verify.html
+# Verify operation
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/ceilometer-verify.html
 #------------------------------------------------------------------------------
 
-echo "Verifying the telemetry installation."
+echo "Verifying the Telemetry installation."
 
 AUTH="source $CONFIG_DIR/admin-openstackrc.sh"
 
-echo "Waiting for ceilometer to start."
+echo -n "Waiting for ceilometer to start."
 until node_ssh controller "$AUTH; ceilometer meter-list" >/dev/null 2>&1; do
     sleep 1
+    echo -n .
 done
+echo
 
-echo "List available meters."
+echo "Listing available meters."
 node_ssh controller "$AUTH; ceilometer meter-list"
 
-echo "Download an image from the Image Service."
-img_name=$(basename "$CIRROS_URL" -disk.img)
-node_ssh controller "$AUTH; glance image-download \"$img_name\" > /tmp/cirros.img"
+echo "Downloading an image from the Image service."
+IMAGE_ID=$(node_ssh controller "$AUTH; glance image-list | grep 'cirros' | awk '{ print \$2 }'")
+echo "IMAGE_ID: $IMAGE_ID"
+node_ssh controller "$AUTH; glance image-download \"$IMAGE_ID\"" > /tmp/cirros.img
 
-echo "List available meters again to validate detection of the image download."
+echo "Listing available meters again to validate detection of the image download."
 node_ssh controller "$AUTH; ceilometer meter-list"
 
-echo "Retrieve usage statistics from the image.download meter."
+echo "Retrieving usage statistics from the image.download meter."
 node_ssh controller "$AUTH; ceilometer statistics -m image.download -p 60"
+
+echo "Removing previously downloaded image file."
+rm /tmp/cirros.img

@@ -9,6 +9,7 @@ cmd snapshot_cycle -n controller controller_node_init
 cmd queue ubuntu/apt_install_mysql.sh
 cmd queue ubuntu/apt_nosql_database.sh
 cmd queue ubuntu/install_rabbitmq.sh
+cmd queue ubuntu/install_memcached.sh
 cmd snapshot_cycle -n controller pre-openstack_installed
 
 cmd queue ubuntu/setup_keystone.sh
@@ -37,12 +38,10 @@ cmd snapshot_cycle -n controller horizon_installed
 #cmd queue ubuntu/setup_lbaas_controller.sh
 #cmd snapshot_cycle -n controller lbaas-controller_installed
 
-# Telemetry service is disabled for the time being as it overloads
-# the cluster. For enabling the same, please uncomment the following.
-# Warning: Use higher configuration (Disk space). The default
-# configuration is optimized for 4GB i3/i5 based machine.
-# cmd queue ubuntu/setup_telemetry_controller.sh
-# cmd snapshot_cycle -n controller telemetry-controller_installed
+# Ceilometer; disable if necessary, fix comments in this file
+# Note: Disable Telemetry service if it overloads the cluster.
+cmd queue ubuntu/setup_telemetry_controller.sh
+cmd snapshot_cycle -n controller telemetry-controller_installed
 
 cmd queue ubuntu/setup_heat_controller.sh
 cmd snapshot_cycle -n controller heat_controller_installed
@@ -67,12 +66,8 @@ cmd snapshot_cycle -n compute1 neutron-compute_installed
 cmd queue ubuntu/setup_cinder_volumes.sh
 cmd snapshot_cycle -n compute1 cinder-volume_installed
 
-# Telemetry service is disabled for the time being as it overloads
-# the cluster. For enabling the same, please uncomment the following.
-# Warning: Use higher configuration (RAM, CPU's). The default
-# configuration is optimized for 4GB i3/i5 based machine.
-# cmd queue ubuntu/setup_telemetry_compute.sh
-# cmd snapshot_cycle -n compute1 telemetry-compute_installed
+cmd queue ubuntu/setup_telemetry_compute.sh
+cmd snapshot_cycle -n compute1 telemetry-compute_installed
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Take snapshot of database changes on controller VM, too

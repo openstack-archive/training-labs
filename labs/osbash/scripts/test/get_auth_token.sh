@@ -12,7 +12,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Use OpenStack client environment script
-# http://docs.openstack.org/liberty/install-guide-ubuntu/keystone-openrc.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/keystone-openrc.html
 #------------------------------------------------------------------------------
 
 # Test in subshell enviroment to keep our environment clean

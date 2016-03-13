@@ -14,11 +14,18 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install Compute controller services
-# http://docs.openstack.org/liberty/install-guide-ubuntu/nova-controller-install.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/nova-controller-install.html
 #------------------------------------------------------------------------------
 
-echo "Setting up database for nova."
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Prerequisites
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+echo "Setting up database nova."
 setup_database nova "$NOVA_DB_USER" "$NOVA_DBPASS"
+
+echo "Setting up database nova_api."
+setup_database nova_api "$NOVA_DB_USER" "$NOVA_DBPASS"
 
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
@@ -48,38 +55,42 @@ openstack service create \
 echo "Creating nova endpoints."
 openstack endpoint create \
     --region "$REGION" \
-    compute public http://controller:8774/v2/%\(tenant_id\)s
+    compute public http://controller:8774/v2.1/%\(tenant_id\)s
 
 openstack endpoint create \
     --region "$REGION" \
-    compute internal http://controller:8774/v2/%\(tenant_id\)s
+    compute internal http://controller:8774/v2.1/%\(tenant_id\)s
 
 openstack endpoint create \
     --region "$REGION" \
-    compute admin http://controller:8774/v2/%\(tenant_id\)s
+    compute admin http://controller:8774/v2.1/%\(tenant_id\)s
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Install and configure components
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing nova for controller node."
-sudo apt-get install -y \
-    nova-api nova-cert nova-conductor nova-consoleauth \
-    nova-novncproxy nova-scheduler python-novaclient
-
-function get_database_url {
-    local db_user=$NOVA_DB_USER
-    local database_host=controller
-
-    echo "mysql+pymysql://$db_user:$NOVA_DBPASS@$database_host/nova"
-}
-
-database_url=$(get_database_url)
+sudo apt-get install -y nova-api nova-cert nova-conductor \
+    nova-consoleauth nova-novncproxy nova-scheduler
 
 conf=/etc/nova/nova.conf
 
+# Configure [DEFAULT] section.
+iniset_sudo $conf DEFAULT enabled_apis osapi_compute,metadata
+
+# Configure [api_database] section.
+database_url="mysql+pymysql://$NOVA_DB_USER:$NOVA_DBPASS@controller/nova_api"
+echo "Setting API database connection: $database_url."
+iniset_sudo $conf api_database connection "$database_url"
+
+# Configure [database] section.
+database_url="mysql+pymysql://$NOVA_DB_USER:$NOVA_DBPASS@controller/nova"
 echo "Setting database connection: $database_url."
 iniset_sudo $conf database connection "$database_url"
 
 echo "Configuring nova services."
 
-# Default Section.
+# Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT rpc_backend rabbit
 
 # Configure [oslo_messaging_rabbit] section.
@@ -93,39 +104,39 @@ iniset_sudo $conf DEFAULT auth_strategy keystone
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
-iniset_sudo $conf keystone_authtoken auth_plugin password
-iniset_sudo $conf keystone_authtoken project_domain_id default
-iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
+iniset_sudo $conf keystone_authtoken auth_type password
+iniset_sudo $conf keystone_authtoken project_domain_name default
+iniset_sudo $conf keystone_authtoken user_domain_name default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$nova_admin_user"
 iniset_sudo $conf keystone_authtoken password "$NOVA_PASS"
 
 # Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT my_ip "$(hostname_to_ip controller)"
-
-iniset_sudo $conf DEFAULT network_api_class nova.network.neutronv2.api.API
-iniset_sudo $conf DEFAULT security_group_api neutron
-iniset_sudo $conf DEFAULT linuxnet_interface_driver                 \
-                    nova.network.linux_net.NeutronLinuxBridgeInterfaceDriver
-iniset_sudo $conf DEFAULT                                           \
-                    firewall_driver nova.virt.firewall.NoopFirewallDriver
+iniset_sudo $conf DEFAULT use_neutron True
+iniset_sudo $conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 
 # Configure [VNC] section.
 iniset_sudo $conf vnc vncserver_listen '$my_ip'
 iniset_sudo $conf vnc vncserver_proxyclient_address '$my_ip'
 
 # Configure [glance] section.
-iniset_sudo $conf glance host controller
+iniset_sudo $conf glance api_servers http://controller:9292
 
 # Configure [oslo_concurrency] section.
 iniset_sudo $conf oslo_concurrency lock_path /var/lib/nova/tmp
 
-# Configure [DEFAULT] section.
-iniset_sudo $conf DEFAULT enabled_apis osapi_compute,metadata
-iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
+# Delete logdir line
+sudo sed -i "/^logdir/ d" $conf
 
 echo "Creating the database tables for nova."
+sudo nova-manage api_db sync
 sudo nova-manage db sync
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Finalize installation
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Restarting nova services."
 declare -a nova_services=(nova-api nova-cert nova-consoleauth \
@@ -146,7 +157,7 @@ sudo rm -f /var/lib/nova/nova.sqlite
 echo "Verify nova service status."
 echo "Checking nova services."
 loop=0
-until nova service-list 2>/dev/null; do
+until openstack service list 2>/dev/null; do
     echo -n .
     loop=$((loop+1))
     if ((loop%10 == 0)); then
@@ -157,8 +168,7 @@ until nova service-list 2>/dev/null; do
 done
 
 echo "Checking nova endpoints."
-nova endpoints
+openstack catalog list
 
 echo "Checking nova images."
-nova image-list
-
+openstack image list

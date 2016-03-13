@@ -14,8 +14,12 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-compute-install-option2.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/neutron-compute-install-option2.html
 #------------------------------------------------------------------------------
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Configure the Linux bridge agent
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Configuring the Linux bridge agent."
 conf=/etc/neutron/plugins/ml2/linuxbridge_agent.ini
@@ -23,7 +27,7 @@ conf=/etc/neutron/plugins/ml2/linuxbridge_agent.ini
 # Edit the [linux_bridge] section.
 # TODO Better method of getting interface name
 PUBLIC_INTERFACE_NAME=eth2
-iniset_sudo $conf linux_bridge physical_interface_mappings public:$PUBLIC_INTERFACE_NAME
+iniset_sudo $conf linux_bridge physical_interface_mappings provider:$PUBLIC_INTERFACE_NAME
 
 # Edit the [vxlan] section.
 OVERLAY_INTERFACE_IP_ADDRESS=$(get_node_ip_in_network "$(hostname)" "mgmt")

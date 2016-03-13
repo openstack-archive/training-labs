@@ -1,8 +1,8 @@
 # This file contains OpenStack configuration data. It is used by both
 # host (osbash, Windows batch) and VM guest scripts.
 
-# one of: icehouse [end of life], juno, kilo, liberty
-: ${OPENSTACK_RELEASE:=liberty}
+# one of: mitaka, mitaka-proposed, mitaka-staging
+: ${OPENSTACK_RELEASE:=mitaka}
 
 # CirrOS image URL
 if [ "$(uname -m)" = "x86_64" ]; then
@@ -14,15 +14,15 @@ CIRROS_URL="http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-$arch-disk.img"
 unset arch
 
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/liberty/install-guide-ubuntu/environment-networking.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-networking.html
 #------------------------------------------------------------------------------
 
 # Networks used by OpenStack training-labs setup
 NETWORK_1="mgmt 10.0.0.0"
-NETWORK_2="public 203.0.113.0"
+NETWORK_2="provider 203.0.113.0"
 
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/liberty/install-guide-ubuntu/launch-instance-networks-public.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-networks-public.html
 #------------------------------------------------------------------------------
 
 # Public network
@@ -33,7 +33,7 @@ NETWORK_2="public 203.0.113.0"
 : ${END_IP_ADDRESS:=203.0.113.200}
 
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/liberty/install-guide-ubuntu/launch-instance-networks-private.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-networks-private.html
 #------------------------------------------------------------------------------
 
 # Private demo network
@@ -45,8 +45,5 @@ NETWORK_2="public 203.0.113.0"
 : ${DNS_RESOLVER:=8.8.4.4}
 
 : ${REGION:=RegionOne}
-
-# Should OpenStack services use verbose logging? (True, False)
-: ${OPENSTACK_VERBOSE:=True}
 
 # vim: set ai ts=4 sw=4 et ft=sh:

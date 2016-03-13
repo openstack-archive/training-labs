@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up Block Storage service controller (cinder controller node)
-# http://docs.openstack.org/liberty/install-guide-ubuntu/cinder-controller-install.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/cinder-controller-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for cinder."
@@ -79,7 +79,7 @@ openstack endpoint create \
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing cinder."
-sudo apt-get install -y cinder-api cinder-scheduler python-cinderclient \
+sudo apt-get install -y cinder-api cinder-scheduler \
     qemu-utils
 # Note: The package 'qemu-utils' is required for 'qemu-img' which allows cinder
 #       to convert additional image types to bootable volumes. By default only
@@ -112,9 +112,9 @@ iniset_sudo $conf DEFAULT auth_strategy keystone
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
-iniset_sudo $conf keystone_authtoken auth_plugin password
-iniset_sudo $conf keystone_authtoken project_domain_id default
-iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken auth_type password
+iniset_sudo $conf keystone_authtoken project_domain_name default
+iniset_sudo $conf keystone_authtoken user_domain_name default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$cinder_admin_user"
 iniset_sudo $conf keystone_authtoken password "$CINDER_PASS"
@@ -122,8 +122,6 @@ iniset_sudo $conf keystone_authtoken password "$CINDER_PASS"
 iniset_sudo $conf DEFAULT my_ip "$(hostname_to_ip controller)"
 
 iniset_sudo $conf oslo_concurrency lock_path /var/lib/cinder/tmp
-
-iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Creating the database tables for cinder."
 sudo cinder-manage db sync

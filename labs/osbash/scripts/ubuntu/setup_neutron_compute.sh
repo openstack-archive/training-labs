@@ -15,11 +15,15 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for compute node.
-# http://docs.openstack.org/liberty/install-guide-ubuntu/neutron-compute-install.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/neutron-compute-install.html
 #------------------------------------------------------------------------------
 
 echo "Installing networking components for compute node."
-sudo apt-get install -y neutron-plugin-linuxbridge-agent
+sudo apt-get install -y neutron-linuxbridge-agent
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Configure the common component
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Configuring neutron for compute node."
 
@@ -41,11 +45,10 @@ neutron_admin_user=$(service_to_user_name neutron)
 # Configuring [keystone_authtoken] section
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
-iniset_sudo $conf keystone_authtoken auth_plugin password
-iniset_sudo $conf keystone_authtoken project_domain_id default
-iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
+iniset_sudo $conf keystone_authtoken auth_type password
+iniset_sudo $conf keystone_authtoken project_domain_name default
+iniset_sudo $conf keystone_authtoken user_domain_name default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$neutron_admin_user"
 iniset_sudo $conf keystone_authtoken password "$NEUTRON_PASS"
-
-iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"

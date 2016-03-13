@@ -10,7 +10,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Create private network
-# http://docs.openstack.org/liberty/install-guide-ubuntu/launch-instance-networks-private.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-networks-private.html
 #------------------------------------------------------------------------------
 
 echo -n "Waiting for first DHCP namespace."
@@ -28,6 +28,10 @@ until [ "$(brctl show | grep -o "^brq[a-z0-9-]*" | wc -l)" -gt 0 ]; do
 done
 echo
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Create the self-service network
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 (
 echo "Sourcing the demo credentials."
 source "$CONFIG_DIR/demo-openstackrc.sh"
@@ -36,15 +40,15 @@ source "$CONFIG_DIR/demo-openstackrc.sh"
 wait_for_neutron
 
 echo "Creating the private network."
-neutron net-create private
+neutron net-create selfservice
 
 echo "Creating a subnet on the tenant network."
-neutron subnet-create private \
-    "$PRIVATE_NETWORK_CIDR" \
-    --name private \
-    --dns-nameserver "$DNS_RESOLVER" \
-    --gateway "$PRIVATE_NETWORK_GATEWAY"
+neutron subnet-create --name selfservice \
+    --dns-nameserver "$DNS_RESOLVER" --gateway "$PRIVATE_NETWORK_GATEWAY" \
+    selfservice "$PRIVATE_NETWORK_CIDR"
 )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo -n "Waiting for second DHCP namespace."
 until [ "$(ip netns | grep -o "^qdhcp-[a-z0-9-]*" | wc -l)" -gt 1 ]; do
@@ -63,12 +67,16 @@ echo
 echo "Bridges are:"
 brctl show
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Create a router
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 (
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
 echo "Adding 'router:external' option to the public provider network."
-neutron net-update public --router:external
+neutron net-update provider --router:external
 )
 
 (
@@ -103,7 +111,7 @@ wait_for_agent neutron-dhcp-agent
 source "$CONFIG_DIR/demo-openstackrc.sh"
 
 echo "Adding the private network subnet as an interface on the router."
-neutron router-interface-add router private
+neutron router-interface-add router selfservice
 )
 
 # The following tests for router namespace, qr-* interface and bridges are just
@@ -126,8 +134,10 @@ done
 source "$CONFIG_DIR/demo-openstackrc.sh"
 
 echo "Setting a gateway on the public network on the router."
-neutron router-gateway-set router public
+neutron router-gateway-set router provider
 )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # The following test for qg-* is just for show.
 echo -n "Waiting for interface qg-* in router namespace."
@@ -135,6 +145,10 @@ until sudo ip netns exec "$nsrouter" ip addr|grep -Po "(?<=: )qg-.*(?=:)"; do
     echo -n "."
 sleep 1
 done
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Verify operation
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Listing network namespaces."
 ip netns
@@ -167,7 +181,7 @@ function get_router_ip_address {
     done
 }
 
-PUBLIC_ROUTER_IP=$(get_router_ip_address "public")
+PUBLIC_ROUTER_IP=$(get_router_ip_address "provider")
 
 echo -n "Waiting for ping reply from public router IP ($PUBLIC_ROUTER_IP)."
 cnt=0

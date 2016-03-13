@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the Image Service (glance).
-# http://docs.openstack.org/liberty/install-guide-ubuntu/glance-install.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/glance-install.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -63,8 +63,12 @@ openstack endpoint create \
     --region "$REGION" \
     image admin http://controller:9292
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Install and configure components
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 echo "Installing glance."
-sudo apt-get install -y glance python-glanceclient
+sudo apt-get install -y glance
 
 function get_database_url {
     local db_user=$GLANCE_DB_USER
@@ -85,9 +89,10 @@ iniset_sudo $conf database connection "$database_url"
 # Keystone_authtoken
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
-iniset_sudo $conf keystone_authtoken auth_plugin password
-iniset_sudo $conf keystone_authtoken project_domain_id default
-iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
+iniset_sudo $conf keystone_authtoken auth_type password
+iniset_sudo $conf keystone_authtoken project_domain_name default
+iniset_sudo $conf keystone_authtoken user_domain_name default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$glance_admin_user"
 iniset_sudo $conf keystone_authtoken password "$GLANCE_PASS"
@@ -95,13 +100,10 @@ iniset_sudo $conf keystone_authtoken password "$GLANCE_PASS"
 # Paste_deploy
 iniset_sudo $conf paste_deploy flavor "keystone"
 
-# Glance_store
+# glance_store
+iniset_sudo $conf glance_store stores "file,http"
 iniset_sudo $conf glance_store default_store file
 iniset_sudo $conf glance_store filesystem_store_datadir /var/lib/glance/images/
-
-# Default section
-iniset_sudo $conf DEFAULT notification_driver noop
-iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Configuring glance-registry.conf."
 conf=/etc/glance/glance-registry.conf
@@ -112,19 +114,16 @@ iniset_sudo $conf database connection "$database_url"
 # Keystone authtoken section
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
-iniset_sudo $conf keystone_authtoken auth_plugin password
-iniset_sudo $conf keystone_authtoken project_domain_id default
-iniset_sudo $conf keystone_authtoken user_domain_id default
+iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
+iniset_sudo $conf keystone_authtoken auth_type password
+iniset_sudo $conf keystone_authtoken project_domain_name default
+iniset_sudo $conf keystone_authtoken user_domain_name default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$glance_admin_user"
 iniset_sudo $conf keystone_authtoken password "$GLANCE_PASS"
 
 # Paste deploy section
 iniset_sudo $conf paste_deploy flavor "keystone"
-
-# Default section
-iniset_sudo $conf DEFAULT notification_driver noop
-iniset_sudo $conf DEFAULT verbose "$OPENSTACK_VERBOSE"
 
 echo "Creating the database tables for glance."
 sudo glance-manage db_sync
@@ -138,31 +137,30 @@ sudo rm -f /var/lib/glance/glance.sqlite
 
 #------------------------------------------------------------------------------
 # Verify the Image Service installation
-# http://docs.openstack.org/liberty/install-guide-ubuntu/glance-verify.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/glance-verify.html
 #------------------------------------------------------------------------------
 
 # Our openstackrc.sh files already set OS_IMAGE_API_VERSION, we can skip this
 # step in the install-guide.
 
-echo "Waiting for glance to start."
-until glance image-list >/dev/null 2>&1; do
+echo -n "Waiting for glance to start."
+until openstack image list >/dev/null 2>&1; do
     sleep 1
+    echo -n .
 done
+echo
 
 # cirros-0.3.4-x86_64-disk.img -> cirros-0.3.4-x86_64
 img_name=$(basename $CIRROS_URL -disk.img)
 
 echo "Adding CirrOS image as $img_name to glance."
 
-glance image-create \
-    --name "$img_name" \
+openstack image create "cirros" \
     --file "$HOME/img/$(basename $CIRROS_URL)" \
-    --disk-format qcow2 \
-    --container-format bare \
-    --visibility public \
-    --progress
+    --disk-format qcow2 --container-format bare \
+    --public
 
 echo "Verifying that the image was successfully added to the service."
 
-echo "glance image-list"
-glance image-list
+echo "openstack image list"
+openstack image list

@@ -12,11 +12,20 @@ indicate_current_auto
 
 exec_logfile
 
+#------------------------------------------------------------------------------
+# Finalize the installation
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-packages.html
+#------------------------------------------------------------------------------
+
 # Note: We assume that apt_init.sh set up repos and updated the apt index files
 
 # Upgrade installed packages and the kernel
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
 sudo apt-get -y dist-upgrade
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Extra work not documented in install-guide
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # If we upgraded the kernel, remove the old one
 INSTALLED_KERNEL=$(readlink /vmlinuz)
@@ -35,3 +44,10 @@ fi
 # Clean apt cache
 sudo apt-get -y autoremove
 sudo apt-get -y clean
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Install OpenStack client (install-guide)
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+echo "Installing OpenStack client."
+sudo apt-get install -y python-openstackclient

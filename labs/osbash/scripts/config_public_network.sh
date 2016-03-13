@@ -9,8 +9,8 @@ exec_logfile
 indicate_current_auto
 
 #------------------------------------------------------------------------------
-# Create the external network and a subnet on it
-# http://docs.openstack.org/liberty/install-guide-ubuntu/launch-instance-networks-public.html
+# Create the provier (external) network and a subnet on it
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-networks-provider.html
 #------------------------------------------------------------------------------
 
 echo "Sourcing the admin credentials."
@@ -39,19 +39,23 @@ echo "linuxbridge-agent and dhcp-agent must be up before we can add interfaces."
 wait_for_agent neutron-linuxbridge-agent
 wait_for_agent neutron-dhcp-agent
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Create the provider network
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 echo "Creating the public network."
-neutron net-create public \
+neutron net-create \
     --shared \
-    --provider:physical_network public \
-    --provider:network_type flat
+    --provider:physical_network provider \
+    --provider:network_type flat \
+    provider
 
 echo "Creating a subnet on the public network."
-neutron subnet-create public  \
-    "$PUBLIC_NETWORK_CIDR" \
-    --name public \
+neutron subnet-create --name provider  \
     --allocation-pool start="$START_IP_ADDRESS,end=$END_IP_ADDRESS" \
     --dns-nameserver "$DNS_RESOLVER" \
-    --gateway "$PUBLIC_NETWORK_GATEWAY"
+    --gateway "$PUBLIC_NETWORK_GATEWAY" \
+    provider "$PUBLIC_NETWORK_CIDR"
 
 echo -n "Waiting for DHCP namespace."
 until [ "$(ip netns | grep -o "^qdhcp-[a-z0-9-]*" | wc -l)" -gt 0 ]; do

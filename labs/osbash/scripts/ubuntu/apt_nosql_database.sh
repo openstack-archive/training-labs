@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the NoSQL (Mongo) service
-# http://docs.openstack.org/liberty/install-guide-ubuntu/environment-nosql-database.html
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-nosql-database.html
 #------------------------------------------------------------------------------
 
 echo "Setting up NoSQL database (MongoDB) for telemetry."

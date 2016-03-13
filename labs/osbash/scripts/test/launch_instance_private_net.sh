@@ -101,13 +101,6 @@ wait_for_service compute1 nova-compute
 echo
 
 function wait_for_nova_compute {
-    (
-    source "$CONFIG_DIR/admin-openstackrc.sh"
-    if openstack compute service list --service nova-compute | \
-            grep -q "| up "; then
-        return 0
-    fi
-    )
 
     echo "  Waiting for nova-compute service in state 'up'."
     if ssh_no_chk_node compute1 service nova-compute status | \
@@ -147,28 +140,50 @@ function wait_for_nova_compute {
 function wait_for_nova_services {
     local start=$(date +%s)
 
-    # TODO Can we replace "sudo nova-manage" with "openstack" here, too?
+    (
+    source "$CONFIG_DIR/admin-openstackrc.sh"
+    echo "Checking for nova services in openstack compute service list."
 
-    echo "Checking services in sudo nova-manage service list."
-    echo -n "  Waiting for controller services to switch from XXX to :-)."
-    # Ignore nova-compute for now, even if a custom config has it on controller
-    until sudo nova-manage service list --host controller | \
-        grep -v nova-compute | grep -q ':-)'; do
-        sleep 2
+    echo -n "  nova-consoleauth"
+    until openstack compute service list --service nova-consoleauth | \
+            grep -q '| up '; do
+        sleep 1
         echo -n .
     done
     echo
 
-    if ! sudo nova-manage service list | grep -q nova-compute; then
-        echo -n "  Waiting for nova-compute to turn up in list."
-        until sudo nova-manage service list | grep -q nova-compute; do
-            sleep 2
-            echo -n .
-        done
-        echo
-    fi
+    echo -n "  nova-cert"
+    until openstack compute service list --service nova-cert | \
+            grep -q '| up '; do
+        sleep 1
+        echo -n .
+    done
+    echo
 
-    wait_for_nova_compute
+    echo -n "  nova-scheduler"
+    until openstack compute service list --service nova-scheduler | \
+            grep -q '| up '; do
+        sleep 1
+        echo -n .
+    done
+    echo
+
+    echo -n "  nova-conductor"
+    until openstack compute service list --service nova-conductor | \
+            grep -q '| up '; do
+        sleep 1
+        echo -n .
+    done
+    echo
+
+    echo -n "  nova-compute"
+    if ! openstack compute service list --service nova-compute | \
+            grep -q '| up '; then
+        wait_for_nova_compute
+    fi
+    echo
+    )
+
     echo
     echo "SUM wait for nova services: $(($(date +%s) - start))"
 }
@@ -179,19 +194,22 @@ fi
 
 wait_for_nova_services
 
+(
+source "$CONFIG_DIR/admin-openstackrc.sh"
 echo "All services are ready:"
-sudo nova-manage service list
+openstack compute service list
 echo
+)
 
 function show_compute_resource_usage {
-    echo "nova list:"
-    nova list
+    echo "openstack server list:"
+    openstack server list
     (
     source "$CONFIG_DIR/admin-openstackrc.sh"
-    echo "As admin user, nova host-list:"
-    nova host-list
-    echo "As admin user, nova host-describe compute:"
-    nova host-describe compute
+    echo "As admin user, openstack host list:"
+    openstack host list
+    echo "As admin user, openstack host show compute1:"
+    openstack host show compute1
     )
 }
 
@@ -231,6 +249,27 @@ function wait_for_neutron_agents {
 
 wait_for_neutron_agents
 
+#------------------------------------------------------------------------------
+# Launch an instance
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance.html
+#------------------------------------------------------------------------------
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Create m1.nano flavor
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+(
+echo "Creating m1.nano flavor which is just big enough for CirrOS."
+
+source "$CONFIG_DIR/admin-openstackrc.sh"
+openstack flavor create --id 0 --vcpus 1 --ram 64 --disk 1 m1.nano
+echo
+)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Generate a key pair
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 if [ ! -f ~/.ssh/id_rsa ]; then
     echo "Generating an ssh key pair (saved to ~/.ssh/id_rsa*)."
     # For training cluster: no password protection on keys to make scripting
@@ -240,19 +279,19 @@ fi
 
 function check_demo_key {
     echo -n "Checking if 'mykey' is already in our OpenStack environment: "
-    if nova keypair-show mykey >/dev/null 2>&1; then
+    if openstack keypair show mykey >/dev/null 2>&1; then
         echo "yes."
 
         echo -n "Checking if the 'mykey' key pair matches our ssh key: "
 
         ssh_key=$(< ~/.ssh/id_rsa.pub awk '{print $2}')
-        stored_key=$(nova keypair-show mykey | \
-            awk '/^Public key: ssh-rsa/ {print $4}')
+        stored_key=$(openstack keypair show --public-key mykey | \
+            awk '{print $2}')
 
         if [ "$ssh_key" != "$stored_key" ]; then
             echo "no."
             echo "Removing the 'mykey' from the OpenStack envirnoment."
-            nova keypair-delete mykey
+            openstack keypair delete mykey
         else
             echo "yes."
         fi
@@ -262,52 +301,70 @@ function check_demo_key {
 }
 check_demo_key
 
-if ! nova keypair-show mykey 2>/dev/null; then
+if ! openstack keypair show mykey 2>/dev/null; then
     echo "Adding the public key to our OpenStack environment."
-    nova keypair-add --pub-key ~/.ssh/id_rsa.pub mykey
+    openstack keypair create --public-key ~/.ssh/id_rsa.pub mykey
 fi
 
 
 echo "Verifying addition of the public key."
-nova keypair-list
+openstack keypair list
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Add security group rules
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo
 echo "Permitting ICMP (ping) to our instances."
-nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0 || rc=$?
+openstack security group rule create --proto icmp default || rc=$?
 if [ ${rc:-0} -ne 0 ]; then
     echo "Rule was already there."
 fi
 
 echo
 echo "Permitting secure shell (SSH) access to our instances."
-nova secgroup-add-rule default tcp 22 22 0.0.0.0/0 || rc=$?
+openstack security group rule create --proto tcp --dst-port 22 default || rc=$?
 if [ ${rc:-0} -ne 0 ]; then
     echo "Rule was already there."
 fi
 
 echo
-echo "Verifying security-group rules."
-nova secgroup-list-rules default
+echo "Verifying security group rules."
+openstack security group list
+openstack security group show default
+
+#------------------------------------------------------------------------------
+# Launch an instance on the self-service network
+# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-selfservice.html
+#------------------------------------------------------------------------------
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Determine instance options
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Listing available flavors."
-nova flavor-list
+openstack flavor list
 
 echo "Listing available images."
-nova image-list
+openstack image list
 
 # Wait for neutron to start
 wait_for_neutron
 
 echo "Listing available networks."
-neutron net-list
+openstack network list
 
-PRIVATE_NET_ID=$(neutron net-list | awk '/ private / {print $2}')
+PRIVATE_SUBNET=selfservice
+
+PRIVATE_NET_ID=$(openstack network list | awk "/ $PRIVATE_SUBNET / {print \$2}")
 echo "ID for demo-net tenant network: $PRIVATE_NET_ID"
 
 echo "Listing available security groups."
-nova secgroup-list
+openstack security group list
 
-PRIVATE_SUBNET=private
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# XXX Network settings
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Settings for $PRIVATE_SUBNET:"
 neutron subnet-show $PRIVATE_SUBNET
@@ -326,13 +383,17 @@ echo "Settings for $PRIVATE_SUBNET:"
 neutron subnet-show $PRIVATE_SUBNET
 echo
 
-nova list
-nova list | awk " / $DEMO_INSTANCE_NAME / {print \$2}" | while read instance; do
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Clean out old instances
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+openstack server list
+openstack server list | awk " / $DEMO_INSTANCE_NAME / {print \$2}" | while read instance; do
     echo "Removing instance $DEMO_INSTANCE_NAME ($instance)."
-    nova delete "$instance"
+    openstack server delete "$instance"
 done
 echo -n "Waiting for removed instances to disappear (may take > 1 min)."
-while nova list|grep -q "$DEMO_INSTANCE_NAME"; do
+while openstack server list|grep -q "$DEMO_INSTANCE_NAME"; do
     sleep 1
     echo -n .
 done
@@ -342,14 +403,15 @@ function check_for_other_vms {
     echo "Verifying that no other instance VMs are left."
     (
     source "$CONFIG_DIR/admin-openstackrc.sh"
-    if [ "$(nova list --all-tenants --minimal | wc -l)" -gt 4 ]; then
+    if [ "$(openstack server list --all-projects | wc -l)" -gt 4 ]; then
         echo "SUM ERROR Unexpected VMs found. Aborting..."
-        nova list --all-tenants
+        openstack server list --all-projects
         exit 1
     fi
     )
 }
 check_for_other_vms
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 NOVA_SCHED_LOG=/var/log/upstart/nova-scheduler.log
 NOVA_API_LOG=/var/log/upstart/nova-api.log
@@ -371,9 +433,9 @@ function request_instance {
     local img_name=$(basename "$CIRROS_URL" -disk.img)
 
     echo "Requesting an instance."
-    nova boot \
-        --flavor m1.tiny \
-        --image "$img_name" \
+    openstack server create \
+        --flavor m1.nano \
+        --image "cirros" \
         --nic net-id="$PRIVATE_NET_ID" \
         --security-group default \
         --key-name mykey \
@@ -387,9 +449,9 @@ echo "Boot log: $BOOT_LOG"
 function save_boot_log {
     local rc=0
     rm -f "$BOOT_LOG"
-    nova console-log "$DEMO_INSTANCE_NAME" >"$BOOT_LOG" 2>&1 || rc=$?
+    openstack console log show "$DEMO_INSTANCE_NAME" >"$BOOT_LOG" 2>&1 || rc=$?
     if [ $rc -ne 0 ]; then
-        echo >&2 "nova console-log returned error status $rc"
+        echo >&2 "openstack console log show returned error status $rc"
     fi
     return $rc
 }
@@ -403,11 +465,11 @@ function explain_instance_failure {
 
   As an admin, we could list hosts (including compute hosts):
 
-  $ nova host-list
+  $ openstack host list
 
   And check resource usage in description of host 'compute':
 
-  $ nova host-describe compute
+  $ openstack host show compute1
 
   As a regular user, we would have to keep trying for up to a minute and hope
   it works soon.
@@ -474,12 +536,12 @@ function console_status_404 {
 }
 
 function instance_status {
-    nova list | awk "/$DEMO_INSTANCE_NAME/ {print \$6}"
+    openstack server list | awk "/$DEMO_INSTANCE_NAME/ {print \$6}"
 }
 
 function instance_status_is {
     local status=$1
-    nova list | grep "$DEMO_INSTANCE_NAME" | grep -q "$status"
+    openstack server list | grep "$DEMO_INSTANCE_NAME" | grep -q "$status"
 }
 
 while : ; do
@@ -488,7 +550,7 @@ while : ; do
     request_instance > /dev/null
 
     if console_status_409; then
-        echo "nova console-log returned:"
+        echo "openstack console log show returned:"
         cat "$BOOT_LOG"
         echo
 
@@ -496,7 +558,7 @@ while : ; do
 
             echo "Instance build failed."
             echo "Deleting failed instance VM."
-            nova delete "$DEMO_INSTANCE_NAME"
+            openstack server delete "$DEMO_INSTANCE_NAME"
 
             echo "Checking nova-compute on the compute node."
             wait_for_nova_compute
@@ -506,7 +568,7 @@ while : ; do
             while : ; do
                 request_instance >/dev/null
                 if console_status_409; then
-                    nova delete "$DEMO_INSTANCE_NAME"
+                    openstack server delete "$DEMO_INSTANCE_NAME"
                     cnt=$((cnt + 1))
                     if [ $cnt -eq 5 ]; then
                         echo
@@ -528,7 +590,7 @@ while : ; do
     fi
 
     if console_status_404; then
-        echo "nova console-log returned:"
+        echo "openstack console log show returned:"
         cat "$BOOT_LOG"
         echo
 
@@ -566,7 +628,7 @@ while : ; do
         fi
 
         echo "Deleting failed instance VM."
-        nova delete "$DEMO_INSTANCE_NAME"
+        openstack server delete "$DEMO_INSTANCE_NAME"
     elif instance_status_is ACTIVE; then
         echo "Instance VM status: ACTIVE."
         break
@@ -627,24 +689,31 @@ until grep -q "$DEMO_INSTANCE_NAME login:" "$BOOT_LOG"; do
 done
 echo
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Access the instance using a virtual console
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 echo "Obtaining a VNC session URL for our instance."
-nova get-vnc-console "$DEMO_INSTANCE_NAME" novnc
+openstack console url show "$DEMO_INSTANCE_NAME"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Access the instance remotely
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo
 echo "Creating a floating IP address on the public network."
-floating_ip_id=$(neutron floatingip-create public | awk '/ id / {print $4}')
-neutron floatingip-show "$floating_ip_id"
-
-floating_ip=$(neutron floatingip-show "$floating_ip_id" |
-    awk '/ floating_ip_address / {print $4}')
+floating_ip=$(openstack ip floating create provider | awk '/ ip / {print $4}')
+openstack ip floating list
 
 echo
 echo "Associating the floating IP address with our instance."
-nova floating-ip-associate "$DEMO_INSTANCE_NAME" "$floating_ip"
+openstack ip floating add "$floating_ip" "$DEMO_INSTANCE_NAME"
 
 echo
 echo "Checking the status of your floating IP address."
-nova list
+openstack server list
 
 echo
 echo -n "Verifying network connectivity to instance VM (may take 2+ min)."
