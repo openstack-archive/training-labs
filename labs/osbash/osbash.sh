@@ -232,7 +232,8 @@ if [ "$CMD" = basedisk ]; then
     exit
 fi
 
-stop_running_cluster_vms
+# Don't stop VMs if LEAVE_VMS_RUNNING is set (needed by repeat-test)
+${LEAVE_VMS_RUNNING:+:} stop_running_cluster_vms
 
 echo "Building nodes using base disk $(get_base_disk_name)"
 

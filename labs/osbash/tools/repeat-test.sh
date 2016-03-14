@@ -119,7 +119,7 @@ until [ $cnt -eq $REP ]; do
     rc=0
     if [ -n "${REBUILD:-}" ]; then
         if [ -n "${TARGET_SNAPSHOT:-}" ]; then
-            "$TOP_DIR/osbash.sh" -t "$TARGET_SNAPSHOT" -b cluster || rc=$?
+            LEAVE_VMS_RUNNING=yes "$TOP_DIR/osbash.sh" -t "$TARGET_SNAPSHOT" -b cluster || rc=$?
         else
             "$TOP_DIR/osbash.sh" -b cluster || rc=$?
         fi
