@@ -44,10 +44,11 @@ function virsh_uses_kvm {
 function set_vm_group {
     local vm_name=$1
 
-    $VIRSH desc "$vm_name" --config --live --title --new-desc "$VM_GROUP"
+    $VIRSH desc "$vm_name" --config --live --title \
+                            --new-desc "$vm_name: $VM_GROUP"
     $VIRSH desc "$vm_name" --config --live --new-desc "All VMs with" \
-            "description title '$VM_GROUP' get shut down when a new cluster" \
-            "build starts."
+            "'$VM_GROUP' in their description title get shut down when a new" \
+            "cluster build starts."
 }
 
 function get_vm_group {
@@ -101,7 +102,7 @@ function stop_running_cluster_vms {
     $VIRSH list --uuid | while read vm_id; do
         if [ -z "$vm_id" ]; then
             continue
-        elif [ "$(get_vm_group "$vm_id")" = "$VM_GROUP" ]; then
+        elif [[ "$(get_vm_group "$vm_id")" =~ "$VM_GROUP" ]]; then
             # vm_id instead of vm_name works just as well
             vm_acpi_shutdown "$vm_id"
         fi
