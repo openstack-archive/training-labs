@@ -101,7 +101,8 @@ function vm_install_base {
 
     disk_compress "$base_disk_name"
 
-    vm_delete "$vm_name"
+    # Just undefine the VM without deleting the base disk
+    $VIRSH undefine "$vm_name"
 
     echo -e >&2 "${CStatus:-}Base disk created${CReset:-}"
 
