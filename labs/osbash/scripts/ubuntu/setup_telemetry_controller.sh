@@ -37,6 +37,9 @@ mongo --host controller --eval "
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
+# Wait for keystone to come up
+wait_for_keystone
+
 echo "Creating ceilometer user and giving it admin role under service tenant."
 openstack user create \
     --domain default \
