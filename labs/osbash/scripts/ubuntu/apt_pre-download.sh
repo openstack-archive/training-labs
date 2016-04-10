@@ -115,5 +115,27 @@ apt_download swift swift-proxy python-swiftclient \
     memcached
 
 # Swift Storage
-apt_download xfsprogs rsync swift-account \
-    swift-container swift-object
+apt_download xfsprogs rsync \
+    swift swift-account swift-container swift-object
+
+function pre-download_remote_config_files {
+    # Swift controller
+    wget --directory-prefix "$HOME" -O "swift-proxy-server.conf" \
+        "https://git.openstack.org/cgit/openstack/swift/plain/etc/proxy-server.conf-sample?h=stable/mitaka"
+
+    # Swift storage
+    wget --directory-prefix "$HOME" -O "swift-account-server.conf" \
+        "https://git.openstack.org/cgit/openstack/swift/plain/etc/account-server.conf-sample?h=stable/mitaka"
+
+    wget --directory-prefix "$HOME" -O "swift-container-server.conf" \
+        "https://git.openstack.org/cgit/openstack/swift/plain/etc/container-server.conf-sample?h=stable/mitaka"
+
+    wget --directory-prefix "$HOME" -O "swift-object-server.conf" \
+        "https://git.openstack.org/cgit/openstack/swift/plain/etc/object-server.conf-sample?h=stable/mitaka"
+
+    # Swift finalize
+    wget --directory-prefix "$HOME" -O "swift-swift.conf" \
+        "https://git.openstack.org/cgit/openstack/swift/plain/etc/swift.conf-sample?h=stable/mitaka"
+}
+
+pre-download_remote_config_files
