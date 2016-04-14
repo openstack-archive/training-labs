@@ -1,0 +1,14 @@
+# Node VM configuration. Used by osbash/wbatch (host and guest).
+
+# Port forwarding
+# ssh access to controller: 127.0.0.1:2250
+VM_SSH_PORT=2250
+
+# Assign network interfaces to networks
+NET_IF_0=dhcp
+
+#------------------------------------------------------------------------------
+# Mgmt network
+NET_IF_1="static 10.0.0.100"
+
+PXE_GATEWAY="10.0.0.101"

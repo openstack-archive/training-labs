@@ -86,3 +86,6 @@ apt_download swift swift-proxy python-swiftclient \
 apt_download xfsprogs rsync \
     swift swift-account swift-container swift-object
 
+# PXE server
+apt_download bind9 isc-dhcp-server apache2 tftpd-hpa inetutils-inetd vlan \
+    iptables-persistent

@@ -121,8 +121,10 @@ function configure_node_netifs {
 
     local index
     local type
+    local prio
     for index in "${!NODE_IF_TYPE[@]}"; do
         type=${NODE_IF_TYPE[index]}
+        prio=${NODE_IF_PRIO[index]}
         if [ "$type" = "dhcp" ]; then
             vm_nic_base "$vm_name" "$index"
         elif [ "$type" = "manual" ]; then
@@ -132,6 +134,10 @@ function configure_node_netifs {
         else
             echo >&2 "ERROR Unknown interface type: $type."
             exit 1
+        fi
+        if [ "$prio" -ne 0 ]; then
+            # Elevate boot prio so this particular NIC is used for PXE booting
+            vm_nic_set_boot_prio "$vm_name" "$index" "$prio"
         fi
     done
 }
@@ -254,7 +260,9 @@ function ssh_process_autostart {
     ssh_env_for_node "$vm_name"
 
     local ssh_port
-    if [ ${PROVIDER:-""} = virtualbox ]; then
+    if [ -n "${PXE_TMP_NODE_IP:-""}" ]; then
+        ssh_port=22
+    elif [ ${PROVIDER:-""} = virtualbox ]; then
         ssh_port=$VM_SSH_PORT
     else
         ssh_port=22
@@ -416,6 +424,10 @@ function command_from_config {
             get_cmd_options $args
             echo >&2 "VM_UI=$vm_ui _vm_boot_with_autostart $vm_name"
             VM_UI=$vm_ui _vm_boot_with_autostart "$vm_name"
+            if [ -n "${PXE_TMP_NODE_IP:-""}" ]; then
+                echo >&2 "Unsetting PXE_TMP_NODE_IP."
+                unset PXE_TMP_NODE_IP
+            fi
             ;;
         snapshot)
             # Format: snapshot [-n <node_name>] <snapshot_name>
@@ -451,12 +463,31 @@ function command_from_config {
             echo >&2 snapshot_cycle "$vm_name" "$shot_name"
             _autostart_queue "shutdown.sh"
             _vm_boot_with_autostart "$vm_name"
+            if [ -n "${PXE_TMP_NODE_IP:-""}" ]; then
+                echo >&2 "Unsetting PXE_TMP_NODE_IP."
+                unset PXE_TMP_NODE_IP
+            fi
             vm_wait_for_shutdown "$vm_name"
             vm_conditional_snapshot "$vm_name" "$shot_name"
+            ;;
+        boot_set_tmp_node_ip)
+            # format: boot_set_tmp_node_ip
+            get_cmd_options $args
+            echo >&2 PXE_TMP_NODE_IP=$PXE_INITIAL_NODE_IP
+            PXE_TMP_NODE_IP=$PXE_INITIAL_NODE_IP
             ;;
         create_node)
             # Format: create_node [-n <node_name>]
             get_cmd_options $args
+            echo >&2 vm_create_node "$vm_name"
+            vm_create_node "$vm_name"
+            ;;
+        create_pxe_node)
+            # Format: create_pxe_node [-n <node_name>]
+            get_cmd_options $args
+            # Set FIRST_DISK_SIZE to disable use of basedisk for PXE booting
+            FIRST_DISK_SIZE=10000
+            echo >&2 "PXE boot node, set FIRST_DISK_SIZE=$FIRST_DISK_SIZE."
             echo >&2 vm_create_node "$vm_name"
             vm_create_node "$vm_name"
             ;;
@@ -477,6 +508,26 @@ function command_from_config {
             local script_rel_path=$args
             echo >&2 _autostart_queue "$script_rel_path"
             _autostart_queue "$script_rel_path"
+            ;;
+        cp_iso)
+            # Format: cp_iso [-n <node_name>]
+            get_cmd_options $args
+            local iso_name=$(get_iso_name)
+            # Run this function in sub-shell to protect our caller's environment
+            # (which might be _our_ enviroment if we get called again)
+            (
+            source "$CONFIG_DIR/config.$vm_name"
+            ssh_env_for_node "$vm_name"
+
+            local ssh_port
+            if [ ${PROVIDER:-""} = virtualbox ]; then
+                ssh_port=$VM_SSH_PORT
+            else
+                ssh_port=22
+            fi
+                    echo >&2 "cp_iso $vm_name $args"
+                    vm_scp_to_vm "$ssh_port" "$ISO_DIR/$iso_name"
+            )
             ;;
         *)
             echo -e >&2 "${CError:-}Error: invalid cmd: ${CData:-}$cmd${CReset:-}"

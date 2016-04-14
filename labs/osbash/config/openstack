@@ -24,6 +24,10 @@ CIRROS_IMG_NAME="cirros"
 NETWORK_1="mgmt 10.0.0.0"
 NETWORK_2="provider 203.0.113.0"
 
+# Static IP used temporarily by PXE booted machines before being reconfigured
+# by osbash
+PXE_INITIAL_NODE_IP="10.0.0.240"
+
 #------------------------------------------------------------------------------
 # http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-networks-public.html
 #------------------------------------------------------------------------------

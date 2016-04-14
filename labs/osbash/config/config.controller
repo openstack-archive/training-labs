@@ -11,8 +11,8 @@ NET_IF_0=dhcp
 #------------------------------------------------------------------------------
 # http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-networking-controller.html
 #------------------------------------------------------------------------------
-# Mgmt network
-NET_IF_1="static 10.0.0.11"
+# Mgmt network (elevate interface boot priority to 1; set when PXE booting)
+NET_IF_1="static 10.0.0.11 1"
 # Public network (select network, IP address configured manually)
 NET_IF_2="manual 203.0.113.0"
 

@@ -104,6 +104,7 @@ function stop_running_cluster_vms {
                 grep -qe '^groups="/'$VM_GROUP; then
             # vm_id instead of vm_name works just as well
             vm_acpi_shutdown "$vm_id"
+            vm_wait_for_shutdown "$vm_id"
         fi
     done
 }
@@ -170,6 +171,12 @@ function ssh_env_for_node {
     local node=$1
 
     VM_SSH_PORT=$(source "$CONFIG_DIR/config.$node"; echo "$VM_SSH_PORT")
+    SSH_IP=127.0.0.1
+    if [ -n "${PXE_TMP_NODE_IP:-""}" ]; then
+        SSH_IP=$PXE_TMP_NODE_IP
+        SSH_PORT=22
+        echo >&2 "PXE_TMP_NODE_IP is set -> SSH_IP=$SSH_IP, SSH_PORT=$SSH_PORT."
+    fi
 }
 
 function hostonlyif_in_use {
@@ -467,6 +474,16 @@ function vm_nic_std {
         "--nicpromisc$nic" allow-all
 }
 
+function vm_nic_set_boot_prio {
+    local vm_name=$1
+    local index=$2
+    local prip=$3
+    # We start counting interfaces at 0, but VirtualBox starts NICs at 1
+    local nic=$((index + 1))
+
+    $VBM modifyvm "$vm_name" "--nicbootprio$nic" "$3"
+}
+
 function vm_create {
     # NOTE: We assume that a VM with a matching name is ours.
     #       Remove and recreate just in case someone messed with it.
@@ -513,6 +530,7 @@ function vm_create {
     $VBM modifyvm "$vm_name" --biosbootmenu disabled
     $VBM modifyvm "$vm_name" --largepages on
     $VBM modifyvm "$vm_name" --boot1 disk
+    $VBM modifyvm "$vm_name" --boot3 net
 
     # XXX temporary hack
     # --portcount not supported in VirtualBox 4.1 (Mac OS X 10.5)

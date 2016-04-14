@@ -86,6 +86,8 @@ function get_node_netif_config {
         line=(${!net_if})
         NODE_IF_TYPE[$if_num]=${line[0]}
         NODE_IF_IP[$if_num]=${line[1]:-""}
+        # Default boot priority is 0 for all interfaces
+        NODE_IF_PRIO[$if_num]=${line[2]:=0}
     done
 }
 

@@ -42,11 +42,22 @@ function vm_create_node {
     fi
 
     vm_add_share "$vm_name" "$SHARE_DIR" "$SHARE_NAME"
-    vm_attach_disk_multi "$vm_name" "$(get_base_disk_path)"
+
+    if [ "${FIRST_DISK_SIZE:-0}" -gt 0 ]; then
+        # Used for PXE build (does not use basedisk)
+        local first_disk_path=$DISK_DIR/$vm_name-sda.vdi
+        create_vdi "$first_disk_path" "${FIRST_DISK_SIZE}"
+        # Port 0 is default
+        vm_attach_disk "$vm_name" "$first_disk_path"
+    else
+        # Use copy-on-write disk over basedisk
+        vm_attach_disk_multi "$vm_name" "$(get_base_disk_path)"
+    fi
 
     if [ "${SECOND_DISK_SIZE:-0}" -gt 0 ]; then
         local second_disk_path=$DISK_DIR/$vm_name-sdb.vdi
         create_vdi "$second_disk_path" "${SECOND_DISK_SIZE}"
+        # Use port 1
         vm_attach_disk "$vm_name" "$second_disk_path" 1
     fi
     )

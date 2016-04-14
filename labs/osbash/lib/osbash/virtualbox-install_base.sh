@@ -64,6 +64,7 @@ function vm_install_base {
     #---------------------------------------------------------------------------
 
     $VBM modifyvm "$vm_name" --boot1 dvd
+    $VBM modifyvm "$vm_name" --boot2 disk
 
     # Configure autostart
     autostart_reset
