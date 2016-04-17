@@ -259,10 +259,16 @@ wait_for_neutron_agents
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 (
-echo "Creating m1.nano flavor which is just big enough for CirrOS."
+echo
+echo "Check if m1.nano flavor is existing or else, create the flavor."
 
 source "$CONFIG_DIR/admin-openstackrc.sh"
-openstack flavor create --id 0 --vcpus 1 --ram 64 --disk 1 m1.nano
+if openstack flavor list | grep m1.nano; then
+    echo "Proceeding, m1.nano flavor exists."
+else
+    echo "Creating m1.nano flavor which is just big enough for CirrOS."
+    openstack flavor create --id 0 --vcpus 1 --ram 64 --disk 1 m1.nano
+fi
 echo
 )
 
