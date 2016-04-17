@@ -15,6 +15,11 @@ NET_IF_1="static 10.0.0.31"
 NET_IF_2="manual 203.0.113.0"
 
 #------------------------------------------------------------------------------
+# Size of second disk in MB (/dev/sdb)
+# Test volume is 1 GB; backing volume must be bigger
+SECOND_DISK_SIZE=1040
+
+#------------------------------------------------------------------------------
 # http://docs.openstack.org/mitaka/install-guide-ubuntu/environment.html
 #------------------------------------------------------------------------------
 # Controller node is running many services.
