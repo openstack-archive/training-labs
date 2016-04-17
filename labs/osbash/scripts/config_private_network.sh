@@ -22,7 +22,7 @@ echo
 
 echo -n "Waiting for first bridge to show up."
 # Bridge names are something like brq219ddb93-c9
-until [ "$(brctl show | grep -o "^brq[a-z0-9-]*" | wc -l)" -gt 0 ]; do
+until [ "$(/sbin/brctl show | grep -o "^brq[a-z0-9-]*" | wc -l)" -gt 0 ]; do
     sleep 1
     echo -n .
 done
@@ -54,14 +54,14 @@ done
 echo
 
 echo -n "Waiting for second bridge."
-until [ "$(brctl show | grep -o "^brq[a-z0-9-]*" | wc -l)" -gt 1 ]; do
+until [ "$(/sbin/brctl show | grep -o "^brq[a-z0-9-]*" | wc -l)" -gt 1 ]; do
     sleep 1
     echo -n .
 done
 echo
 
 echo "Bridges are:"
-brctl show
+/sbin/brctl show
 
 (
 echo "Sourcing the admin credentials."
