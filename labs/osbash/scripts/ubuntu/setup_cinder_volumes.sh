@@ -33,13 +33,15 @@ sudo apt-get install -y lvm2
 
 echo "Configuring LVM physical and logical volumes."
 
-cinder_dev=/dev/sdb
+cinder_dev=sdb
 
-sudo pvcreate $cinder_dev
-sudo vgcreate cinder-volumes $cinder_dev
+sudo pvcreate /dev/$cinder_dev
+sudo vgcreate cinder-volumes /dev/$cinder_dev
 
-# We could configure LVM to only use the device we just set up, but scanning
-# our block devices to find our volume group is fast enough.
+conf=/etc/lvm/lvm.conf
+echo "Setting LVM filter line in $conf to only allow /dev/$cinder_dev:"
+sudo sed -i '/^[[:space:]]\{1,\}filter/ s|= .*|= [ "a/'$cinder_dev'/", "r/.*/"]|' $conf
+grep "^[[:space:]]\{1,\}filter" $conf
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Install and configure Cinder Volumes
