@@ -46,7 +46,7 @@ function ssh_no_chk_node {
 }
 
 function ssh_no_chk {
-    echo "ssh $@"
+    echo "ssh $*"
     # Options set to disable strict host key checking and related messages.
     ssh \
         -o "UserKnownHostsFile /dev/null" \
@@ -435,8 +435,6 @@ function request_instance {
         instance_info=$LOG_DIR/test-instance.info
         echo "Instance info: $instance_info"
     fi
-
-    local img_name=$(basename "$CIRROS_URL" -disk.img)
 
     echo "Requesting an instance."
     openstack server create \

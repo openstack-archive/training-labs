@@ -14,7 +14,7 @@ indicate_current_auto
 #------------------------------------------------------------------------------
 
 echo -n "Waiting for first DHCP namespace."
-until [ "$(ip netns | grep -o "^qdhcp-[a-z0-9-]*" | wc -l)" -gt 0 ]; do
+until [ "$(ip netns | grep -c -o "^qdhcp-[a-z0-9-]*")" -gt 0 ]; do
     sleep 1
     echo -n .
 done
@@ -22,7 +22,7 @@ echo
 
 echo -n "Waiting for first bridge to show up."
 # Bridge names are something like brq219ddb93-c9
-until [ "$(/sbin/brctl show | grep -o "^brq[a-z0-9-]*" | wc -l)" -gt 0 ]; do
+until [ "$(/sbin/brctl show | grep -c -o "^brq[a-z0-9-]*")" -gt 0 ]; do
     sleep 1
     echo -n .
 done
@@ -51,14 +51,14 @@ neutron subnet-create --name selfservice \
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo -n "Waiting for second DHCP namespace."
-until [ "$(ip netns | grep -o "^qdhcp-[a-z0-9-]*" | wc -l)" -gt 1 ]; do
+until [ "$(ip netns | grep -c -o "^qdhcp-[a-z0-9-]*")" -gt 1 ]; do
     sleep 1
     echo -n .
 done
 echo
 
 echo -n "Waiting for second bridge."
-until [ "$(/sbin/brctl show | grep -o "^brq[a-z0-9-]*" | wc -l)" -gt 1 ]; do
+until [ "$(/sbin/brctl show | grep -c -o "^brq[a-z0-9-]*")" -gt 1 ]; do
     sleep 1
     echo -n .
 done
@@ -175,8 +175,8 @@ function get_router_ip_address {
             echo -n >&2 .
             continue
         fi
-        router_ip=$(echo $line|grep -Po "$network_part\.\d+")
-        echo $router_ip
+        router_ip=$(echo "$line"|grep -Po "$network_part\.\d+")
+        echo "$router_ip"
         return 0
     done
 }

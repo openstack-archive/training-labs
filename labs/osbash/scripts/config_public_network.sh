@@ -58,7 +58,7 @@ neutron subnet-create --name provider  \
     provider "$PUBLIC_NETWORK_CIDR"
 
 echo -n "Waiting for DHCP namespace."
-until [ "$(ip netns | grep -o "^qdhcp-[a-z0-9-]*" | wc -l)" -gt 0 ]; do
+until [ "$(ip netns | grep -c -o "^qdhcp-[a-z0-9-]*")" -gt 0 ]; do
     sleep 1
     echo -n .
 done
@@ -66,7 +66,7 @@ echo
 
 echo -n "Waiting for bridge to show up."
 # Bridge names are something like brq219ddb93-c9
-until [ "$(/sbin/brctl show | grep -o "^brq[a-z0-9-]*" | wc -l)" -gt 0 ]; do
+until [ "$(/sbin/brctl show | grep -c -o "^brq[a-z0-9-]*")" -gt 0 ]; do
     sleep 1
     echo -n .
 done

@@ -244,5 +244,5 @@ vm_build_nodes "$CMD"
 #-------------------------------------------------------------------------------
 ENDTIME=$(date +%s)
 echo -e >&2 "${CStatus:-}$(date) osbash finished successfully${CReset:-}"
-echo -e >&2 "${CStatus:-}osbash completed in $(($ENDTIME - $STARTTIME))" \
+echo -e >&2 "${CStatus:-}osbash completed in $((ENDTIME - STARTTIME))" \
             "seconds.${CReset:-}"

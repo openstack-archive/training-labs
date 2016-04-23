@@ -162,7 +162,7 @@ function get_iniset_tmpfile {
     local prefix=$(get_next_prefix "$tmpdir" "$ext")
 
     # Typical tmpfile path: /tmp/000_etc_keystone_keystone.conf.iniset
-    local tmpfile=$tmpdir/$prefix$(echo $file | tr '/' '_').$ext
+    local tmpfile=$tmpdir/$prefix$(echo "$file" | tr '/' '_').$ext
 
     # Create file owned by regular user so it can be edited without privileges
     touch "$tmpfile"
@@ -174,7 +174,7 @@ function get_iniset_tmpfile {
 # iniset config-file section option value
 function iniset_sudo {
     if (($# != 4)); then
-        echo -n "ERROR: $# instead of 4 arguments for iniset: $@"
+        echo -n "ERROR: $# instead of 4 arguments for iniset: $*"
         exit 1
     fi
 
@@ -401,7 +401,7 @@ function log_point {
 #-------------------------------------------------------------------------------
 
 function no_chk_ssh {
-    echo >&2 "ssh $@"
+    echo >&2 "ssh $*"
     # Options set to disable strict host key checking and related messages.
     ssh \
         -o "UserKnownHostsFile /dev/null" \

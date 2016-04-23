@@ -42,13 +42,13 @@ function colorizer {
     local On_White='\x1b[47m'
 
     # Color codes
-    CError=$Red
-    CStatus=$Bold_Purple
-    CInfo=$Bold_Yellow
-    CProcess=$Bold_Blue
-    CData=$Bold_Cyan
-    CMissing=$Bold_Red
-    CReset=$Reset_Color
+    export CError=$Red
+    export CStatus=$Bold_Purple
+    export CInfo=$Bold_Yellow
+    export CProcess=$Bold_Blue
+    export CData=$Bold_Cyan
+    export CMissing=$Bold_Red
+    export CReset=$Reset_Color
 }
 colorizer
 unset colorizer

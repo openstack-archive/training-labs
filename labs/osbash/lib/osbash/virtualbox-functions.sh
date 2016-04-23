@@ -21,7 +21,7 @@ function vbm {
         local rc=0
         "$VBM_EXE" "$@" || rc=$?
         if [ $rc -ne 0 ]; then
-            echo -e >&2 "${CError:-}FAILURE: VBoxManage: $@${CReset:-}"
+            echo -e >&2 "${CError:-}FAILURE: VBoxManage: ${*}${CReset:-}"
             return 1
         fi
     else
@@ -100,10 +100,10 @@ function stop_running_cluster_vms {
     # Get VM ID from a line looking like this:
     # "My VM" {0a13e26d-9543-460d-82d6-625fa657b7c4}
     $VBM list runningvms | sed 's/.* {\(.*\)}/\1/' | while read vm_id; do
-        if $VBM showvminfo --machinereadable $vm_id |
+        if $VBM showvminfo --machinereadable "$vm_id" |
                 grep -qe '^groups="/'$VM_GROUP; then
             # vm_id instead of vm_name works just as well
-            vm_acpi_shutdown $vm_id
+            vm_acpi_shutdown "$vm_id"
         fi
     done
 }
@@ -552,7 +552,7 @@ function vm_export_ova {
         if [ -n "${share_paths[$ii]}" ]; then
             vm_add_share "$node" "${share_paths[$ii]}" "$SHARE_NAME"
         fi
-        ii=$(($ii + 1))
+        ii=$((ii + 1))
     done
 }
 

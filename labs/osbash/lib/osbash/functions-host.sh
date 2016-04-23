@@ -110,7 +110,7 @@ function create_host_networks {
 
     local index
     for index in "${!NET_NAME[@]}"; do
-        create_network $index
+        create_network "$index"
     done
 }
 
@@ -124,11 +124,11 @@ function configure_node_netifs {
     for index in "${!NODE_IF_TYPE[@]}"; do
         type=${NODE_IF_TYPE[index]}
         if [ "$type" = "dhcp" ]; then
-            vm_nic_base "$vm_name" $index
+            vm_nic_base "$vm_name" "$index"
         elif [ "$type" = "manual" ]; then
-            vm_nic_std "$vm_name" $index
+            vm_nic_std "$vm_name" "$index"
         elif [ "$type" = "static" ]; then
-            vm_nic_std "$vm_name" $index
+            vm_nic_std "$vm_name" "$index"
         else
             echo >&2 "ERROR Unknown interface type: $type."
             exit 1
