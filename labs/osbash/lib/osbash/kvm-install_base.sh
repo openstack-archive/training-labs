@@ -65,8 +65,8 @@ function vm_install_base {
         --wait=-1 \
         &
 
-    local delay=5
-    echo >&2 "Waiting $delay seconds for VM \"$vm_name\" to come up"
+    local delay=10
+    echo >&2 "Waiting $delay seconds for VM \"$vm_name\" to come up."
     conditional_sleep "$delay"
 
     distro_start_installer "$vm_name"
