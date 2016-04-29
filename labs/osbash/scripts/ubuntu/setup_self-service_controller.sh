@@ -162,10 +162,6 @@ iniset_sudo $conf DEFAULT enable_isolated_metadata True
 iniset_sudo $conf DEFAULT dnsmasq_config_file /etc/neutron/dnsmasq-neutron.conf
 
 cat << DNSMASQ | sudo tee /etc/neutron/dnsmasq-neutron.conf
-# Set interface MTU to 1450 (for instance, ssh authentication may fail
-# otherwise due to GRE overhead)
-dhcp-option-force=26,1450
-
 # Override --no-hosts dnsmasq option supplied by neutron
 addn-hosts=/etc/hosts
 
