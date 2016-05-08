@@ -348,10 +348,11 @@ function vm_get_disk_path {
 
 function vm_detach_disk {
     local vm_name=$1
+    local port=${2:-0}
     echo >&2 "Detaching disk from VM \"$vm_name\""
     $VBM storageattach "$vm_name" \
         --storagectl SATA \
-        --port 0 \
+        --port "$port" \
         --device 0 \
         --type hdd \
         --medium none
@@ -363,10 +364,11 @@ function vm_detach_disk {
 function vm_attach_disk {
     local vm_name=$1
     local disk=$2
+    local port=${3:-0}
     echo >&2 -e "Attaching to VM \"$vm_name\":\n\t$disk"
     $VBM storageattach "$vm_name" \
         --storagectl SATA \
-        --port 0 \
+        --port "$port" \
         --device 0 \
         --type hdd \
         --medium "$disk"
@@ -376,13 +378,14 @@ function vm_attach_disk {
 function vm_attach_disk_multi {
     local vm_name=$1
     local disk=$2
+    local port=${3:-0}
 
     $VBM modifyhd --type multiattach "$disk"
 
     echo >&2 -e "Attaching to VM \"$vm_name\":\n\t$disk"
     $VBM storageattach "$vm_name" \
         --storagectl SATA \
-        --port 0 \
+        --port "$port" \
         --device 0 \
         --type hdd \
         --medium "$disk"
@@ -516,7 +519,8 @@ function vm_create {
     if [[ $ver == 4.1*  ]]; then
         $VBM storagectl "$vm_name" --name SATA --add sata
     else
-        $VBM storagectl "$vm_name" --name SATA --add sata --portcount 1
+        # Enough ports for three disks
+        $VBM storagectl "$vm_name" --name SATA --add sata --portcount 3
     fi
     $VBM storagectl "$vm_name" --name SATA --hostiocache on
 

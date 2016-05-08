@@ -33,28 +33,13 @@ sudo apt-get install -y lvm2
 
 echo "Configuring LVM physical and logical volumes."
 
-# We don't have a dedicated physical partition for cinder to use; instead,
-# we configure a file-backed loopback device.
-cinder_loop_path=/var/lib/cinder-volumes
-cinder_loop_dev=/dev/loop2
-sudo dd if=/dev/zero of=$cinder_loop_path bs=1 count=0 seek=4G
-sudo losetup $cinder_loop_dev $cinder_loop_path
+cinder_dev=/dev/sdb
 
-# Tell upstart to run losetup again when the system is rebooted
-cat << UPSTART | sudo tee "/etc/init/cinder-losetup.conf"
-description "Set up loop device for cinder."
+sudo pvcreate $cinder_dev
+sudo vgcreate cinder-volumes $cinder_dev
 
-start on mounted MOUNTPOINT=/
-task
-exec /sbin/losetup $cinder_loop_dev $cinder_loop_path
-UPSTART
-
-sudo pvcreate $cinder_loop_dev
-sudo vgcreate cinder-volumes $cinder_loop_dev
-
-# We could configure LVM to only use loopback devices or only the device
-# we just set up, but scanning our block devices to find our volume group
-# is fast enough.
+# We could configure LVM to only use the device we just set up, but scanning
+# our block devices to find our volume group is fast enough.
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Install and configure Cinder Volumes

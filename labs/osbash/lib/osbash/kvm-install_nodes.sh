@@ -40,6 +40,12 @@ function vm_init_node {
         --backing-vol "$base_disk_name" \
         --backing-vol-format qcow2
 
+    if [ "${SECOND_DISK_SIZE:-0}" -gt 0 ]; then
+        disk_create "$vm_name-sdb" "$SECOND_DISK_SIZE"
+        local disks="--disk vol=$KVM_VOL_POOL/${vm_name}-sdb,cache=none"
+        echo >&2 "Adding second disk: $disks:"
+    fi
+
     local console_type
     if [ "$VM_UI" = "headless" ]; then
         console_type="--noautoconsole"
@@ -56,6 +62,7 @@ function vm_init_node {
         --vcpus "${VM_CPUS:-1}" \
         --os-type=linux \
         --disk vol="$KVM_VOL_POOL/${vm_name},cache=none" \
+        ${disks:-} \
         ${KVM_NET_OPTIONS:-""} \
         --import \
         $console_type \
