@@ -130,7 +130,7 @@ function wait_for_nova_compute {
             echo "Restarting nova-compute on compute node."
             ssh_no_chk_node compute1 \
                 sudo service nova-compute restart
-            NOVA_COMPUTE_RESTART=$((${NOVA_COMPUTE_RESTART:-0} + 1))
+            echo "SUM ERROR nova-compute restart in wait_for_nova_compute"
         fi
     done
     )
@@ -187,10 +187,6 @@ function wait_for_nova_services {
     echo
     echo "SUM wait for nova services: $(($(date +%s) - start))"
 }
-
-if [ ${NOVA_COMPUTE_RESTART:-0} -ne 0 ]; then
-    echo "SUM ERROR nova-compute restarts: $NOVA_COMPUTE_RESTART"
-fi
 
 wait_for_nova_services
 
@@ -580,7 +576,7 @@ while : ; do
                         echo "Restarting nova-compute on compute node."
                         ssh_no_chk_node compute-mgmt \
                             sudo service nova-compute restart
-                        NOVA_COMPUTE_RESTART=$((${NOVA_COMPUTE_RESTART:-0} + 1))
+                        echo "SUM ERROR nova-compute restart (status 409)"
                     fi
                     sleep 2
                     echo -n .
@@ -628,7 +624,7 @@ while : ; do
             echo "Restarting nova-compute on compute node."
             ssh_no_chk_node compute-mgmt \
                 sudo service nova-compute restart
-            NOVA_COMPUTE_RESTART=$((${NOVA_COMPUTE_RESTART:-0} + 1))
+            echo "SUM ERROR nova-compute restart (RetryFilter)"
         fi
 
         echo "Deleting failed instance VM."
