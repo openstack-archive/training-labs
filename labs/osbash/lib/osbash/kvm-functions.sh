@@ -16,7 +16,7 @@ function virsh {
     local rc=0
     $VIRSH_CALL "$@" || rc=$?
     if [ $rc -ne 0 ]; then
-        echo -e >&2 "${CError:-}FAILURE ($rc): virsh: $@${CReset:-}"
+        echo -e >&2 "${CError:-}FAILURE ($rc): virsh: ${*}${CReset:-}"
         echo "FAILURE ($rc): $VIRSH_CALL $@" >> "$VIRT_LOG"
         return 1
     fi
@@ -29,7 +29,7 @@ function virt_install {
     local rc=0
     $VIRT_INSTALL_CALL "$@" || rc=$?
     if [ $rc -ne 0 ]; then
-        echo -e >&2 "${CError:-}FAILURE ($rc): $VIRT_INSTALL_CALL $@${CReset:-}"
+        echo -e >&2 "${CError:-}FAILURE ($rc): $VIRT_INSTALL_CALL ${*}${CReset:-}"
         echo "FAILURE ($rc): $VIRT_INSTALL_CALL $@" >> "$VIRT_LOG"
         return 1
     fi
@@ -104,7 +104,7 @@ function stop_running_cluster_vms {
     $VIRSH list --uuid | while read vm_id; do
         if [ -z "$vm_id" ]; then
             continue
-        elif [[ "$(get_vm_group "$vm_id")" =~ "$VM_GROUP" ]]; then
+        elif [[ "$(get_vm_group "$vm_id")" =~ $VM_GROUP ]]; then
             # vm_id instead of vm_name works just as well
             vm_acpi_shutdown "$vm_id"
         fi
@@ -149,7 +149,7 @@ function vm_snapshot_restore {
 }
 
 function vm_snapshot_restore_current {
-    local $vm_name=$1
+    local vm_name=$1
 
     $VIRSH snapshot-revert "$vm_name" --current
 }
@@ -361,8 +361,8 @@ function base_disk_delete {
 # Use virt-sparsify to compress disk image and make it sparse
 function disk_compress {
     local disk_name=$1
-    local disk_path=$($VIRSH vol-path --pool $KVM_VOL_POOL $disk_name)
-    local pool_dir=$(dirname $disk_path)
+    local disk_path=$($VIRSH vol-path --pool "$KVM_VOL_POOL" "$disk_name")
+    local pool_dir=$(dirname "$disk_path")
 
     local spexe
     if ! spexe=$(which virt-sparsify); then
@@ -377,7 +377,7 @@ function disk_compress {
     sudo du -sh "$disk_path"
 
     # Sparsify and compress basedisk image
-    sudo $spexe --compress "$disk_path" "$pool_dir/.$disk_name"
+    sudo "$spexe" --compress "$disk_path" "$pool_dir/.$disk_name"
 
     # Copy owner and file modes from original file
     sudo chown -v --reference="$disk_path" "$pool_dir/.$disk_name"

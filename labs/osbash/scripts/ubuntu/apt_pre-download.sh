@@ -42,7 +42,7 @@ function get_cirros {
 }
 
 function apt_download {
-    echo "apt_download: $@"
+    echo "apt_download: $*"
     sudo apt-get install -y --download-only "$@"
 }
 

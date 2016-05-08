@@ -30,7 +30,6 @@ sudo service neutron-server restart
 
 # Configure openstack dashboard
 function check_dashboard_settings {
-    local memcached_conf=/etc/memcached.conf
     local dashboard_conf=/etc/openstack-dashboard/local_settings.py
 
     # Enabling Neutron LBaaS on Horizon
