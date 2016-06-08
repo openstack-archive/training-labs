@@ -23,7 +23,7 @@ set_yum_proxy
 
 # Enable RDO repo
 if [[ ${OPENSTACK_RELEASE:-} = kilo ]]; then
-    sudo yum install -y "https://repos.fedorapeople.org/repos/openstack/openstack-kilo/rdo-release-kilo-1.noarch.rpm"
+    sudo yum install -y "https://repos.fedorapeople.org/openstack/openstack-kilo/rdo-release-kilo-2.noarch.rpm"
 elif [[ ${OPENSTACK_RELEASE:-} = liberty ]]; then
     sudo yum install -y "https://repos.fedorapeople.org/repos/openstack/openstack-liberty/rdo-release-liberty-2.noarch.rpm"
 else
