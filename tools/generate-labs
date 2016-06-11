@@ -18,16 +18,15 @@ else
     release=$1
 fi
 # Replace '/' with '-' for renaming stable/<release-name> to
-# stalbe-<release-name>
+# stable-<release-name>
 release=${release////-}
+echo "Current OpenStack release: $release"
 
 # Create required folders
 mkdir -p ./build/dist/
 
-# Generate windows batch scripts
-labs/osbash/osbash.sh -w cluster
-
 # Create tarball of labs scripts for Linux/OS X users
+echo 'Creating the tar-balls.'
 tar --exclude=*.iso \
     --exclude=*.vdi \
     --exclude=*.log \
@@ -35,9 +34,11 @@ tar --exclude=*.iso \
     -czf build/dist/labs-${release}.tgz labs/osbash
 
 
-# TODO (dbite): Fix issue with missing zip dep. in openstack ci.
 # Generate Windows batch scripts
+labs/osbash/osbash.sh -w cluster
+
 #labs/osbash/osbash.sh -w cluster
 # Create zip file of labs scripts for Windows users
-#zip -r build/dist/labs-${release}.zip labs/osbash \
-#    -x *.iso \*.vdi \*.log \*.auto
+echo 'Generating zip files.'
+zip -r build/dist/labs-${release}.zip labs/osbash \
+    -x \*.iso \*.vdi \*.log \*.auto
