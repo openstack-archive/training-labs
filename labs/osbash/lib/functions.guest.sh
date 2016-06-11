@@ -391,7 +391,7 @@ function log_point {
 
     (
     cd "$logdir"
-    sudo bash -c "shopt -s nullglob; ls -l auth.log keystone/* upstart/*.log mysql/* neutron/*" | \
+    sudo bash -c "shopt -s nullglob; ls -l auth.log* keystone/* upstart/*.log mysql/* neutron/*" | \
         sudo tee "$logdir/$fname" > /dev/null
     )
 }

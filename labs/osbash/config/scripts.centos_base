@@ -1,0 +1,3 @@
+# Scripts for CentOS installations
+cmd queue centos/yum_init.sh
+cmd queue centos/yum_update.sh
