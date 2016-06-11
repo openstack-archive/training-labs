@@ -22,6 +22,16 @@ see the `OpenStack wiki <https://wiki.openstack.org/wiki/Documentation/training-
 * Source: http://git.openstack.org/cgit/openstack/training-labs
 * Bugs: http://bugs.launchpad.net/training-labs
 
+OpenStack Release
+-----------------
+
+The current release is master which usually means that we are developing for the next
+OpenStack release. The current one is ``OpenStack Newton``. For non-development purposes
+(training etc.) please checkout the stable branches. Assuming that ``$remote`` is your
+remote branch (usually origin) and ``$release`` is the release version.
+
+    $ git checkout $remote/stable/$release
+
 Pre-requisite
 -------------
 
