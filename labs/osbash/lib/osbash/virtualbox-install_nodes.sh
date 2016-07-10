@@ -1,6 +1,6 @@
 # This bash library contains the main function that creates a node VM.
 
-# Boot node VM; wait until autostart files are processed and VM is shut down
+# Boot node VM; wait until autostart files are processed
 function _vm_boot_with_autostart {
     local vm_name=$1
 
