@@ -70,15 +70,13 @@ cmd snapshot_cycle -n compute1 cinder-volume_installed
 
 cmd queue ubuntu/setup_telemetry_compute.sh
 cmd snapshot_cycle -n compute1 telemetry-compute_installed
+cmd boot -n compute1
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Take snapshot of database changes on controller VM, too
-cmd queue shutdown_controller.sh
-cmd boot -n compute1
+cmd shutdown -n controller
 
-cmd wait_for_shutdown -n controller
 cmd snapshot -n controller controller_-_compute1_node_installed
-#cmd boot -n controller
 #==============================================================================
 cmd queue config_public_network.sh
 cmd queue config_private_network.sh

@@ -424,6 +424,15 @@ function command_from_config {
             echo >&2 vm_conditional_snapshot "$vm_name" "$shot_name"
             vm_conditional_snapshot "$vm_name" "$shot_name"
             ;;
+        shutdown)
+            # Format: shutdown [-n <node_name>]
+            get_cmd_options $args
+            echo >&2 "vm_acpi_shutdown $vm_name"
+            vm_acpi_shutdown "$vm_name"
+            echo >&2 vm_wait_for_shutdown "$vm_name"
+            vm_wait_for_shutdown "$vm_name"
+            conditional_sleep 1
+            ;;
         wait_for_shutdown)
             # Format: wait_for_shutdown [-n <node_name>]
             get_cmd_options $args
