@@ -435,7 +435,7 @@ function request_instance {
     echo "Requesting an instance."
     openstack server create \
         --flavor m1.nano \
-        --image "cirros" \
+        --image "$CIRROS_IMG_NAME" \
         --nic net-id="$PRIVATE_NET_ID" \
         --security-group default \
         --key-name mykey \

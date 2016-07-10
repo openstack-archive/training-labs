@@ -150,12 +150,9 @@ until openstack image list >/dev/null 2>&1; do
 done
 echo
 
-# cirros-0.3.4-x86_64-disk.img -> cirros-0.3.4-x86_64
-img_name=$(basename $CIRROS_URL -disk.img)
+echo "Adding CirrOS image as $CIRROS_IMG_NAME to glance."
 
-echo "Adding CirrOS image as $img_name to glance."
-
-openstack image create "cirros" \
+openstack image create "$CIRROS_IMG_NAME" \
     --file "$HOME/img/$(basename $CIRROS_URL)" \
     --disk-format qcow2 --container-format bare \
     --public

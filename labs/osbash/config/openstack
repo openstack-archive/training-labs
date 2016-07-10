@@ -13,6 +13,9 @@ fi
 CIRROS_URL="http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-$arch-disk.img"
 unset arch
 
+# Name used for CirrOS image in glance
+CIRROS_IMG_NAME="cirros"
+
 #------------------------------------------------------------------------------
 # http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-networking.html
 #------------------------------------------------------------------------------
