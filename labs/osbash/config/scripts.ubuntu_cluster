@@ -1,5 +1,6 @@
 #==============================================================================
 # Scripts for controller node
+cmd create_node -n controller
 cmd init_node -n controller
 
 cmd queue etc_hosts.sh
@@ -49,6 +50,7 @@ cmd snapshot_cycle -n controller heat_controller_installed
 cmd boot -n controller
 #==============================================================================
 # Scripts for compute1 node
+cmd create_node -n compute1
 cmd init_node -n compute1
 
 cmd queue etc_hosts.sh
