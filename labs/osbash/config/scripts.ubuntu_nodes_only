@@ -3,7 +3,8 @@
 #==============================================================================
 
 # Scripts for controller node
-cmd init_node -n controller
+cmd create_node -n controller
+cmd queue_renamed -n controller osbash/init_xxx_node.sh
 
 cmd queue etc_hosts.sh
 cmd queue osbash/enable_osbash_ssh_keys.sh
@@ -11,7 +12,8 @@ cmd snapshot_cycle -n controller controller_node_init
 
 #==============================================================================
 # Scripts for compute1 node
-cmd init_node -n compute1
+cmd create_node -n compute1
+cmd queue_renamed -n compute1 osbash/init_xxx_node.sh
 
 cmd queue etc_hosts.sh
 cmd queue osbash/enable_osbash_ssh_keys.sh

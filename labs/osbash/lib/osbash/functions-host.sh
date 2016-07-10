@@ -359,19 +359,6 @@ function log_autostart_source {
     echo >&2 "Copying autostart files set in $src_file"
 }
 
-# autostart <src_dir> <file> <new_name>
-# e.g. autostart osbash init_xxx_node.sh init_controller_node.sh
-function autostart_and_rename {
-    local src_dir=$1
-    local src_file=$2
-    local target_file=$3
-
-    # Don't log this file -- log our caller's source file
-    log_autostart_source "${BASH_SOURCE[1]##*/}"
-
-    _autostart_queue "$src_dir/$src_file" "$target_file"
-}
-
 # autostart <file> [<file> ...]
 # e.g. autostart zero_empty.sh osbash/base_fixups.sh
 function autostart {
@@ -464,12 +451,16 @@ function command_from_config {
             echo >&2 vm_create_node "$vm_name"
             vm_create_node "$vm_name"
             ;;
-        init_node)
-            # Format: init_node [-n <node_name>]
+        queue_renamed)
+            # Queue a script for autostart, replacing xxx with vm_name
+            # Format: queue <script_name> [-n <node_name>]
             get_cmd_options $args
-            # Rename to pass the node name to the script
-            autostart_and_rename osbash init_xxx_node.sh \
-                "init_${vm_name}_node.sh"
+            local script_rel_path=$args
+            local old_name=$(basename "$script_rel_path")
+            # Replace xxx with vm_name
+            local new_name=${old_name/xxx/$vm_name}
+            echo >&2 _autostart_queue "$script_rel_path" "$new_name"
+            _autostart_queue "$script_rel_path" "$new_name"
             ;;
         queue)
             # Queue a script for autostart
