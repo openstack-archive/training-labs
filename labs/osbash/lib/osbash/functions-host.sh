@@ -458,11 +458,18 @@ function command_from_config {
             vm_wait_for_shutdown "$vm_name"
             vm_conditional_snapshot "$vm_name" "$shot_name"
             ;;
+        create_node)
+            # Format: create_node [-n <node_name>]
+            get_cmd_options $args
+            echo >&2 vm_create_node "$vm_name"
+            vm_create_node "$vm_name"
+            ;;
         init_node)
             # Format: init_node [-n <node_name>]
             get_cmd_options $args
-            echo >&2 vm_init_node "$vm_name"
-            vm_init_node "$vm_name"
+            # Rename to pass the node name to the script
+            autostart_and_rename osbash init_xxx_node.sh \
+                "init_${vm_name}_node.sh"
             ;;
         queue)
             # Queue a script for autostart

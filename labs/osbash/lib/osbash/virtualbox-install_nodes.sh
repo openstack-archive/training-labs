@@ -14,8 +14,8 @@ function _vm_boot_with_autostart {
     echo >&2 "VM \"$vm_name\": autostart files executed"
 }
 
-# Create a new node VM and run basic configuration scripts
-function vm_init_node {
+# Create a new node VM
+function vm_create_node {
     # XXX Run this function in sub-shell to protect our caller's environment
     #     (which might be _our_ enviroment if we get called again)
     (
@@ -49,11 +49,6 @@ function vm_init_node {
         create_vdi "$second_disk_path" "${SECOND_DISK_SIZE}"
         vm_attach_disk "$vm_name" "$second_disk_path" 1
     fi
-
-    #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Rename to pass the node name to the script
-    autostart_and_rename osbash init_xxx_node.sh "init_${vm_name}_node.sh"
-
     )
 }
 
