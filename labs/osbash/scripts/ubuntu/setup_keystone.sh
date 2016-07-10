@@ -29,6 +29,7 @@ echo "$ADMIN_TOKEN"
 
 
 echo "Disabling the keystone service from starting automatically after installation."
+# Will not be re-enabled because apache2 wsgi serves these ports now
 echo "manual" | sudo tee /etc/init/keystone.override
 
 echo "Installing keystone packages."
