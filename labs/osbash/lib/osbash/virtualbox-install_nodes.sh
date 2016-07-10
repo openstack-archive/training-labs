@@ -45,7 +45,7 @@ function vm_init_node {
     vm_attach_disk_multi "$vm_name" "$(get_base_disk_path)"
 
     if [ "${SECOND_DISK_SIZE:-0}" -gt 0 ]; then
-        local second_disk_path=$DISK_DIR/$vm_name-sdb.vi
+        local second_disk_path=$DISK_DIR/$vm_name-sdb.vdi
         create_vdi "$second_disk_path" "${SECOND_DISK_SIZE}"
         vm_attach_disk "$vm_name" "$second_disk_path" 1
     fi
