@@ -91,6 +91,11 @@ function print_config {
 
 }
 
+if [ $(whoami) = "root" ]; then
+    echo "Please run this program as a regular user, not as root or with sudo."
+    exit 1
+fi
+
 while getopts :be:g:-:hnt:w opt; do
     case $opt in
         e)
