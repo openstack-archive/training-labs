@@ -6,11 +6,18 @@ TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/openstack"
+source "$CONFIG_DIR/localrc"
 source "$LIB_DIR/functions.guest.sh"
 
 exec_logfile
 
 indicate_current_auto
+
+if [ -n "${VM_PROXY:-""}" ]; then
+    echo "Using VM_PROXY as http_proxy: $VM_PROXY"
+    export http_proxy=$VM_PROXY
+    export https_proxy=$VM_PROXY
+fi
 
 # Download CirrOS image
 function get_cirros {

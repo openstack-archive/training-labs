@@ -558,6 +558,11 @@ function download {
     local dest_file=$3
     local rc=0
 
+    if [ -n "${VM_PROXY:-""}" ]; then
+	echo "Using VM_PROXY as http_proxy: $VM_PROXY"
+	export http_proxy=$VM_PROXY
+    fi
+
     local wget_exe=$(which wget)
     mkdir -pv "$dest_dir"
     if [ -n "$wget_exe" ]; then

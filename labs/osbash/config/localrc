@@ -2,10 +2,11 @@
 # than IMG_DIR (which defaults to TOP_DIR/img)
 #INSTALL_ISO=/data/iso/ubuntu/ubuntu-12.04.4-server-amd64.iso
 
-# VM_PROXY will be used by apt/yum once the operating system is
-# installed (i.e. for software updates and installation). It is only
-# used to speed up the process. If you have to use a proxy to connect
-# to the Internet, this is not sufficient.
+# VM_PROXY will be used by osbash to get the ISO image and by apt/yum/wget once
+# the operating system is installed (i.e. for software updates and
+# installation). It should be sufficient to build a base disk if you have to
+# use a proxy to connect to the Internet. Building the cluster itself does not
+# require an Internet connection at all.
 #VM_PROXY="http://192.168.178.20:3128"
 
 # Options:  ubuntu-12.04.4-server-amd64

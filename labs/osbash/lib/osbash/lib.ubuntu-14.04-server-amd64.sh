@@ -12,7 +12,9 @@ readonly ISO_URL_BASE=http://releases.ubuntu.com/14.04/
 ISO_URL=$ISO_URL_BASE/ubuntu-14.04.4-server-amd64.iso
 ISO_MD5=2ac1f3e0de626e54d05065d6f549fa3a
 
-readonly _PS_ssh=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-ssh-v2.cfg
+# FIXME This URL is for testing only. It needs to be replaced with the
+#       training-labs repo URL before the patch is merged
+readonly _PS_ssh=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-ssh-v4.cfg
 readonly _PS_vbadd=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-vbadd.cfg
 readonly _PS_all=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-all-v2.cfg
 
@@ -63,6 +65,11 @@ function distro_start_installer {
     echo "Using $preseed ${!preseed}"
 
     local boot_args=$(printf "$_BOOT_ARGS" "${!preseed}")
+
+    if [ -n "${VM_PROXY:-""}" ]; then
+        echo >&2 "Using proxy $VM_PROXY."
+        boot_args="$boot_args mirror/http/proxy=$VM_PROXY http_proxy=$VM_PROXY"
+    fi
 
     keyboard_send_escape "$vm_name"
     keyboard_send_escape "$vm_name"
