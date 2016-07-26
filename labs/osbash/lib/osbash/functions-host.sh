@@ -51,7 +51,8 @@ function vm_conditional_snapshot {
     local vm_name=$1
     local shot_name=$2
 
-    if ! vm_snapshot_exists "$vm_name" "$shot_name"; then
+    # On Windows, don't test; take snapshots unconditionally
+    if ! WBATCH= vm_snapshot_exists "$vm_name" "$shot_name"; then
         vm_snapshot "$vm_name" "$shot_name"
     fi
 }
