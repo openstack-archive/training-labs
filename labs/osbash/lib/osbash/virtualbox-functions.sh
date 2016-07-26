@@ -85,10 +85,9 @@ function vm_power_off {
 
 function vm_acpi_shutdown {
     local vm_name=$1
-    if vm_is_running "$vm_name"; then
-        echo -e >&2 "${CStatus:-}ACPI shutdown for VM ${CData:-}\"$vm_name\"${CReset:-}"
-        $VBM controlvm "$vm_name" acpipowerbutton
-    fi
+    echo -e >&2 "${CStatus:-}ACPI shutdown for VM ${CData:-}\"$vm_name\"${CReset:-}"
+    $VBM controlvm "$vm_name" acpipowerbutton
+
     # VirtualBox VM needs a break before taking new commands
     conditional_sleep 1
 }
