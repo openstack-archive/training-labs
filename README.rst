@@ -20,7 +20,7 @@ see the `OpenStack wiki <https://wiki.openstack.org/wiki/Documentation/training-
 * Free software: Apache license
 * Documentation: http://docs.openstack.org/developer/training-labs
 * Source: http://git.openstack.org/cgit/openstack/training-labs
-* Bugs: http://bugs.launchpad.net/training-labs
+* Bugs: http://bugs.launchpad.net/labs
 
 OpenStack Release
 -----------------
