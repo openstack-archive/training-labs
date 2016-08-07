@@ -2,7 +2,7 @@ cmd boot -n pxeserver
 #==============================================================================
 # Scripts for controller node
 cmd create_pxe_node -n controller
-cmd boot_set_tmp_node_ip
+cmd boot_set_tmp_node_ip -n controller
 cmd queue_renamed -n controller osbash/init_xxx_node.sh
 
 cmd queue etc_hosts.sh
@@ -72,7 +72,7 @@ cmd boot -n controller
 #==============================================================================
 # Scripts for compute1 node
 cmd create_pxe_node -n compute1
-cmd boot_set_tmp_node_ip
+cmd boot_set_tmp_node_ip -n compute1
 cmd queue_renamed -n compute1 osbash/init_xxx_node.sh
 
 cmd queue etc_hosts.sh

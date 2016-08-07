@@ -64,3 +64,8 @@ labs/osbash/log/
 labs/osbash/wbatch/
 labs/osbash/lib/vagrant-ssh-keys/
 labs/osbash/test_tmp/
+
+labs/autostart/
+labs/img/
+labs/log/
+labs/wbatch/

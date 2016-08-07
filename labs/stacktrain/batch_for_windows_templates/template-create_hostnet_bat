@@ -1,0 +1,9 @@
+ECHO VBoxManage hostonlyif create
+VBoxManage hostonlyif create
+IF %errorlevel% NEQ 0 GOTO :vbm_error
+
+ECHO VBoxManage hostonlyif ipconfig "#IFNAME" --ip #IFIP --netmask 255.255.255.0
+VBoxManage hostonlyif ipconfig "#IFNAME" --ip #IFIP --netmask 255.255.255.0
+IF %errorlevel% NEQ 0 GOTO :vbm_error
+
+REM vim: set ai ts=4 sw=4 et ft=dosbatch:
