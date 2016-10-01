@@ -8,6 +8,14 @@ trap 'kill -- -$$' SIGINT
 
 TOP_DIR=$(cd "$(dirname "$0")" && pwd)
 
+# Abort for Windows environment before sourcing scripts that may result
+# in other errors.
+if uname | grep -i -e "cygwin" -e "mingw"; then
+    echo "Running osbash.sh in Windows is not supported. Instead, use the"
+    echo "Windows batch scripts in the wbatch directory."
+    exit 1
+fi
+
 source "$TOP_DIR/config/localrc"
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/openstack"
