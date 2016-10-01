@@ -299,4 +299,12 @@ function enter2scancode {
     echo -n " 1c 9c"
 }
 
+function backspace2scancode {
+    echo -n " 0e 8e"
+}
+
+function f6_2scancode {
+    echo -n " 40 c0"
+}
+
 # vim: set ai ts=4 sw=4 et ft=sh:

@@ -299,4 +299,12 @@ function enter2scancode {
     echo -n " KEY_ENTER"
 }
 
+function backspace2scancode {
+    echo -n " KEY_BACKSPACE"
+}
+
+function f6_2scancode {
+    echo -n " KEY_F6"
+}
+
 # vim: set ai ts=4 sw=4 et ft=sh:
