@@ -308,6 +308,10 @@ function vm_nic_std {
     KVM_NET_OPTIONS="${KVM_NET_OPTIONS:-} --network network=$netname"
 }
 
+function vm_nic_set_boot_prio {
+    : Not implemented
+}
+
 function create_network {
     local index=$1
     local net_name=${NET_NAME[index]}
