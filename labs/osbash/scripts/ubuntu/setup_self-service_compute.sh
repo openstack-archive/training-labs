@@ -25,8 +25,9 @@ echo "Configuring the Linux bridge agent."
 conf=/etc/neutron/plugins/ml2/linuxbridge_agent.ini
 
 # Edit the [linux_bridge] section.
-# TODO Better method of getting interface name
-PUBLIC_INTERFACE_NAME=eth2
+set_iface_list
+PUBLIC_INTERFACE_NAME=$(ifnum_to_ifname 2)
+echo "PUBLIC_INTERFACE_NAME=$PUBLIC_INTERFACE_NAME"
 iniset_sudo $conf linux_bridge physical_interface_mappings provider:$PUBLIC_INTERFACE_NAME
 
 # Edit the [vxlan] section.

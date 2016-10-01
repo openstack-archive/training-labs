@@ -4,13 +4,6 @@
 
 readonly UBUNTU_IF_FILE=/etc/network/interfaces
 
-function _ifnum_to_ifname {
-    local if_num=$1
-    local -a if_names=('eth0' 'eth1' 'eth2' 'eth3')
-
-    echo "${if_names[$if_num]}"
-}
-
 function config_netif {
     local if_type=$1
     local if_num=${2:-""}
@@ -25,7 +18,7 @@ function config_netif {
         template="template-ubuntu-interfaces-static"
     fi
 
-    local if_name="$(_ifnum_to_ifname "$if_num")"
+    local if_name="$(ifnum_to_ifname "$if_num")"
 
     # Empty line before this entry
     echo | sudo tee -a "$UBUNTU_IF_FILE"
