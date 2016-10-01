@@ -318,12 +318,15 @@ function wait_for_neutron {
 
 # Wait for keystone to come up
 function wait_for_keystone {
+    (
+    source "$CONFIG_DIR/admin-openstackrc.sh"
     echo -n "Waiting for keystone to come up."
     until openstack user list >/dev/null 2>&1; do
         echo -n .
         sleep 1
     done
     echo
+    )
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
