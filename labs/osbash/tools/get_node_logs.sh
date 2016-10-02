@@ -34,6 +34,7 @@ for node in $(script_cfg_get_nodenames); do
         echo "Getting server log files from $node node."
         mkdir "$node_dir"
         vm_ssh "$VM_SSH_PORT" "sudo tar cf - -C /var log --exclude=installer" | tar xf - -C "$node_dir"
+        vm_ssh "$VM_SSH_PORT" "dmesg" > "$node_dir"/dmesg
     fi
 
     echo -e "Splitting log files into:\n\t$node_dir/split_logs"
