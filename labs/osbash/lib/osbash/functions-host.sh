@@ -71,6 +71,16 @@ function keyboard_send_enter {
     _keyboard_push_scancode "$vm_name" "$(enter2scancode)"
 }
 
+function keyboard_send_backspace {
+    local vm_name=$1
+    _keyboard_push_scancode "$vm_name" "$(backspace2scancode)"
+}
+
+function keyboard_send_f6 {
+    local vm_name=$1
+    _keyboard_push_scancode "$vm_name" "$(f6_2scancode)"
+}
+
 # Turn strings into keycodes and send them to target VM
 function keyboard_send_string {
     local vm_name=$1
