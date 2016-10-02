@@ -9,12 +9,9 @@ source "$OSBASH_LIB_DIR/$PROVIDER-functions.sh"
 
 OSBASH=exec_cmd
 
-LOG_NAME=test.log
 RESULTS_ROOT=$LOG_DIR/test-results
 
 CONTROLLER_SNAPSHOT="controller_node_installed"
-# TODO Add better method for setting TEST_SCRIPT
-TEST_SCRIPT=$TOP_DIR/scripts/test/launch_instance_private_net.sh
 
 VERBOSE=${VERBOSE:=1}
 
@@ -88,6 +85,27 @@ mkdir -p "$RESULTS_ROOT"
 # Default to repeating forever
 : ${REP:=-1}
 
+function run_test {
+        local script_name=$1
+        local script_path=$TOP_DIR/scripts/test/$script_name
+        local log_path=$LOG_DIR/test-$(basename "$script_name" .sh).log
+        echo "Running test. Log file: $log_path"
+        TEST_ONCE=$TOP_DIR/tools/test-once.sh
+        if [ "${VERBOSE:-}" -eq 1 ]; then
+            "$TEST_ONCE" "$script_path" 2>&1 | tee "$log_path" || rc=$?
+        else
+            "$TEST_ONCE" "$script_path" > "$log_path" 2>&1 || rc=$?
+        fi
+
+        echo "################################################################"
+        if [ $rc -eq 0 ]; then
+            echo "# Test passed: $script_name"
+        else
+            echo "# ERROR: Test failed: $script_name"
+        fi
+        echo "################################################################"
+}
+
 cnt=0
 until [ $cnt -eq $REP ]; do
     cnt=$((cnt + 1))
@@ -128,20 +146,10 @@ until [ $cnt -eq $REP ]; do
     if [ $rc -ne 0 ]; then
         echo "ERROR: Cluster build failed. Skipping test."
     else
-        echo "Running test. Log file: $LOG_DIR/$LOG_NAME"
-        TEST_ONCE=$TOP_DIR/tools/test-once.sh
-        if [ "${VERBOSE:-}" -eq 1 ]; then
-            "$TEST_ONCE" "$TEST_SCRIPT" 2>&1 | tee "$LOG_DIR/$LOG_NAME" || rc=$?
-        else
-            "$TEST_ONCE" "$TEST_SCRIPT" > "$LOG_DIR/$LOG_NAME" 2>&1 || rc=$?
-        fi
-
-        echo "################################################################"
-        if [ $rc -eq 0 ]; then
-            echo "Test passed."
-        else
-            echo "ERROR: Test failed."
-        fi
+        for script_name in launch_instance_private_net.sh heat_stack.sh \
+                test_horizon.sh; do
+            run_test "$script_name"
+        done
     fi
     )
 
