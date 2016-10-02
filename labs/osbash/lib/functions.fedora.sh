@@ -2,13 +2,6 @@
 # Fedora /etc/sysconfig/network-scripts/ifcfg-* configuration
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-function _ifnum_to_ifname {
-    local if_num=$1
-    local -a if_names=('p2p1' 'p7p1' 'p8p1' 'p9p1')
-
-    echo "${if_names[$if_num]}"
-}
-
 function config_netif {
     local if_type=$1
     local if_num=${2:-""}
@@ -21,7 +14,7 @@ function config_netif {
         template="template-fedora-ifcfg-static"
     fi
 
-    local if_name="$(_ifnum_to_ifname "$if_num")"
+    local if_name="$(ifnum_to_ifname "$if_num")"
 
     local if_file=/etc/sysconfig/network-scripts/ifcfg-$if_name
 

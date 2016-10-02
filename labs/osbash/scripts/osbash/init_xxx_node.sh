@@ -23,6 +23,8 @@ indicate_current_auto
 
 exec_logfile
 
+set_iface_list
+
 # Set hostname for now and for rebooted system
 sudo hostname "$NODE_NAME" >/dev/null
 echo "$NODE_NAME" | sudo tee /etc/hostname > /dev/null
@@ -31,6 +33,6 @@ echo "$NODE_NAME" | sudo tee /etc/hostname > /dev/null
 config_network
 netcfg_show
 
-for iface in $(ip -o link show|grep -o "eth[[:digit:]]"); do
+for iface in ${IF_NAMES[@]}; do
     sudo ifup "$iface"
 done
