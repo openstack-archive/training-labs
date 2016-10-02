@@ -779,6 +779,8 @@ function test_internet {
         until ssh_no_chk "cirros@$floating_ip" ping -c1 8.8.8.8; do
             if [ $ext_ping -eq 3 ]; then
                 echo "Failed. Giving up."
+                echo "Check IP masquerading (Internet sharing) for the VMs" \
+                     "on the host system."
                 echo "SUM ERROR ping Internet: failed ($ext_ping)"
                 ext_ping="$ext_ping (failed)"
                 return 0
