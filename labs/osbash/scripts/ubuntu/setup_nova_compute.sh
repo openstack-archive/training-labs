@@ -14,11 +14,9 @@ exec_logfile
 indicate_current_auto
 
 #------------------------------------------------------------------------------
-# Set up OpenStack Compute (nova) for compute node.
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/nova-compute-install.html
+# Install and configure a compute node
+# http://docs.openstack.org/newton/install-guide-ubuntu/nova-compute-install.html
 #------------------------------------------------------------------------------
-
-echo "Installing nova for compute node."
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # NOTE We deviate slightly from the install-guide here because inside our VMs,
@@ -26,6 +24,7 @@ echo "Installing nova for compute node."
 # TODO Add option to use nova-compute instead if we are inside a VM that allows
 #      using KVM.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+echo "Installing nova for compute node."
 sudo apt-get install -y nova-compute-qemu
 
 echo "Configuring nova for compute node."
@@ -34,6 +33,7 @@ conf=/etc/nova/nova.conf
 echo "Configuring $conf."
 
 # Configure [DEFAULT] section.
+iniset_sudo $conf DEFAULT enabled_apis osapi_compute,metadata
 iniset_sudo $conf DEFAULT rpc_backend rabbit
 
 # Configure [oslo_messaging_rabbit] section.
@@ -44,7 +44,7 @@ iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 # Configuring [DEFAULT] section.
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
-nova_admin_user=$(service_to_user_name nova)
+nova_admin_user=nova
 
 MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
 
@@ -100,5 +100,16 @@ echo "Config: $(sudo grep virt_type $conf)"
 echo "Restarting nova services."
 sudo service nova-compute restart
 
+# Not in install-guide:
 # Remove SQLite database created by Ubuntu package for nova.
 sudo rm -v /var/lib/nova/nova.sqlite
+
+#------------------------------------------------------------------------------
+# Verify operation
+# http://docs.openstack.org/newton/install-guide-ubuntu/nova-verify.html
+#------------------------------------------------------------------------------
+
+echo "Verifying operation of the Compute service."
+
+echo "openstack compute service list"
+openstack compute service list

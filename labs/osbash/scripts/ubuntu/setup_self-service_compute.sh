@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/neutron-compute-install-option2.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-compute-install-option2.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -35,9 +35,6 @@ OVERLAY_INTERFACE_IP_ADDRESS=$(get_node_ip_in_network "$(hostname)" "mgmt")
 iniset_sudo $conf vxlan enable_vxlan True
 iniset_sudo $conf vxlan local_ip $OVERLAY_INTERFACE_IP_ADDRESS
 iniset_sudo $conf vxlan l2_population True
-
-# Edit the [agent] section.
-iniset_sudo $conf agent prevent_arp_spoofing True
 
 # Edit the [securitygroup] section.
 iniset_sudo $conf securitygroup enable_security_group True

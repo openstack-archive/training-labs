@@ -151,18 +151,22 @@ NET_ID=$(grep "provider" $OUTPUT_FILE3 | \
 
 echo "The provider NET_ID is $NET_ID"
 
+#######
+# The following part is broken.
+# The same DATA section works on the previous requests so either the
+# REFERER or the IMG_URL (not likely) have changed since Mitaka
 
-IMG_URL="http://$IP/horizon/project/images/"
-DATA="login_region='http://controller:5000/v3'&login_domain=default&\
-csrfmiddlewaretoken=$TOKEN&sessionid=$SESSIONID"
+#IMG_URL="http://$IP/horizon/project/images/"
+#DATA="login_region='http://controller:5000/v3'&login_domain=default&\
+#csrfmiddlewaretoken=$TOKEN&sessionid=$SESSIONID"
 
-# Step 4: Load the page with the available images
-echo "Loading the images tab and parsing the image ID for cirros."
-request_cmd "$IMG_URL" $OUTPUT_FILE4 "$DATA" "$REFERER"
-
-# Parse (cirros) image ID
-IMAGE_ID=$(grep "cirros" $OUTPUT_FILE4 | \
-        awk -F"obj_id=" '{print $2}' | \
-        awk -F'"' '{print $1}')
-
-echo "The cirros IMAGE_ID is $IMAGE_ID"
+## Step 4: Load the page with the available images
+#echo "Loading the images tab and parsing the image ID for cirros."
+#request_cmd "$IMG_URL" $OUTPUT_FILE4 "$DATA" "$REFERER"
+#
+## Parse (cirros) image ID
+#IMAGE_ID=$(grep "cirros" $OUTPUT_FILE4 | \
+#        awk -F"obj_id=" '{print $2}' | \
+#        awk -F'"' '{print $1}')
+#
+#echo "The cirros IMAGE_ID is $IMAGE_ID"

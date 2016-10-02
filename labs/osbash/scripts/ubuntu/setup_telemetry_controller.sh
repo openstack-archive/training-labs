@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the Telemetry service
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/ceilometer-install.html
+# http://docs.openstack.org/project-install-guide/telemetry/newton/install-base-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -23,7 +23,7 @@ indicate_current_auto
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Create Ceilometer user and database.
-ceilometer_admin_user=$(service_to_user_name ceilometer)
+ceilometer_admin_user=ceilometer
 
 mongodb_user=$CEILOMETER_DB_USER
 
@@ -117,24 +117,54 @@ iniset_sudo $conf keystone_authtoken username "$ceilometer_admin_user"
 iniset_sudo $conf keystone_authtoken password "$CEILOMETER_PASS"
 
 # Configure [service_credentials] section.
-iniset_sudo $conf service_credentials os_auth_url http://controller:5000/v2.0
-iniset_sudo $conf service_credentials os_username "$ceilometer_admin_user"
-iniset_sudo $conf service_credentials os_tenant_name "$SERVICE_PROJECT_NAME"
-iniset_sudo $conf service_credentials os_password "$CEILOMETER_PASS"
+iniset_sudo $conf service_credentials auth_type password
+iniset_sudo $conf service_credentials os_auth_url http://controller:5000/v3
+iniset_sudo $conf service_credentials project_domain_name default
+iniset_sudo $conf service_credentials user_domain_name default
+iniset_sudo $conf service_credentials project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf service_credentials username "$ceilometer_admin_user"
+iniset_sudo $conf service_credentials password "$CEILOMETER_PASS"
 iniset_sudo $conf service_credentials interface internalURL
 iniset_sudo $conf service_credentials region_name "$REGION"
 
-iniset_sudo $conf DEFAULT verbose True
+# FIXME /var/www/cgi-bin/ceilometer/app does not exist
+echo "Creating /etc/apache2/sites-available/wsgi-ceilometer.conf"
+cat << WSGI | sudo tee -a /etc/apache2/sites-available/wsgi-ceilometer.conf
+Listen 8777
+
+<VirtualHost *:8777>
+    WSGIDaemonProcess ceilometer-api processes=2 threads=10 user=ceilometer group=ceilometer display-name=%{GROUP}
+    WSGIProcessGroup ceilometer-api
+    WSGIScriptAlias / "/var/www/cgi-bin/ceilometer/app"
+    WSGIApplicationGroup %{GLOBAL}
+    ErrorLog /var/log/apache2/ceilometer_error.log
+    CustomLog /var/log/apache2/ceilometer_access.log combined
+</VirtualHost>
+
+WSGISocketPrefix /var/run/apache2
+WSGI
+
+echo "Enabling the Telemetry service virtual hosts."
+
+# FIXME The documentation uses ceilometer here
+# https://bugs.launchpad.net/ceilometer/+bug/1631629
+sudo a2ensite wsgi-ceilometer
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Install and configure components
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+echo "Reloading the Apache HTTP server."
+sudo service apache2 reload
 
 echo "Restarting telemetry service."
 sudo service ceilometer-agent-central restart
 sudo service ceilometer-agent-notification restart
-sudo service ceilometer-api restart
 sudo service ceilometer-collector restart
 
 #------------------------------------------------------------------------------
 # Enable Image service meters
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/ceilometer-glance.html
+# http://docs.openstack.org/project-install-guide/telemetry/newton/configure_services/glance/install-glance-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -169,12 +199,13 @@ iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
 iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
 iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 
+echo "Restarting the Image service."
 sudo service glance-registry restart
 sudo service glance-api restart
 
 #------------------------------------------------------------------------------
 # Enable Block Storage meters
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/ceilometer-cinder.html
+# http://docs.openstack.org/project-install-guide/telemetry/newton/configure_services/cinder/install-cinder-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -185,8 +216,8 @@ conf=/etc/cinder/cinder.conf
 echo "Configuring $conf."
 
 # Configure [oslo_messaging_notifications] section.
-iniset_sudo $conf oslo_messaging_notifications notification_driver messagingv2
+iniset_sudo $conf oslo_messaging_notifications driver messagingv2
 
-echo "Restarting cinder services."
+echo "Restarting the Block Storage services on the controller node."
 sudo service cinder-api restart
 sudo service cinder-scheduler restart

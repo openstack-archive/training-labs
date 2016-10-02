@@ -7,45 +7,56 @@ cmd queue etc_hosts.sh
 cmd queue osbash/enable_osbash_ssh_keys.sh
 cmd snapshot_cycle -n controller controller_node_init
 
+# Environment
 cmd queue ubuntu/apt_install_mysql.sh
-cmd queue ubuntu/apt_nosql_database.sh
 cmd queue ubuntu/install_rabbitmq.sh
 cmd queue ubuntu/install_memcached.sh
 cmd snapshot_cycle -n controller pre-openstack_installed
 
+# Identity
 cmd queue ubuntu/setup_keystone.sh
 cmd queue test/get_auth_token.sh
 cmd snapshot_cycle -n controller keystone_installed
 
+# Image
 cmd queue ubuntu/setup_glance.sh
 cmd snapshot_cycle -n controller glance_installed
 
+# Compute
 cmd queue ubuntu/setup_nova_controller.sh
 cmd snapshot_cycle -n controller nova-controller_installed
 
+# Networking
 cmd queue ubuntu/setup_neutron_controller.sh
 cmd queue ubuntu/setup_self-service_controller.sh
 cmd queue ubuntu/setup_neutron_controller_part_2.sh
 cmd snapshot_cycle -n controller neutron-controller_installed
 
-cmd queue ubuntu/setup_cinder_controller.sh
-cmd snapshot_cycle -n controller cinder_installed
-
+# Dashboard
 cmd queue ubuntu/setup_horizon.sh
 cmd snapshot_cycle -n controller horizon_installed
 
-# FIXME Our LBaaS support for kilo is broken; the configuration edits
+# Block Storage
+cmd queue ubuntu/setup_cinder_controller.sh
+cmd snapshot_cycle -n controller cinder_installed
+
+# Orchestration
+cmd queue ubuntu/setup_heat_controller.sh
+cmd snapshot_cycle -n controller heat_controller_installed
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Telemetry (currently unsupported)
+# NoSQL DB (mongo) needed for Telemetry
+#cmd queue ubuntu/apt_nosql_database.sh
+# Note: Disable Telemetry service if it overloads the cluster.
+#cmd queue ubuntu/setup_telemetry_controller.sh
+#cmd snapshot_cycle -n controller telemetry-controller_installed
+
+# FIXME Our LBaaS support is broken; the configuration edits
 #       in setup_lbaas_controller.sh break neutron
 #cmd queue ubuntu/setup_lbaas_controller.sh
 #cmd snapshot_cycle -n controller lbaas-controller_installed
-
-# Ceilometer; disable if necessary, fix comments in this file
-# Note: Disable Telemetry service if it overloads the cluster.
-cmd queue ubuntu/setup_telemetry_controller.sh
-cmd snapshot_cycle -n controller telemetry-controller_installed
-
-cmd queue ubuntu/setup_heat_controller.sh
-cmd snapshot_cycle -n controller heat_controller_installed
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 cmd boot -n controller
 #==============================================================================
@@ -57,21 +68,25 @@ cmd queue etc_hosts.sh
 cmd queue osbash/enable_osbash_ssh_keys.sh
 cmd snapshot_cycle -n compute1 compute1_node_init
 
+# Compute
 cmd queue ubuntu/setup_nova_compute.sh
 cmd snapshot_cycle -n compute1 nova-compute1_installed
 
+# Networking
 cmd queue ubuntu/setup_neutron_compute.sh
 cmd queue ubuntu/setup_self-service_compute.sh
 cmd queue ubuntu/setup_neutron_compute_part_2.sh
 cmd snapshot_cycle -n compute1 neutron-compute_installed
 
+# Block Storage
 cmd queue ubuntu/setup_cinder_volumes.sh
 cmd snapshot_cycle -n compute1 cinder-volume_installed
 
-cmd queue ubuntu/setup_telemetry_compute.sh
-cmd snapshot_cycle -n compute1 telemetry-compute_installed
-cmd boot -n compute1
+# Telemetry
+#cmd queue ubuntu/setup_telemetry_compute.sh
+#cmd snapshot_cycle -n compute1 telemetry-compute_installed
 
+cmd boot -n compute1
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Take snapshot of database changes on controller VM, too
 cmd shutdown -n controller
@@ -81,5 +96,6 @@ cmd snapshot -n controller controller_-_compute1_node_installed
 cmd queue config_public_network.sh
 cmd queue config_private_network.sh
 cmd snapshot_cycle -n controller public_private_networks
+#==============================================================================
 
 cmd boot -n controller

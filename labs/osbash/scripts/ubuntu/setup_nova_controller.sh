@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install Compute controller services
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/nova-controller-install.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/nova-controller-install.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -30,7 +30,7 @@ setup_database nova_api "$NOVA_DB_USER" "$NOVA_DBPASS"
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
-nova_admin_user=$(service_to_user_name nova)
+nova_admin_user=nova
 
 # Wait for keystone to come up
 wait_for_keystone
@@ -70,8 +70,8 @@ openstack endpoint create \
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing nova for controller node."
-sudo apt-get install -y nova-api nova-cert nova-conductor \
-    nova-consoleauth nova-novncproxy nova-scheduler
+sudo apt-get install -y nova-api nova-conductor nova-consoleauth \
+    nova-novncproxy nova-scheduler
 
 conf=/etc/nova/nova.conf
 
@@ -128,9 +128,11 @@ iniset_sudo $conf glance api_servers http://controller:9292
 iniset_sudo $conf oslo_concurrency lock_path /var/lib/nova/tmp
 
 # Delete logdir line
+# According to install-guide, "Due to a packaging bug, remove the logdir option
+# from the [DEFAULT] section."
 sudo sed -i "/^logdir/ d" $conf
 
-echo "Creating the database tables for nova."
+echo "Populating the Compute databases."
 sudo nova-manage api_db sync
 sudo nova-manage db sync
 
@@ -139,33 +141,28 @@ sudo nova-manage db sync
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Restarting nova services."
-declare -a nova_services=(nova-api nova-cert nova-consoleauth \
-    nova-scheduler nova-conductor nova-novncproxy)
+declare -a nova_services=(nova-api nova-consoleauth nova-scheduler \
+    nova-conductor nova-novncproxy)
 
 for nova_service in "${nova_services[@]}"; do
     echo "Restarting $nova_service."
     sudo service "$nova_service" restart
 done
 
+# Not in install-guide:
 echo "Removing default SQLite database."
-sudo rm -f /var/lib/nova/nova.sqlite
+sudo rm -v /var/lib/nova/nova.sqlite
 
 #------------------------------------------------------------------------------
-# Verify the Compute controller installation
+# Verify the Compute controller installation (not in install-guide)
 #------------------------------------------------------------------------------
 
-echo "Verify nova service status."
-echo "Checking nova services."
-loop=0
+echo -n "Verifying operation of the Compuyte service."
 until openstack service list 2>/dev/null; do
-    echo -n .
-    loop=$((loop+1))
-    if ((loop%10 == 0)); then
-        echo
-        echo still checking
-    fi
     sleep 1
+    echo -n .
 done
+echo
 
 echo "Checking nova endpoints."
 openstack catalog list

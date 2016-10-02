@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for controller node.
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/neutron-controller-install.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-controller-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for neutron."
@@ -22,7 +22,7 @@ setup_database neutron "$NEUTRON_DB_USER" "$NEUTRON_DBPASS"
 
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
-neutron_admin_user=$(service_to_user_name neutron)
+neutron_admin_user=neutron
 
 # Wait for keystone to come up
 wait_for_keystone

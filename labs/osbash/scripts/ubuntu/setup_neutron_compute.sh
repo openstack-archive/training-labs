@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for compute node.
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/neutron-compute-install.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-compute-install.html
 #------------------------------------------------------------------------------
 
 echo "Installing networking components for compute node."
@@ -40,7 +40,7 @@ iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
 # Configuring [DEFAULT] section
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
-neutron_admin_user=$(service_to_user_name neutron)
+neutron_admin_user=neutron
 
 # Configuring [keystone_authtoken] section
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000

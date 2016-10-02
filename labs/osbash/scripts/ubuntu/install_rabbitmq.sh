@@ -14,14 +14,29 @@ indicate_current_auto
 
 #-------------------------------------------------------------------------------
 # Install the message broker service (RabbitMQ).
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-messaging.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/environment-messaging.html
 #-------------------------------------------------------------------------------
 
 echo "Installing RabbitMQ."
 sudo apt-get install -y rabbitmq-server
 
+echo -n "Waiting for RabbitMQ to start."
+while ! sudo rabbitmqctl status >/dev/null; do
+    sleep 1
+    echo -n .
+done
+echo
+
+echo ---------------------------------------------------------------
+echo "sudo rabbitmqctl status"
+sudo rabbitmqctl status
+echo - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+echo "sudo rabbitmqctl report"
+sudo rabbitmqctl report
+echo ---------------------------------------------------------------
+
 echo "Adding openstack user to messaging service."
 sudo rabbitmqctl add_user openstack "$RABBIT_PASS"
 
-echo "Permit configuration, write and read access for the openstack user."
+echo "Permitting configuration, write and read access for the openstack user."
 sudo rabbitmqctl set_permissions openstack ".*" ".*" ".*"

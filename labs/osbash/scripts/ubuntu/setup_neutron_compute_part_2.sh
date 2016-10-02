@@ -15,23 +15,20 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for compute node.
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/neutron-compute-install.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-compute-install.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Configure Compute to use Networking
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-neutron_admin_user=$(service_to_user_name neutron)
+neutron_admin_user=neutron
 
 echo "Configuring Compute to use Networking."
 conf=/etc/nova/nova.conf
 iniset_sudo $conf neutron url http://controller:9696
 iniset_sudo $conf neutron auth_url http://controller:35357
-# No complaints without auth_type
-#iniset_sudo $conf neutron auth_type password
-# without this auth_plugin, launch vm failed (image not found, flavor not found etc.)
-iniset_sudo $conf neutron auth_plugin password
+iniset_sudo $conf neutron auth_type password
 iniset_sudo $conf neutron project_domain_name default
 iniset_sudo $conf neutron user_domain_name default
 iniset_sudo $conf neutron region_name "$REGION"
@@ -51,13 +48,13 @@ sudo service neutron-linuxbridge-agent restart
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/neutron-verify-option2.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-verify-option2.html
 #------------------------------------------------------------------------------
 
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
-echo "List agents to verify successful launch of the neutron agents."
+echo "Listing agents to verify successful launch of the neutron agents."
 
 echo "neutron agent-list"
 neutron agent-list

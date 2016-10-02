@@ -67,7 +67,7 @@ function wait_for_service {
     local cnt=0
     echo -n "Node $node, service $service:"
     until ssh_no_chk_node "$node" service "$service" status | \
-            grep -q "start/running"; do
+            grep -q "active (running)"; do
         cnt=$((cnt + 1))
         if [ $((cnt % 150)) -eq 0 ]; then
             echo " does not seem to come up. Forcing restart."
@@ -146,14 +146,6 @@ function wait_for_nova_services {
 
     echo -n "  nova-consoleauth"
     until openstack compute service list --service nova-consoleauth | \
-            grep -q '| up '; do
-        sleep 1
-        echo -n .
-    done
-    echo
-
-    echo -n "  nova-cert"
-    until openstack compute service list --service nova-cert | \
             grep -q '| up '; do
         sleep 1
         echo -n .
@@ -259,6 +251,9 @@ echo
 echo "Check if m1.nano flavor is existing or else, create the flavor."
 
 source "$CONFIG_DIR/admin-openstackrc.sh"
+echo "Current flavors:"
+openstack flavor list
+
 if openstack flavor list | grep m1.nano; then
     echo "Proceeding, m1.nano flavor exists."
 else
@@ -415,8 +410,8 @@ function check_for_other_vms {
 check_for_other_vms
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-NOVA_SCHED_LOG=/var/log/upstart/nova-scheduler.log
-NOVA_API_LOG=/var/log/upstart/nova-api.log
+NOVA_SCHED_LOG=/var/log/nova/nova-scheduler.log
+NOVA_API_LOG=/var/log/nova/nova-api.log
 
 
 VM_LAUNCHES=0
@@ -704,12 +699,12 @@ openstack console url show "$DEMO_INSTANCE_NAME"
 
 echo
 echo "Creating a floating IP address on the public network."
-floating_ip=$(openstack ip floating create provider | awk '/ ip / {print $4}')
+floating_ip=$(openstack floating ip create provider | awk '/ floating_ip_address / {print $4}')
 openstack ip floating list
 
 echo
 echo "Associating the floating IP address with our instance."
-openstack ip floating add "$floating_ip" "$DEMO_INSTANCE_NAME"
+openstack server add floating ip "$DEMO_INSTANCE_NAME" "$floating_ip"
 
 echo
 echo "Checking the status of your floating IP address."

@@ -11,4 +11,4 @@ exec_logfile
 echo "Shutting down"
 
 # Shutdown some time after returning so our caller has time to finish
-sudo -b sh -c 'sleep 2; /sbin/shutdown -P now'
+sudo -b sh -c 'sleep 2; systemctl poweroff'

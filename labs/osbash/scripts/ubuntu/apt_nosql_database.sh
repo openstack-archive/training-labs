@@ -14,11 +14,13 @@ exec_logfile
 indicate_current_auto
 
 #------------------------------------------------------------------------------
-# Install the NoSQL (Mongo) service
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-nosql-database.html
+# NoSQL database for Ubuntu
+# http://docs.openstack.org/project-install-guide/telemetry/newton/database/environment-nosql-database-ubuntu.html
 #------------------------------------------------------------------------------
 
-echo "Setting up NoSQL database (MongoDB) for telemetry."
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Install and configure components
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing the MongoDB packages."
 sudo apt-get install -y mongodb-server mongodb-clients python-pymongo
@@ -32,7 +34,7 @@ echo "Stopping mongodb."
 sudo service mongodb stop
 
 echo "Removing initial journal files (if any)."
-sudo rm -f /var/lib/mongodb/journal/prealloc.*
+sudo rm -vf /var/lib/mongodb/journal/prealloc.*
 
 echo "Starting mongodb."
 sudo service mongodb start
@@ -42,3 +44,4 @@ while sudo service mongodb status 2>/dev/null | grep "stop"; do
     sleep 2
     echo -n .
 done
+echo

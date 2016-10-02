@@ -14,8 +14,8 @@ exec_logfile
 indicate_current_auto
 
 #------------------------------------------------------------------------------
-# Set up Block Storage service (cinder).
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/cinder-storage-install.html
+# Install and configure a storage node
+# http://docs.openstack.org/newton/install-guide-ubuntu/cinder-storage-install.html
 #------------------------------------------------------------------------------
 
 MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
@@ -35,16 +35,29 @@ echo "Configuring LVM physical and logical volumes."
 
 cinder_dev=sdb
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Not in install-guide
+# Avoid error due to service not running
+# XXX Alternatively, in /etc/lvm/lvm.conf, set use_lvmetad = 0
+sudo systemctl enable lvm2-lvmetad.service
+sudo systemctl enable lvm2-lvmetad.socket
+sudo systemctl start lvm2-lvmetad.service
+sudo systemctl start lvm2-lvmetad.socket
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 sudo pvcreate /dev/$cinder_dev
 sudo vgcreate cinder-volumes /dev/$cinder_dev
 
 conf=/etc/lvm/lvm.conf
-echo "Setting LVM filter line in $conf to only allow /dev/$cinder_dev:"
-sudo sed -i '/^[[:space:]]\{1,\}filter/ s|= .*|= [ "a/'$cinder_dev'/", "r/.*/"]|' $conf
+
+echo "Setting LVM filter line in $conf to only allow /dev/$cinder_dev."
+sudo sed -i '0,/# filter = / {s|# filter = .*|filter = [ "a/'$cinder_dev'/", "r/.*/"]|}' $conf
+
+echo "Verifying LVM filter."
 grep "^[[:space:]]\{1,\}filter" $conf
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Install and configure Cinder Volumes
+# Install and configure components
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing cinder."
@@ -61,7 +74,7 @@ function get_database_url {
 }
 
 database_url=$(get_database_url)
-cinder_admin_user=$(service_to_user_name cinder)
+cinder_admin_user=cinder
 
 echo "Setting database connection: $database_url."
 iniset_sudo $conf database connection "$database_url"
@@ -78,6 +91,7 @@ iniset_sudo $conf DEFAULT auth_strategy keystone
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
+iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password
 iniset_sudo $conf keystone_authtoken project_domain_name default
 iniset_sudo $conf keystone_authtoken user_domain_name default
@@ -87,26 +101,30 @@ iniset_sudo $conf keystone_authtoken password "$CINDER_PASS"
 
 iniset_sudo $conf DEFAULT my_ip "$MY_MGMT_IP"
 
-iniset_sudo $conf lvm volume_driver cinder.volume.drivers.lvm.LVMVolumeDriver
-iniset_sudo $conf lvm volume_group  cinder-volumes
-iniset_sudo $conf lvm iscsi_protocol iscsi
-iniset_sudo $conf lvm iscsi_helper  tgtadm
+iniset_sudo $conf DEFAULT volume_driver cinder.volume.drivers.lvm.LVMVolumeDriver
+iniset_sudo $conf DEFAULT volume_group cinder-volumes
+iniset_sudo $conf DEFAULT iscsi_protocol iscsi
+iniset_sudo $conf DEFAULT iscsi_helper tgtadm
 
 iniset_sudo $conf DEFAULT enabled_backends lvm
 iniset_sudo $conf DEFAULT glance_api_servers http://controller:9292
 
 iniset_sudo $conf oslo_concurrency lock_path /var/lib/cinder/tmp
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Finalize installation
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 echo "Restarting cinder service."
 sudo service tgt restart
 sudo service cinder-volume restart
 
-sudo rm -f /var/lib/cinder/cinder.sqlite
+# Not in the install-guide:
+sudo rm -v /var/lib/cinder/cinder.sqlite
 
 #------------------------------------------------------------------------------
 # Verify the Block Storage installation
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/cinder-verify.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/cinder-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying Block Storage installation on controller node."
@@ -114,10 +132,13 @@ echo "Verifying Block Storage installation on controller node."
 echo "Sourcing the admin credentials."
 AUTH="source $CONFIG_DIR/admin-openstackrc.sh"
 
-# It takes time for Cinder to be aware of its services status.
-# Force restart cinder API and wait for 20 seconds.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Not in install-guide:
 echo "Restarting Cinder API."
 node_ssh controller "sudo service cinder-api restart"
+
+echo "Restarting restarting cinder-scheduler."
+node_ssh controller "sudo service cinder-scheduler restart"
 
 echo -n "Waiting for cinder to start."
 until node_ssh controller "$AUTH; cinder service-list" >/dev/null 2>&1; do
@@ -125,6 +146,7 @@ until node_ssh controller "$AUTH; cinder service-list" >/dev/null 2>&1; do
     sleep 1
 done
 echo
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "cinder service-list is available:"
 node_ssh controller "$AUTH; cinder service-list"
@@ -164,6 +186,12 @@ function check_cinder_services {
 # is aware of the exact status of its services.
 echo -n "Waiting for all cinder services to start."
 check_cinder_services
+
+#------------------------------------------------------------------------------
+# Verify the Block Storage installation
+# http://docs.openstack.org/newton/install-guide-ubuntu/launch-instance-cinder.html
+# (partial implementation without instance)
+#------------------------------------------------------------------------------
 
 echo "Sourcing the demo credentials."
 AUTH="source $CONFIG_DIR/demo-openstackrc.sh"

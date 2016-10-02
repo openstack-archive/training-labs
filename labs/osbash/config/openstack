@@ -1,8 +1,10 @@
 # This file contains OpenStack configuration data. It is used by both
 # host (osbash, Windows batch) and VM guest scripts.
 
-# one of: mitaka, mitaka-proposed, mitaka-staging
-: ${OPENSTACK_RELEASE:=mitaka}
+# newton                (production release; cloud-archive:newton)
+# newton-proposed       (pre-release testing: cloud-archive:newton-proposed)
+# newton-staging        (ppa:openstack-ubuntu-testing/newton)
+: ${OPENSTACK_RELEASE:=newton}
 
 # CirrOS image URL
 if [ "$(uname -m)" = "x86_64" ]; then
@@ -29,12 +31,12 @@ NETWORK_2="provider 203.0.113.0"
 PXE_INITIAL_NODE_IP="10.0.0.240"
 
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-networks-public.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/launch-instance-networks-provider.html
 #------------------------------------------------------------------------------
 
 # Public network
-: ${PUBLIC_NETWORK_CIDR:=203.0.113.0/24}
-: ${PUBLIC_NETWORK_GATEWAY:=203.0.113.1}
+: ${PROVIDER_NETWORK_CIDR:=203.0.113.0/24}
+: ${PROVIDER_NETWORK_GATEWAY:=203.0.113.1}
 # Floating IP addresses
 : ${START_IP_ADDRESS:=203.0.113.101}
 : ${END_IP_ADDRESS:=203.0.113.200}
@@ -44,8 +46,8 @@ PXE_INITIAL_NODE_IP="10.0.0.240"
 #------------------------------------------------------------------------------
 
 # Private demo network
-: ${PRIVATE_NETWORK_CIDR:=172.16.1.0/24}
-: ${PRIVATE_NETWORK_GATEWAY:=172.16.1.1}
+: ${SELFSERVICE_NETWORK_CIDR:=172.16.1.0/24}
+: ${SELFSERVICE_NETWORK_GATEWAY:=172.16.1.1}
 
 # DNS name server used by instance VMs.
 # Default is Google Public DNS (8.8.4.4).

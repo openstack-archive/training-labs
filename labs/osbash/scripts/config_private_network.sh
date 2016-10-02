@@ -10,7 +10,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Create private network
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-networks-private.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/launch-instance-networks-selfservice.html
 #------------------------------------------------------------------------------
 
 echo -n "Waiting for first DHCP namespace."
@@ -28,6 +28,9 @@ until [ "$(/sbin/brctl show | grep -c -o "^brq[a-z0-9-]*")" -gt 0 ]; do
 done
 echo
 
+# Wait for neutron to start
+wait_for_neutron
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Create the self-service network
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -36,20 +39,17 @@ echo
 echo "Sourcing the demo credentials."
 source "$CONFIG_DIR/demo-openstackrc.sh"
 
-# Wait for neutron to start
-wait_for_neutron
-
 echo "Creating the private network."
 neutron net-create selfservice
 
-echo "Creating a subnet on the tenant network."
+echo "Creating a subnet on the private network."
 neutron subnet-create --name selfservice \
-    --dns-nameserver "$DNS_RESOLVER" --gateway "$PRIVATE_NETWORK_GATEWAY" \
-    selfservice "$PRIVATE_NETWORK_CIDR"
+    --dns-nameserver "$DNS_RESOLVER" --gateway "$SELFSERVICE_NETWORK_GATEWAY" \
+    selfservice "$SELFSERVICE_NETWORK_CIDR"
 )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+# Not in install-guide:
 echo -n "Waiting for second DHCP namespace."
 until [ "$(ip netns | grep -c -o "^qdhcp-[a-z0-9-]*")" -gt 1 ]; do
     sleep 1
@@ -87,13 +87,16 @@ echo "Creating a router."
 neutron router-create router
 )
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Not in install-guide:
+
 function wait_for_agent {
     local agent=$1
 
     echo -n "Waiting for neutron agent $agent."
     (
     source "$CONFIG_DIR/admin-openstackrc.sh"
-    while neutron agent-list|grep "$agent" | grep "xxx" >/dev/null; do
+    while neutron agent-list | grep "$agent" | grep "xxx" >/dev/null; do
         sleep 1
         echo -n .
     done
@@ -107,12 +110,15 @@ echo "linuxbridge-agent and dhcp-agent must be up before we can add interfaces."
 wait_for_agent neutron-linuxbridge-agent
 wait_for_agent neutron-dhcp-agent
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 (
 source "$CONFIG_DIR/demo-openstackrc.sh"
 
 echo "Adding the private network subnet as an interface on the router."
 neutron router-interface-add router selfservice
 )
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Not in install-guide:
 
 # The following tests for router namespace, qr-* interface and bridges are just
 # for show. They are not needed to prevent races.
@@ -129,15 +135,15 @@ until sudo ip netns exec "$nsrouter" ip addr|grep -Po "(?<=: )qr-.*(?=:)"; do
     echo -n "."
     sleep 1
 done
-
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 (
 source "$CONFIG_DIR/demo-openstackrc.sh"
 
 echo "Setting a gateway on the public network on the router."
 neutron router-gateway-set router provider
 )
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Not in install-guide:
 
 # The following test for qg-* is just for show.
 echo -n "Waiting for interface qg-* in router namespace."
@@ -188,7 +194,7 @@ cnt=0
 until ping -c1 "$PUBLIC_ROUTER_IP" > /dev/null; do
     cnt=$((cnt + 1))
     if [ $cnt -eq 20 ]; then
-        echo "ERROR no reply from public router IP in 20 s, exiting."
+        echo "ERROR No reply from public router IP in 20 seconds, aborting."
         exit 1
     fi
     sleep 1

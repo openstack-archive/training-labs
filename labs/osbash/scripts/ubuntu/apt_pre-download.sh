@@ -36,8 +36,8 @@ apt_download keystone python-openstackclient apache2 \
 apt_download glance python-glanceclient
 
 # Nova Controller
-apt_download nova-api nova-cert nova-conductor nova-consoleauth \
-    nova-novncproxy nova-scheduler python-novaclient
+apt_download nova-api nova-conductor nova-consoleauth \
+    nova-novncproxy nova-scheduler
 
 # Neutron Controller
 apt_download neutron-server neutron-plugin-ml2 \

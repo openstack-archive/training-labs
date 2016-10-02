@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/neutron-controller-install-option2.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-controller-install-option2.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -38,11 +38,9 @@ function get_database_url {
 
 database_url=$(get_database_url)
 
-# Get neutron service info.
-neutron_admin_user=$(service_to_user_name neutron)
+neutron_admin_user=neutron
 
-# Get nova service info.
-nova_admin_user=$(service_to_user_name nova)
+nova_admin_user=nova
 
 echo "Setting database connection: $database_url."
 conf=/etc/neutron/neutron.conf
@@ -79,7 +77,6 @@ iniset_sudo $conf keystone_authtoken password "$NEUTRON_PASS"
 # Configure nova related parameters
 iniset_sudo $conf DEFAULT notify_nova_on_port_status_changes True
 iniset_sudo $conf DEFAULT notify_nova_on_port_data_changes True
-iniset_sudo $conf DEFAULT nova_url http://controller:8774/v2
 
 # Configure [nova] section.
 iniset_sudo $conf nova auth_url http://controller:35357
@@ -131,9 +128,6 @@ iniset_sudo $conf vxlan enable_vxlan True
 iniset_sudo $conf vxlan local_ip $OVERLAY_INTERFACE_IP_ADDRESS
 iniset_sudo $conf vxlan l2_population True
 
-# Edit the [agent] section.
-iniset_sudo $conf agent prevent_arp_spoofing True
-
 # Edit the [securitygroup] section.
 iniset_sudo $conf securitygroup enable_security_group True
 iniset_sudo $conf securitygroup firewall_driver neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
@@ -160,6 +154,7 @@ iniset_sudo $conf DEFAULT interface_driver neutron.agent.linux.interface.BridgeI
 iniset_sudo $conf DEFAULT dhcp_driver neutron.agent.linux.dhcp.Dnsmasq
 iniset_sudo $conf DEFAULT enable_isolated_metadata True
 
+# Not in install-guide:
 iniset_sudo $conf DEFAULT dnsmasq_config_file /etc/neutron/dnsmasq-neutron.conf
 
 cat << DNSMASQ | sudo tee /etc/neutron/dnsmasq-neutron.conf

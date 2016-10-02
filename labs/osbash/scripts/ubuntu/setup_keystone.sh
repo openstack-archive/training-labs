@@ -15,31 +15,29 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up keystone for controller node
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/keystone-install.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/keystone-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for keystone."
 setup_database keystone "$KEYSTONE_DB_USER" "$KEYSTONE_DBPASS"
 
-# Create a "shared secret" used as OS_TOKEN, together with OS_URL, before
-# keystone can be used for authentication
-echo -n "Using openssl to generate a random admin token: "
-ADMIN_TOKEN=$(openssl rand -hex 10)
-echo "$ADMIN_TOKEN"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Not in install-guide:
+echo "Sanity check: local auth should work."
+mysql -u keystone -p"$KEYSTONE_DBPASS" keystone -e quit
 
+echo "Sanity check: remote auth should work."
+mysql -u keystone -p"$KEYSTONE_DBPASS" keystone -h controller -e quit
 
-echo "Disabling the keystone service from starting automatically after installation."
-# Will not be re-enabled because apache2 wsgi serves these ports now
-echo "manual" | sudo tee /etc/init/keystone.override
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Install and configure components
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-echo "Installing keystone packages."
-sudo apt-get install -y keystone apache2 libapache2-mod-wsgi
+echo "Installing keystone."
+sudo apt-get install -y keystone
 
 conf=/etc/keystone/keystone.conf
-echo "Configuring [DEFAULT] section in $conf."
-
-echo "Setting admin_token to bootstrap authentication."
-iniset_sudo $conf DEFAULT admin_token "$ADMIN_TOKEN"
+echo "Editing $conf."
 
 function get_database_url {
     local db_user=$KEYSTONE_DB_USER
@@ -50,8 +48,6 @@ function get_database_url {
 
 database_url=$(get_database_url)
 
-echo "Configuring [database] section in /etc/keystone/keystone.conf."
-
 echo "Setting database connection: $database_url."
 iniset_sudo $conf database connection "$database_url"
 
@@ -61,72 +57,43 @@ iniset_sudo $conf token provider fernet
 echo "Creating the database tables for keystone."
 sudo keystone-manage db_sync
 
-echo "Initializing Fernet keys."
+echo "Initializing Fernet key repositories."
 sudo keystone-manage fernet_setup \
     --keystone-user keystone \
     --keystone-group keystone
 
-# Configure Apache HTTP server.
+sudo keystone-manage credential_setup \
+    --keystone-user keystone \
+    --keystone-group keystone
+
+echo "Bootstrapping the Identity service."
+sudo keystone-manage bootstrap --bootstrap-password "$ADMIN_PASS" \
+    --bootstrap-admin-url http://controller:35357/v3/ \
+    --bootstrap-internal-url http://controller:35357/v3/ \
+    --bootstrap-public-url http://controller:5000/v3/ \
+    --bootstrap-region-id "$REGION"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Configure the Apache HTTP server
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 conf=/etc/apache2/apache2.conf
 echo "Configuring ServerName option in $conf to reference controller node."
 echo "ServerName controller" | sudo tee -a $conf
 
-echo "Creating /etc/apache2/sites-available/wsgi-keystone.conf."
-cat << WSGI | sudo tee -a /etc/apache2/sites-available/wsgi-keystone.conf
-Listen 5000
-Listen 35357
 
-<VirtualHost *:5000>
-    WSGIDaemonProcess keystone-public processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP}
-    WSGIProcessGroup keystone-public
-    WSGIScriptAlias / /usr/bin/keystone-wsgi-public
-    WSGIApplicationGroup %{GLOBAL}
-    WSGIPassAuthorization On
-    <IfVersion >= 2.4>
-      ErrorLogFormat "%{cu}t %M"
-    </IfVersion>
-    ErrorLog /var/log/apache2/keystone.log
-    CustomLog /var/log/apache2/keystone_access.log combined
+conf=/etc/apache2/sites-enabled/keystone.conf
+if [ -f $conf ]; then
+    echo "Identity service virtual hosts enabled already."
+else
+    echo "Enabling the Identity service virtual hosts."
+    sudo ln -s /etc/apache2/sites-available/keystone.conf \
+        /etc/apache2/sites-enabled
+fi
 
-    <Directory /usr/bin>
-        <IfVersion >= 2.4>
-            Require all granted
-        </IfVersion>
-        <IfVersion < 2.4>
-            Order allow,deny
-            Allow from all
-        </IfVersion>
-    </Directory>
-</VirtualHost>
-
-<VirtualHost *:35357>
-    WSGIDaemonProcess keystone-admin processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP}
-    WSGIProcessGroup keystone-admin
-    WSGIScriptAlias / /usr/bin/keystone-wsgi-admin
-    WSGIApplicationGroup %{GLOBAL}
-    WSGIPassAuthorization On
-    <IfVersion >= 2.4>
-      ErrorLogFormat "%{cu}t %M"
-    </IfVersion>
-    ErrorLog /var/log/apache2/keystone.log
-    CustomLog /var/log/apache2/keystone_access.log combined
-
-    <Directory /usr/bin>
-        <IfVersion >= 2.4>
-            Require all granted
-        </IfVersion>
-        <IfVersion < 2.4>
-            Order allow,deny
-            Allow from all
-        </IfVersion>
-    </Directory>
-</VirtualHost>
-
-WSGI
-
-echo "Enabling the identity service virtual hosts."
-sudo ln -s /etc/apache2/sites-available/wsgi-keystone.conf /etc/apache2/sites-enabled
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Finalize the installation
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Restarting apache."
 sudo service apache2 restart
@@ -134,71 +101,22 @@ sudo service apache2 restart
 echo "Removing default SQLite database."
 sudo rm -f /var/lib/keystone/keystone.db
 
-#------------------------------------------------------------------------------
-# Create the service entity and API endpoints
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/keystone-services.html
-#------------------------------------------------------------------------------
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Prerequisites
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-echo "Using OS_TOKEN, OS_URL for authentication."
-export OS_TOKEN=$ADMIN_TOKEN
-export OS_URL=http://controller:35357/v3
+# Set environment variables for authentication
+export OS_USERNAME=$ADMIN_USER_NAME
+export OS_PASSWORD=$ADMIN_PASS
+export OS_PROJECT_NAME=$ADMIN_PROJECT_NAME
+export OS_USER_DOMAIN_NAME=Default
+export OS_PROJECT_DOMAIN_NAME=Default
+export OS_AUTH_URL=http://controller:35357/v3
 export OS_IDENTITY_API_VERSION=3
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Create the service entity and API endpoints
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-echo "Creating keystone service."
-openstack service create \
-    --name keystone \
-    --description "OpenStack Identity" \
-    identity
-
-echo "Creating endpoints for keystone."
-openstack endpoint create --region "$REGION" \
-    identity public http://controller:5000/v3
-
-openstack endpoint create --region "$REGION" \
-    identity internal http://controller:5000/v3
-
-openstack endpoint create --region "$REGION" \
-    identity admin http://controller:35357/v3
-
 #------------------------------------------------------------------------------
-# Create projects, users, and roles
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/keystone-users.html
+# Create a domain, projects, users, and roles
+# http://docs.openstack.org/newton/install-guide-ubuntu/keystone-users.html
 #------------------------------------------------------------------------------
 
 # Wait for keystone to come up
 wait_for_keystone
-
-echo "Creating default domain."
-openstack domain create \
-    --description "Default Domain" \
-    default
-
-echo "Creating admin project."
-openstack project create --domain default \
-    --description "Admin Project" \
-    "$ADMIN_PROJECT_NAME"
-
-echo "Creating admin user."
-openstack user create --domain default \
-    --password "$ADMIN_PASS" \
-    "$ADMIN_USER_NAME"
-
-echo "Creating admin role."
-openstack role create "$ADMIN_ROLE_NAME"
-
-echo "Adding admin role to admin project."
-openstack role add \
-    --project "$ADMIN_PROJECT_NAME" \
-    --user "$ADMIN_USER_NAME" \
-    "$ADMIN_ROLE_NAME"
 
 echo "Creating service project."
 openstack project create --domain default \
@@ -227,23 +145,21 @@ openstack role add \
 
 #------------------------------------------------------------------------------
 # Verify operation
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/keystone-verify.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/keystone-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying keystone installation."
 
-# Disable temporary authentication token mechanism
+# Disable the temporary authentication token mechanism
 conf=/etc/keystone/keystone-paste.ini
+echo "Removing admin_token_auth from pipelines."
+sudo ls -l $conf
+sudo sed -i '/^pipeline = / s/admin_token_auth //' $conf
+sudo ls -l $conf
 
-for section in pipeline:public_api pipeline:admin_api pipeline:api_v3; do
-    if ini_has_option_sudo $conf $section admin_token_auth; then
-        echo "Disabling admin_token_auth in section $section."
-        inicomment_sudo $conf $section admin_token_auth
-    fi
-done
-
+# XXX still in install-guide, but no longer necessary
 # From this point on, we are going to use keystone for authentication
-unset OS_TOKEN OS_URL
+unset OS_URL
 
 echo "Requesting an authentication token as an admin user."
 openstack \
@@ -256,39 +172,6 @@ openstack \
     --os-password "$ADMIN_PASS" \
     token issue
 
-#echo "Requesting project list."
-#openstack \
-#    --os-auth-url http://controller:35357 \
-#    --os-project-domain-name default \
-#    --os-user-domain-name default \
-#    --os-project-name "$ADMIN_PROJECT_NAME" \
-#    --os-username "$ADMIN_USER_NAME" \
-#    --os-auth-type password \
-#    --os-password "$ADMIN_PASS" \
-#    project list
-#
-#echo "Requesting user list."
-#openstack \
-#    --os-auth-url http://controller:35357/v3 \
-#    --os-project-domain-name default \
-#    --os-user-domain-name default \
-#    --os-project-name "$ADMIN_PROJECT_NAME" \
-#    --os-username "$ADMIN_USER_NAME" \
-#    --os-auth-type password \
-#    --os-password "$ADMIN_PASS" \
-#    user list
-#
-#echo "Requesting role list."
-#openstack \
-#    --os-auth-url http://controller:35357/v3 \
-#    --os-project-domain-name default \
-#    --os-user-domain-name default \
-#    --os-project-name "$ADMIN_PROJECT_NAME" \
-#    --os-username "$ADMIN_USER_NAME" \
-#    --os-auth-type password \
-#    --os-password "$ADMIN_PASS" \
-#    role list
-
 echo "Requesting an authentication token for the demo user."
 openstack \
     --os-auth-url http://controller:5000/v3 \
@@ -299,22 +182,3 @@ openstack \
     --os-auth-type password \
     --os-password "$DEMO_PASS" \
     token issue
-
-#echo "Verifying that an admin-only request by the demo user is denied."
-#openstack \
-#    --os-auth-url http://controller:5000/v3 \
-#    --os-project-domain-name default \
-#    --os-user-domain-name default \
-#    --os-project-name "$DEMO_PROJECT_NAME" \
-#    --os-username "$DEMO_USER_NAME" \
-#    --os-auth-type password \
-#    --os-password "$DEMO_PASS" \
-#    user list || rc=$?
-#
-#echo rc=$rc
-#if [ $rc -eq 0 ]; then
-#    echo "The request was not denied. This is an error. Exiting."
-#    exit 1
-#else
-#    echo "The request was correctly denied."
-#fi

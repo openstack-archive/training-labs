@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up Block Storage service controller (cinder controller node)
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/cinder-controller-install.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/cinder-controller-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for cinder."
@@ -22,7 +22,7 @@ setup_database cinder "$CINDER_DB_USER" "$CINDER_DBPASS"
 
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
-cinder_admin_user=$(service_to_user_name cinder)
+cinder_admin_user=cinder
 
 # Wait for keystone to come up
 wait_for_keystone
@@ -47,7 +47,7 @@ openstack service create \
 
 openstack service create \
     --name cinderv2 \
-    --description "OpenStack Block Storage v2" \
+    --description "OpenStack Block Storage" \
     volumev2
 
 openstack endpoint create \
@@ -112,6 +112,7 @@ iniset_sudo $conf DEFAULT auth_strategy keystone
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
+iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password
 iniset_sudo $conf keystone_authtoken project_domain_name default
 iniset_sudo $conf keystone_authtoken user_domain_name default
@@ -123,20 +124,30 @@ iniset_sudo $conf DEFAULT my_ip "$(hostname_to_ip controller)"
 
 iniset_sudo $conf oslo_concurrency lock_path /var/lib/cinder/tmp
 
-echo "Creating the database tables for cinder."
+echo "Populating the Block Storage database."
 sudo cinder-manage db sync
 
-echo "Configuring nova.conf"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Configure Compute to use Block Storage
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+echo "Configuring Compute to use Block Storage."
+
 conf=/etc/nova/nova.conf
 
 iniset_sudo $conf cinder os_region_name "$REGION"
 
-echo "Restart Compute API service."
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Finalize installation
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+echo "Restarting the Compute API service."
 sudo service nova-api restart
 
-echo "Restarting cinder service."
+echo "Restarting the Block Storage services."
 sudo service cinder-scheduler restart
 sudo service cinder-api restart
 
-echo "Removing unused SQLite database file (if any)."
-sudo rm -f /var/lib/cinder/cinder.sqlite
+# Not in the install-guide:
+echo "Removing unused SQLite database file."
+sudo rm -v /var/lib/cinder/cinder.sqlite

@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the Image Service (glance).
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/glance-install.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/glance-install.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -27,7 +27,7 @@ setup_database glance "$GLANCE_DB_USER" "$GLANCE_DBPASS"
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
-glance_admin_user=$(service_to_user_name glance)
+glance_admin_user=glance
 
 # Wait for keystone to come up
 wait_for_keystone
@@ -43,11 +43,10 @@ openstack role add \
     --user "$glance_admin_user" \
     "$ADMIN_ROLE_NAME"
 
-# Create glance user
 echo "Registering glance with keystone so that other services can locate it."
 openstack service create \
     --name glance \
-    --description "OpenStack Image Service" \
+    --description "OpenStack Image" \
     image
 
 # Create glance endpoints.
@@ -132,16 +131,10 @@ echo "Restarting glance service."
 sudo service glance-registry restart
 sudo service glance-api restart
 
-echo "Removing default SQLite database."
-sudo rm -f /var/lib/glance/glance.sqlite
-
 #------------------------------------------------------------------------------
 # Verify the Image Service installation
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/glance-verify.html
+# http://docs.openstack.org/newton/install-guide-ubuntu/glance-verify.html
 #------------------------------------------------------------------------------
-
-# Our openstackrc.sh files already set OS_IMAGE_API_VERSION, we can skip this
-# step in the install-guide.
 
 echo -n "Waiting for glance to start."
 until openstack image list >/dev/null 2>&1; do
@@ -150,7 +143,7 @@ until openstack image list >/dev/null 2>&1; do
 done
 echo
 
-echo "Adding CirrOS image as $CIRROS_IMG_NAME to glance."
+echo "Adding pre-downloaded CirrOS image as $CIRROS_IMG_NAME to glance."
 
 openstack image create "$CIRROS_IMG_NAME" \
     --file "$HOME/img/$(basename $CIRROS_URL)" \

@@ -45,10 +45,14 @@ check_for_other_vms
 
 echo "Creating a test heat template."
 
+# FIXME mykey is created in launch_instance_private_net.sh
+
+# Note: unlike install-guide, we use m1.nano (default flavors like m1.tiny
+#       are no longer installed)
 node_ssh controller "cat > demo-template.yml" << HEAT
 heat_template_version: 2015-10-15
 description: Launch a basic instance with CirrOS image using the
-             ``m1.tiny`` flavor, ``mykey`` key,  and one network.
+             ``m1.nano`` flavor, ``mykey`` key,  and one network.
 
 parameters:
   NetID:
@@ -60,7 +64,7 @@ resources:
     type: OS::Nova::Server
     properties:
       image: cirros
-      flavor: m1.tiny
+      flavor: m1.nano
       key_name: mykey
       networks:
       - network: { get_param: NetID }
@@ -75,6 +79,29 @@ outputs:
 HEAT
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Create m1.nano flavor
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Newton does no longer create default flavors:
+# http://docs.openstack.org/releasenotes/nova/unreleased.html 2016-09-25
+(
+echo
+
+source "$CONFIG_DIR/admin-openstackrc.sh"
+
+if openstack flavor list | grep m1.nano; then
+    echo "Proceeding, m1.nano flavor exists."
+else
+    echo "Creating m1.nano flavor which is just big enough for CirrOS."
+    openstack flavor create --id 0 --vcpus 1 --ram 64 --disk 1 m1.nano
+fi
+
+echo "Current flavors:"
+openstack flavor list
+echo
+)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Create a stack
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -82,19 +109,21 @@ TEST_STACK_NAME=stack
 DEMO_NET=provider
 NET_ID=$(node_ssh controller "$AUTH; openstack network list" | awk "/ $DEMO_NET / { print \$2 }")
 
-node_ssh controller "$AUTH; heat stack-create -f demo-template.yml \
-    -P 'NetID=$NET_ID' $TEST_STACK_NAME"
+echo "NET_ID: $NET_ID"
+
+node_ssh controller "$AUTH; openstack stack create -t demo-template.yml \
+    --parameter 'NetID=$NET_ID' $TEST_STACK_NAME"
 
 echo "Verifying successful creation of stack."
 
 cnt=0
-echo "heat stack-list"
-until node_ssh controller "$AUTH; heat stack-list" 2>/dev/null | grep "CREATE_COMPLETE"; do
+echo "openstack stack list"
+until node_ssh controller "$AUTH; openstack stack list" 2>/dev/null | grep "CREATE_COMPLETE"; do
     cnt=$((cnt + 1))
     if [ $cnt -eq 60 ]; then
         # Print current stack list to help with debugging
         echo
-        node_ssh controller "$AUTH; heat stack-list"
+        node_ssh controller "$AUTH; openstack stack list"
         echo "Heat stack creation failed. Exiting."
         echo "[Warning]: Please debug heat services on the
         controller node. Heat may not work."
@@ -106,15 +135,15 @@ until node_ssh controller "$AUTH; heat stack-list" 2>/dev/null | grep "CREATE_CO
 done
 
 echo "Showing the name and IP address of the instance."
-node_ssh controller "$AUTH; heat output-show --all $TEST_STACK_NAME; nova list"
+node_ssh controller "$AUTH; openstack stack output show --all $TEST_STACK_NAME; nova list"
 
 echo "Deleting the test stack."
-heat_stack_id=$(node_ssh controller "$AUTH; heat stack-list" | awk "/ $TEST_STACK_NAME / {print \$2}")
+heat_stack_id=$(node_ssh controller "$AUTH; openstack stack list" | awk "/ $TEST_STACK_NAME / {print \$2}")
 
-node_ssh controller "$AUTH; heat stack-delete $heat_stack_id"
+node_ssh controller "$AUTH; openstack stack delete $heat_stack_id"
 
 echo -n "Waiting for test stack to disappear."
-while node_ssh controller "$AUTH; heat stack-list|grep $heat_stack_id" >/dev/null 2>&1; do
+while node_ssh controller "$AUTH; openstack stack list|grep $heat_stack_id" >/dev/null 2>&1; do
     sleep 1
     echo -n .
 done

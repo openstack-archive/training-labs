@@ -270,8 +270,9 @@ $option = $value
 
 function mysql_exe {
     local cmd="$1"
-    echo "MySQL cmd: $cmd."
-    mysql -u "root" -p"$DATABASE_PASSWORD" -e "$cmd"
+    echo "mysql cmd: $cmd."
+    # XXX install-guide uses password, but distro install uses socket auth
+    sudo mysql -u "root" -e "$cmd"
 }
 
 function setup_database {
@@ -295,14 +296,15 @@ function setup_database {
 # process, the neutron server sometimes fails to come up. We restart the
 # neutron server if it does not reply for too long.
 function wait_for_neutron {
+    (
+    source $CONFIG_DIR/demo-openstackrc.sh
     echo -n "Waiting for neutron to come up."
     local cnt=0
-    local auth="source $CONFIG_DIR/demo-openstackrc.sh"
     until openstack network list >/dev/null 2>&1; do
         if [ "$cnt" -eq 10 ]; then
             echo
             echo "ERROR No response from neutron. Restarting neutron-server."
-            node_ssh controller "$auth; sudo service neutron-server restart"
+            node_ssh controller "sudo service neutron-server restart"
             echo -n "Waiting for neutron to come up."
         elif [ "$cnt" -eq 20 ]; then
             echo
@@ -314,6 +316,7 @@ function wait_for_neutron {
         cnt=$((cnt + 1))
     done
     echo
+    )
 }
 
 # Wait for keystone to come up
@@ -329,22 +332,30 @@ function wait_for_keystone {
     )
 }
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Service-specific users in keystone
-
-function service_to_user_name {
-    local service_name=$1
-    echo "${service_name}"
-}
-
-function service_to_user_password {
-    local service_name=$1
-    echo "${service_name}_pass"
-}
-
 #-------------------------------------------------------------------------------
 # Network configuration
 #-------------------------------------------------------------------------------
+
+# Return the nth network interface name (not counting loopback; 0 -> eth0)
+function ifnum_to_ifname {
+    local if_num=$1
+
+    # Skip loopback and start counting with next interface
+    local iface=${IF_NAMES[$((if_num + 1))]}
+
+    echo >&2 "ifnum_to_ifname: interface $if_num is $iface"
+    echo "$iface"
+}
+
+# Get all network interfaces (e.g. eth0, p2p1, ens0, enp0s3) into an array
+function set_iface_list {
+    unset IF_NAMES
+    local iface
+    for iface in $(ip -o link show|awk '/: / {print $2}'|tr -d ':'); do
+        IF_NAMES+=($iface)
+    done
+    echo "Set IF_NAMES to ${IF_NAMES[*]}"
+}
 
 # Return the nth network interface name (not counting loopback; 0 -> eth0)
 function ifnum_to_ifname {
