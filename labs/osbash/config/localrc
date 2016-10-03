@@ -9,18 +9,20 @@
 # require an Internet connection at all.
 #VM_PROXY="http://192.168.178.20:3128"
 
-# Options:  ubuntu-12.04.4-server-amd64
-#           ubuntu-14.04-server-amd64 (default)
+# Options:
+#           ubuntu-16.04-server-amd64 (default)
+#           ubuntu-16.04-server-i386
+#           ubuntu-14.04-server-amd64
 #           ubuntu-14.04-server-i386
-#           centos-7-x86_64
-#DISTRO=ubuntu-12.04.4-server-amd64
-#DISTRO=centos-7-x86_64
+#
+# ex:- DISTRO=ubuntu-16.04-server-i386
 : ${DISTRO:=ubuntu-16.04-server-amd64}
 
 # PROVIDER: virtualbox or kvm (defaults to virtualbox)
 # KVM tends to give better performance (on Linux), but may be harder to set up
 # and osbash does not (yet) support all features with a KVM backend.
-#PROVIDER=kvm
+#
+# ex:- PROVIDER=kvm
 : ${PROVIDER:=virtualbox}
 
 # vim: set ai ts=4 sw=4 et ft=sh:
