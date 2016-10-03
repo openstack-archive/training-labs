@@ -9,8 +9,8 @@
 
 readonly ISO_URL_BASE=http://releases.ubuntu.com/14.04/
 
-ISO_URL=$ISO_URL_BASE/ubuntu-14.04.3-server-i386.iso
-ISO_MD5=352009d5b44f0e97c9558919f0147c0c
+ISO_URL=$ISO_URL_BASE/ubuntu-14.04.5-server-i386.iso
+ISO_MD5=812ac191b8898b33aed4aef9ab066b5a
 
 readonly _PS_ssh=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-ssh-v4.cfg
 readonly _PS_vbadd=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-vbadd.cfg
@@ -36,8 +36,9 @@ readonly _BOOT_ARGS="/install/vmlinuz
 # as soon as a new ISO appears.
 function update_iso_variables {
     # Get matching line from distro repo's MD5SUMS file, e.g.
-    # "9e5fecc94b3925bededed0fdca1bd417 *ubuntu-14.04.3-server-i386.iso"
-    local distro_info=$(wget -O - "$ISO_URL_BASE/MD5SUMS"|grep server-i386)
+    # "9e5fecc94b3925bededed0fdca1bd417 *ubuntu-14.04.5-server-i386.iso"
+    local distro_info=$(wget -O - "$ISO_URL_BASE/MD5SUMS" | \
+                        grep server-i386 | tail -n1)
 
     # First part (removing everything after first space) is the md5sum
     ISO_MD5=${distro_info%% *}
