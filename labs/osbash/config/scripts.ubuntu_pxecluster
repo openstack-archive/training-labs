@@ -10,7 +10,12 @@ cmd queue ubuntu/apt_init.sh
 cmd queue ubuntu/apt_upgrade.sh
 cmd queue pre-download.sh
 cmd queue osbash/enable_osbash_ssh_keys.sh
-cmd snapshot_cycle -n controller controller_node_init
+# This reboot is not optional, we must switch from temporary PXE IP address to
+# final address before installing servers
+cmd queue shutdown.sh
+cmd boot -n controller
+cmd wait_for_shutdown -n controller
+cmd snapshot -n controller controller_node_init
 
 cmd queue ubuntu/apt_install_mysql.sh
 cmd queue ubuntu/apt_nosql_database.sh
@@ -64,7 +69,12 @@ cmd queue ubuntu/apt_init.sh
 cmd queue ubuntu/apt_upgrade.sh
 cmd queue pre-download.sh
 cmd queue osbash/enable_osbash_ssh_keys.sh
-cmd snapshot_cycle -n compute1 compute1_node_init
+# This reboot is not optional, we must switch from temporary PXE IP address to
+# final address before installing servers
+cmd queue shutdown.sh
+cmd boot -n compute1
+cmd wait_for_shutdown -n compute1
+cmd snapshot -n compute1 compute1_node_init
 
 cmd queue ubuntu/setup_nova_compute.sh
 cmd snapshot_cycle -n compute1 nova-compute1_installed
