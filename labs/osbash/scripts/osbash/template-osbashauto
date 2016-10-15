@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# By default, this file is /etc/init.d/osbashauto on the guest system.
+# By default, this file is /root/osbashauto (with systemd) or
+# /etc/init.d/osbashauto (for sysvinit) on the guest system.
 # On boot-up, it executes in order all files that have been put into
 # the autostart folder.
 
