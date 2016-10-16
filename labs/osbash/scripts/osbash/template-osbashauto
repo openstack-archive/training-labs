@@ -12,12 +12,23 @@ SHARE_NAME=%SHARE_NAME%
 # Make sure we have a mount point for the shared directory
 mkdir -p /$SHARE_NAME
 
-if ! mountpoint -q /$SHARE_NAME; then
-    mount -t vboxsf -ouid=%VM_SHELL_USER%,gid=%VM_SHELL_USER% $SHARE_NAME /$SHARE_NAME
-fi
+# Wait for mountpoint to become available (keep log file so we can copy it to
+# the share once it is mounted)
+SHARE_MOUNT_LOG=share_mount.log
+while ! mountpoint -q /$SHARE_NAME; do
+    if mount -t vboxsf -ouid=%VM_SHELL_USER%,gid=%VM_SHELL_USER% $SHARE_NAME /$SHARE_NAME; then
+        echo "$(date) Mounting succeeded!" >> /tmp/$SHARE_MOUNT_LOG
+    else
+        echo "$(date) Mounting failed, trying again." >> /tmp/$SHARE_MOUNT_LOG
+    fi
+    sleep 1
+done
 
 # LOG_DIR is set in activate_autostart.sh as NLOG_DIR
 LOG_DIR=%NLOG_DIR%
+
+# Save share mount log for all reboots in one file
+cat /tmp/$SHARE_MOUNT_LOG >> "$LOG_DIR/$SHARE_MOUNT_LOG"
 
 STATUS_DIR=%NLOG_DIR%/status
 
