@@ -11,6 +11,11 @@
 # additions
 VM_ACCESS=vbadd
 
+# With VirtualBox 5.1.6, console type "headless" often gives no access to the
+# VM console which on Windows is the main method for interacting with the
+# cluster. Use "separate" which works at least on 5.0.26 and 5.1.6.
+VM_UI=separate
+
 #-------------------------------------------------------------------------------
 # Helper functions
 #-------------------------------------------------------------------------------
