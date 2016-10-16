@@ -81,7 +81,12 @@ function vm_install_base {
     # Boot VM into distribution installer
     vm_boot "$vm_name"
 
-    local delay=5
+    # Note: It takes about 5 seconds for the installer in the VM to be ready
+    #       on a fairly typical laptop. If we don't wait long enough, the
+    #       installation will fail. Ideally, we would have a different method
+    #       of making sure the installer is ready. For now, we just have to
+    #       try and err on the side of caution.
+    local delay=10
     echo >&2 "Waiting $delay seconds for VM \"$vm_name\" to come up"
     conditional_sleep "$delay"
 
