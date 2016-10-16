@@ -30,13 +30,16 @@ wait_for_ssh "$VM_SSH_PORT"
 function get_remote_top_dir {
     if vm_ssh "$VM_SSH_PORT" "test -d /osbash"; then
         # The installation uses a VirtualBox shared folder.
+        local remote_top_dir=/osbash
         echo >&2 -n "Waiting for shared folder."
-        until vm_ssh "$VM_SSH_PORT" "test -f $REMOTE_TOP_DIR/lib"; do
+        # Just to be on the safe side -- the shared folder should be there
+        # before ssh comes up.
+        until vm_ssh "$VM_SSH_PORT" "test -e $remote_top_dir/lib"; do
             sleep 1
             echo >&2 -n .
         done
         echo >&2
-        echo /osbash
+        echo $remote_top_dir
     else
         # Copy and execute the script with scp/ssh.
         echo /home/osbash
