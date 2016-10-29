@@ -98,22 +98,25 @@ sudo sed -i 's|// forwarders {|forwarders {\n\
 echo "Restarting DNS server."
 sudo service bind9 restart
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-echo "Creating a VLAN IP as gateway."
+set_iface_list
+IFACE_0=$(ifnum_to_ifname 0)
+IFACE_1=$(ifnum_to_ifname 1)
+echo "Creating a VLAN IP as gateway (interfaces $IFACE_0, $IFACE_1)."
 sudo apt-get -y install vlan
 sudo modprobe 8021q
-sudo vconfig add eth1 10
+sudo vconfig add "$IFACE_1" 10
 sudo su -c 'echo "8021q" >> /etc/modules'
 
 cat << VLAN_IP | sudo tee -a /etc/network/interfaces
 
-auto eth1.10
-iface eth1.10 inet static
+auto $IFACE_1.10
+iface $IFACE_1.10 inet static
       address $PXE_GATEWAY
       netmask 255.255.255.0
-      vlan-raw-device eth1
+      vlan-raw-device $IFACE_1
 VLAN_IP
 
-sudo ifup eth1.10
+sudo ifup "$IFACE_1".10
 
 # Forward traffic from eth0.10 to eth0 and eth1
 
@@ -131,9 +134,9 @@ sudo iptables -t nat -F
 sudo iptables -t mangle -F
 sudo iptables -X
 
-sudo iptables --table nat --append POSTROUTING --out-interface eth0 -j MASQUERADE
-sudo iptables --append FORWARD --in-interface eth0 -j ACCEPT
-sudo iptables --append FORWARD --in-interface eth1 -j ACCEPT
+sudo iptables --table nat --append POSTROUTING --out-interface $IFACE_0 -j MASQUERADE
+sudo iptables --append FORWARD --in-interface $IFACE_0 -j ACCEPT
+sudo iptables --append FORWARD --in-interface $IFACE_1 -j ACCEPT
 
 echo "Making iptable rules persistent."
 echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections

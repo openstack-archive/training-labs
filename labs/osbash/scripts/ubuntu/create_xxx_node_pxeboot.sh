@@ -31,7 +31,11 @@ echo "IP on the management network: $PXE_NET_IP."
 # -----------------------------------------------------------------------------
 echo "Creating preseed file for training-labs."
 TMPF=/var/www/html/ubuntu/preseed/training-labs.seed
-sudo cp "$LIB_DIR/osbash/netboot/preseed-ssh-v3.cfg" "$TMPF"
+sudo cp -v "$LIB_DIR/osbash/netboot/preseed-ssh-v5.cfg" "$TMPF"
+
+set_iface_list
+IFACE_1=$(ifnum_to_ifname 1)
+echo "Using interface $IFACE_1."
 
 # -----------------------------------------------------------------------------
 function create_boot_entry {
@@ -46,7 +50,7 @@ function create_boot_entry {
 
 label $entry_name
         kernel ubuntu-installer/amd64/linux
-        append preseed/url=http://$PXE_NET_IP/ubuntu/preseed/training-labs.seed vga=normal initrd=ubuntu-installer/amd64/initrd.gz debian-installer=en_US auto=true locale=en_US hostname=foobar debconf/frontend=noninteractive keyboard-configuration/modelcode=SKIP console-setup/ask_detect=false netcfg/choose_interface=eth1 priority=critical netcfg/get_ipaddress=$node_ip netcfg/get_netmask=255.255.255.0 netcfg/get_gateway=$PXE_GATEWAY netcfg/get_nameservers=$PXE_GATEWAY netcfg/disable_dhcp=true
+        append preseed/url=http://$PXE_NET_IP/ubuntu/preseed/training-labs.seed vga=normal initrd=ubuntu-installer/amd64/initrd.gz debian-installer=en_US auto=true locale=en_US hostname=foobar debconf/frontend=noninteractive keyboard-configuration/modelcode=SKIP console-setup/ask_detect=false netcfg/choose_interface=$IFACE_1 priority=critical netcfg/get_ipaddress=$node_ip netcfg/get_netmask=255.255.255.0 netcfg/get_gateway=$PXE_GATEWAY netcfg/get_nameservers=$PXE_GATEWAY netcfg/disable_dhcp=true
 PXEMENU
 }
 
