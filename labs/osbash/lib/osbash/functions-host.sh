@@ -496,6 +496,12 @@ function command_from_config {
         create_pxe_node)
             # Format: create_pxe_node [-n <node_name>]
             get_cmd_options $args
+            if [ "$PROVIDER" = "kvm" ]; then
+                echo -e >&2 "${CError:-}PXE booting with KVM is currently" \
+                    "not supported.\nPlease file a bug if you need it." \
+                    "${CReset:-}"
+                exit 1
+            fi
             # Set FIRST_DISK_SIZE to disable use of basedisk for PXE booting
             FIRST_DISK_SIZE=10000
             echo >&2 "PXE boot node, set FIRST_DISK_SIZE=$FIRST_DISK_SIZE."
