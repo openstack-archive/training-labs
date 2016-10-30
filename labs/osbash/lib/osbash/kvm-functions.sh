@@ -107,6 +107,7 @@ function stop_running_cluster_vms {
         elif [[ "$(get_vm_group "$vm_id")" =~ $VM_GROUP ]]; then
             # vm_id instead of vm_name works just as well
             vm_acpi_shutdown "$vm_id"
+            vm_wait_for_shutdown "$vm_id"
         fi
     done
 }
