@@ -15,7 +15,10 @@ exec_logfile
 # Note: We assume that apt_init.sh set up repos and updated the apt index files
 
 # Upgrade installed packages and the kernel
-sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+# Keep our changes to /etc/sudoers from tripping up apt-get
+sudo DEBIAN_FRONTEND=noninteractive apt-get \
+    -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
+    -y upgrade
 sudo apt-get -y dist-upgrade
 
 # If we upgraded the kernel, remove the old one
