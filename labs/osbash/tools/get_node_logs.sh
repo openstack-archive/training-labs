@@ -35,6 +35,9 @@ for node in $(script_cfg_get_nodenames); do
         mkdir "$node_dir"
         vm_ssh "$VM_SSH_PORT" "sudo tar cf - -C /var log --exclude=installer" | tar xf - -C "$node_dir"
         vm_ssh "$VM_SSH_PORT" "dmesg" > "$node_dir"/dmesg
+    else
+        echo "VM $node does not reply."
+        continue
     fi
 
     echo -e "Splitting log files into:\n\t$node_dir/split_logs"
@@ -50,4 +53,6 @@ ssh_env_for_node controller
 if vm_ssh "$VM_SSH_PORT" 'ls log/test-*.*' >/dev/null 2>&1; then
     vm_ssh "$VM_SSH_PORT" 'cd log; tar cf - test-*.*' | tar xf - -C "$RESULTS_DIR/controller"
     vm_ssh "$VM_SSH_PORT" 'rm log/test-*.*'
+else
+    echo "VM controller does not reply."
 fi
