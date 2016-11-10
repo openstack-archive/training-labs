@@ -188,10 +188,14 @@ function vm_scp_to_vm {
         local target_path=$(strip_top_dir "$src_path")
         local target_dir=$(dirname "$target_path")
         vm_ssh "$ssh_port" "mkdir -p $target_dir"
+        # To avoid getting stuck on broken ssh connection, disable connection
+        # sharing (ControlPath) and use a timeout when connecting.
         scp -q -r \
             -i "$LIB_DIR/osbash-ssh-keys/osbash_key" \
             -o "UserKnownHostsFile /dev/null" \
             -o "StrictHostKeyChecking no" \
+            -o ConnectTimeout=10 \
+            -o ControlPath=none \
             -P "$ssh_port" \
             "$src_path" "$VM_SHELL_USER@$ssh_ip:$target_path"
     done
@@ -208,10 +212,14 @@ function vm_ssh {
     # Some operating systems (e.g., Mac OS X) export locale settings to the
     # target that cause some Python clients to fail. Override with a standard
     # setting (LC_ALL=C).
+    # To avoid getting stuck on broken ssh connection, disable connection
+    # sharing (ControlPath) and use a timeout when connecting.
     LC_ALL=C ssh -q \
         -i "$LIB_DIR/osbash-ssh-keys/osbash_key" \
         -o "UserKnownHostsFile /dev/null" \
         -o "StrictHostKeyChecking no" \
+        -o ConnectTimeout=10 \
+        -o ControlPath=none \
         -p "$ssh_port" \
         "$VM_SHELL_USER@$ssh_ip" "$@"
 }
