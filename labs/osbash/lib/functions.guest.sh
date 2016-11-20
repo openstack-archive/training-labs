@@ -357,27 +357,6 @@ function set_iface_list {
     echo "Set IF_NAMES to ${IF_NAMES[*]}"
 }
 
-# Return the nth network interface name (not counting loopback; 0 -> eth0)
-function ifnum_to_ifname {
-    local if_num=$1
-
-    # Skip loopback and start counting with next interface
-    local iface=${IF_NAMES[$((if_num + 1))]}
-
-    echo >&2 "ifnum_to_ifname: interface $if_num is $iface"
-    echo "$iface"
-}
-
-# Get all network interfaces (e.g. eth0, p2p1, ens0, enp0s3) into an array
-function set_iface_list {
-    unset IF_NAMES
-    local iface
-    for iface in $(ip -o link show|awk '/: / {print $2}'|tr -d ':'); do
-        IF_NAMES+=($iface)
-    done
-    echo "Set IF_NAMES to ${IF_NAMES[*]}"
-}
-
 function hostname_to_ip {
     local host_name=$1
     getent hosts "$host_name"|awk '{print $1}'
