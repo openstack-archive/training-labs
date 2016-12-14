@@ -27,6 +27,7 @@ WBATCH=exec_cmd
 
 function wbatch_reset {
     clean_dir "$WBATCH_DIR"
+    cp -v "$WBATCH_TEMPLATE_DIR/config_bat" "$WBATCH_DIR/config.bat"
 }
 
 function wbatch_new_file {

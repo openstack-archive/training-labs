@@ -1,10 +1,15 @@
-REM VBoxManage is not in PATH, but this is a good guess
-SET VBM=%ProgramFiles%\Oracle\VirtualBox\VBoxManage.exe
+REM Load likely VBoxManage location from configuration file
+CALL "%~dp0\CONFIG.BAT"
+
 IF EXIST "%VBM%" GOTO vbm_found
 
 ECHO.
 ECHO %time% Searching %SystemDrive% for VBoxManage, this may take a while
 ECHO.
+ECHO To skip the search process and speed up script execution, edit
+ECHO config.bat so that VBM contains the full path to VBoxManage.exe.
+ECHO.
+
 FOR /r %SystemDrive%\ %%a IN (*) DO (
     IF "%%~nxa"=="VBoxManage.exe" SET VBM=%%~dpnxa && GOTO vbm_found
 )
