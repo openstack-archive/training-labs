@@ -16,7 +16,18 @@ FOR /r %SystemDrive%\ %%a IN (*) DO (
 
 ECHO.
 ECHO %time% Cannot find VBoxManage.exe (part of VirtualBox) on %SystemDrive%.
-ECHO %time% Program stops.
+
+ECHO.
+ECHO %time% Searching D: for VBoxManage, this may take a while
+ECHO.
+
+FOR /r D:\ %%a IN (*) DO (
+    IF "%%~nxa"=="VBoxManage.exe" SET VBM=%%~dpnxa && GOTO vbm_found
+)
+
+ECHO.
+ECHO %time% Cannot find VBoxManage.exe (part of VirtualBox) on D:.
+ECHO %time% Giving up. Program stops.
 ECHO.
 GOTO :terminate
 
