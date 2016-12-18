@@ -1,16 +1,11 @@
 # The order of packages is significant, because pip processes them in the order
 # of appreance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
-hacking<0.11,>=0.10.0
 
-coverage>=3.6
-python-subunit>=0.0.18
+# Dependencies for generating documentation.
 sphinx>=1.2.1,!=1.3b1,<1.4  # BSD
 sphinx-testing # BSD License
 oslosphinx>=4.7.0
-oslotest>=1.10.0
-testrepository>=0.0.18
-testscenarios>=0.4
-testtools>=1.4.0
 
+# For linting/profiling the code.
 bashate # pep8 equivalent for bash scripts
