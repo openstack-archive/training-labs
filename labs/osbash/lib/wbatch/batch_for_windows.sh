@@ -257,7 +257,7 @@ function wbatch_log_vbm {
     # Echo what we are about to do
     wbatch_write_line "ECHO VBoxManage ${ARGS[@]}"
 
-    wbatch_write_line "VBoxManage ${ARGS[@]}"
+    wbatch_write_line "\"%VBM%\" ${ARGS[@]}"
 
     # Abort if VBoxManage call raised errorlevel
     wbatch_write_line "IF %errorlevel% NEQ 0 GOTO :vbm_error"
