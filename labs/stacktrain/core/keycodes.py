@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import importlib
 import stacktrain.config.general as conf
+import stacktrain.core.cond_sleep as cs
 kc = importlib.import_module("stacktrain.%s.keycodes" % conf.provider)
 
 # -----------------------------------------------------------------------------
@@ -37,3 +38,12 @@ def keyboard_send_string(vm_name, string):
     for letter in string:
         scancode = kc.char2scancode(letter)
         kc.keyboard_push_scancode(vm_name, scancode)
+
+        # Inject sleep into the wbatch files because the Windows batch file
+        # is sometimes _too_ efficient and overruns the keyboard input buffer
+        if conf.wbatch:
+            keyboard_send_string.cnt += 1
+            if keyboard_send_string.cnt % 50 == 0:
+                cs.conditional_sleep(1)
+
+keyboard_send_string.cnt = 0
