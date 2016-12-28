@@ -5,6 +5,7 @@ cmd queue_renamed -n controller osbash/init_xxx_node.sh
 
 cmd queue etc_hosts.sh
 cmd queue osbash/enable_osbash_ssh_keys.sh
+cmd queue osbash/copy_openrc.sh
 cmd snapshot_cycle -n controller controller_node_init
 
 # Environment
@@ -66,6 +67,7 @@ cmd queue_renamed -n compute1 osbash/init_xxx_node.sh
 
 cmd queue etc_hosts.sh
 cmd queue osbash/enable_osbash_ssh_keys.sh
+cmd queue osbash/copy_openrc.sh
 cmd snapshot_cycle -n compute1 compute1_node_init
 
 # Compute
