@@ -39,27 +39,27 @@ sudo apt update
 
 # ---------------------------------------------------------------------------
 # Enable the OpenStack repository
-# http://docs.openstack.org/newton/install-guide-ubuntu/environment-packages.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/environment-packages.html
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # NOTE: Using pre-release staging ppa is not documented in install-guide
-# https://launchpad.net/~ubuntu-cloud-archive/+archive/ubuntu/newton-staging
+# https://launchpad.net/~ubuntu-cloud-archive/+archive/ubuntu/ocata-staging
 #--------------------------------------------------------------------------
 
 echo "Installing packages needed for add-apt-repository."
 sudo apt -y install software-properties-common
 
 case "$OPENSTACK_RELEASE" in
-    newton)
-        REPO=cloud-archive:newton
-        SRC_FILE=cloudarchive-newton.list
+    ocata)
+        REPO=cloud-archive:ocata
+        SRC_FILE=cloudarchive-ocata.list
         ;;
-    newton-proposed)
-        REPO=cloud-archive:newton-proposed
-        SRC_FILE=cloudarchive-newton-proposed.list
+    ocata-proposed)
+        REPO=cloud-archive:ocata-proposed
+        SRC_FILE=cloudarchive-ocata-proposed.list
         ;;
-    newton-staging)
-        REPO=ppa:ubuntu-cloud-archive/newton-staging
-        SRC_FILE=ubuntu-cloud-archive-ubuntu-newton-staging-xenial.list
+    ocata-staging)
+        REPO=ppa:ubuntu-cloud-archive/ocata-staging
+        SRC_FILE=ubuntu-cloud-archive-ubuntu-ocata-staging-xenial.list
         ;;
     *)
         echo >&2 "Unknown OpenStack release: $OPENSTACK_RELEASE. Aborting."

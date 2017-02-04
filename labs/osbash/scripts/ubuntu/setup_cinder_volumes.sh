@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install and configure a storage node
-# http://docs.openstack.org/newton/install-guide-ubuntu/cinder-storage-install.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/cinder-storage-install.html
 #------------------------------------------------------------------------------
 
 MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
@@ -120,7 +120,7 @@ sudo rm -v /var/lib/cinder/cinder.sqlite
 
 #------------------------------------------------------------------------------
 # Verify the Block Storage installation
-# http://docs.openstack.org/newton/install-guide-ubuntu/cinder-verify.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/cinder-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying Block Storage installation on controller node."
@@ -129,23 +129,20 @@ echo "Sourcing the admin credentials."
 AUTH="source $CONFIG_DIR/admin-openstackrc.sh"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Not in install-guide:
-echo "Restarting Cinder API."
-node_ssh controller "sudo service cinder-api restart"
-
 echo "Restarting restarting cinder-scheduler."
 node_ssh controller "sudo service cinder-scheduler restart"
 
 echo -n "Waiting for cinder to start."
-until node_ssh controller "$AUTH; cinder service-list" >/dev/null 2>&1; do
+until node_ssh controller "$AUTH; openstack volume service list" >/dev/null \
+        2>&1; do
     echo -n .
     sleep 1
 done
 echo
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-echo "cinder service-list is available:"
-node_ssh controller "$AUTH; cinder service-list"
+echo "openstack volume service list is available:"
+node_ssh controller "$AUTH; openstack volume service list"
 
 
 function check_cinder_services {
@@ -157,18 +154,18 @@ function check_cinder_services {
     while : ; do
         # Check service-list every 5 seconds
         if [ $(( i % 5 )) -ne 0 ]; then
-            if ! node_ssh controller "$AUTH; cinder service-list" 2>&1 |
-                    grep -q down; then
+            if ! node_ssh controller "$AUTH; openstack volume service list" \
+                    2>&1 | grep -q down; then
                 echo
                 echo "All cinder services seem to be up and running."
-                node_ssh controller "$AUTH; cinder service-list"
+                node_ssh controller "$AUTH; openstack volume service list"
                 return 0
             fi
         fi
         if [[ "$i" -eq "60" ]]; then
             echo
             echo "ERROR Cinder services are not working as expected."
-            node_ssh controller "$AUTH; cinder service-list"
+            node_ssh controller "$AUTH; openstack volume service list"
             exit 1
         fi
         i=$((i + 1))
@@ -185,7 +182,7 @@ check_cinder_services
 
 #------------------------------------------------------------------------------
 # Verify the Block Storage installation
-# http://docs.openstack.org/newton/install-guide-ubuntu/launch-instance-cinder.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/launch-instance-cinder.html
 # (partial implementation without instance)
 #------------------------------------------------------------------------------
 

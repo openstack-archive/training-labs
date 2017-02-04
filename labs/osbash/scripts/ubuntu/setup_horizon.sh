@@ -13,7 +13,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Dashboard (horizon)
-# http://docs.openstack.org/newton/install-guide-ubuntu/horizon-install.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/horizon-install.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -28,6 +28,18 @@ indicate_current_auto
 #       of a reload when we are done changing the configuration files.
 echo "Installing horizon."
 sudo apt install -y openstack-dashboard
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# XXX changing owner/permissions (work-around for packaging bug -- the
+#     Dashboard will not work without it)
+sudo ls -l /var/lib/openstack-dashboard/
+sudo namei -l /var/lib/openstack-dashboard/
+
+sudo chown www-data:www-data /var/lib/openstack-dashboard
+sudo chown www-data:www-data /var/lib/openstack-dashboard/secret_key
+sudo chmod 700 /var/lib/openstack-dashboard
+sudo chmod 600 /var/lib/openstack-dashboard/secret_key
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Edit the /etc/openstack-dashboard/local_settings.py file.
 conf=/etc/openstack-dashboard/local_settings.py
@@ -104,6 +116,13 @@ iniset_sudo_no_section $conf "TIME_ZONE" '"UTC"'
 
 echo "Removing default Ubuntu theme."
 sudo apt remove --auto-remove -y openstack-dashboard-ubuntu-theme
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Reduce memory usage (not in install-guide)
+conf=/etc/apache2/conf-available/openstack-dashboard.conf
+sudo sed -i --follow-symlinks '/WSGIDaemonProcess/ s/processes=[0-9]*/processes=1/' $conf
+sudo sed -i --follow-symlinks '/WSGIDaemonProcess/ s/threads=[0-9]*/threads=2/' $conf
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Finalize installation

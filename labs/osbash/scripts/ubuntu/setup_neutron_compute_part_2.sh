@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for compute node.
-# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-compute-install.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-compute-install.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -48,7 +48,7 @@ sudo service neutron-linuxbridge-agent restart
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-verify-option2.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-verify-option2.html
 #------------------------------------------------------------------------------
 
 echo "Sourcing the admin credentials."

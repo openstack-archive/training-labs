@@ -17,7 +17,7 @@ wait_for_keystone
 
 #------------------------------------------------------------------------------
 # Install the Orchestration Service (heat)
-# http://docs.openstack.org/project-install-guide/orchestration/newton/install-ubuntu.html
+# http://docs.openstack.org/project-install-guide/orchestration/ocata/install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -206,7 +206,7 @@ echo "Restarting heat servies took $((ENDTIME - STARTTIME)) seconds."
 
 #------------------------------------------------------------------------------
 # Verify operation of Orchestration Service (heat).
-# http://docs.openstack.org/project-install-guide/orchestration/newton/verify.html
+# http://docs.openstack.org/project-install-guide/orchestration/ocata/verify.html
 #------------------------------------------------------------------------------
 
 echo "Listing service components."

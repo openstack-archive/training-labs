@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-compute-install-option2.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-compute-install-option2.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -32,10 +32,10 @@ iniset_sudo $conf linux_bridge physical_interface_mappings provider:$PUBLIC_INTE
 
 # Edit the [vxlan] section.
 OVERLAY_INTERFACE_IP_ADDRESS=$(get_node_ip_in_network "$(hostname)" "mgmt")
-iniset_sudo $conf vxlan enable_vxlan True
+iniset_sudo $conf vxlan enable_vxlan true
 iniset_sudo $conf vxlan local_ip $OVERLAY_INTERFACE_IP_ADDRESS
-iniset_sudo $conf vxlan l2_population True
+iniset_sudo $conf vxlan l2_population true
 
 # Edit the [securitygroup] section.
-iniset_sudo $conf securitygroup enable_security_group True
+iniset_sudo $conf securitygroup enable_security_group true
 iniset_sudo $conf securitygroup firewall_driver neutron.agent.linux.iptables_firewall.IptablesFirewallDriver

@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for compute node.
-# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-compute-install.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-compute-install.html
 #------------------------------------------------------------------------------
 
 echo "Installing networking components for compute node."

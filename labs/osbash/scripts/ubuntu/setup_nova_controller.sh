@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install Compute controller services
-# http://docs.openstack.org/newton/install-guide-ubuntu/nova-controller-install.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/nova-controller-install.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -27,10 +27,16 @@ setup_database nova "$NOVA_DB_USER" "$NOVA_DBPASS"
 echo "Setting up database nova_api."
 setup_database nova_api "$NOVA_DB_USER" "$NOVA_DBPASS"
 
+echo "Setting up first cell database."
+# nova_cell0 is default name for first cell database
+# https://docs.openstack.org/developer/nova/cells.html#fresh-install
+setup_database nova_cell0 "$NOVA_DB_USER" "$NOVA_DBPASS"
+
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
 nova_admin_user=nova
+placement_admin_user=placement
 
 # Wait for keystone to come up
 wait_for_keystone
@@ -55,15 +61,46 @@ openstack service create \
 echo "Creating nova endpoints."
 openstack endpoint create \
     --region "$REGION" \
-    compute public http://controller:8774/v2.1/%\(tenant_id\)s
+    compute public http://controller:8774/v2.1
 
 openstack endpoint create \
     --region "$REGION" \
-    compute internal http://controller:8774/v2.1/%\(tenant_id\)s
+    compute internal http://controller:8774/v2.1
 
 openstack endpoint create \
     --region "$REGION" \
-    compute admin http://controller:8774/v2.1/%\(tenant_id\)s
+    compute admin http://controller:8774/v2.1
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+echo "Creating placement user and giving it the admin role."
+openstack user create \
+    --domain default  \
+    --password "$PLACEMENT_PASS" \
+    "$placement_admin_user"
+
+openstack role add \
+    --project "$SERVICE_PROJECT_NAME" \
+    --user "$placement_admin_user" \
+    "$ADMIN_ROLE_NAME"
+
+echo "Creating the Placement API entry in the service catalog."
+openstack service create \
+    --name placement \
+    --description "Placement API" \
+    placement
+
+echo "Creating nova endpoints."
+openstack endpoint create \
+    --region "$REGION" \
+    placement public http://controller:8778
+
+openstack endpoint create \
+    --region "$REGION" \
+    placement internal http://controller:8778
+
+openstack endpoint create \
+    --region "$REGION" \
+    placement admin http://controller:8778
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Install and configure components
@@ -71,7 +108,13 @@ openstack endpoint create \
 
 echo "Installing nova for controller node."
 sudo apt install -y nova-api nova-conductor nova-consoleauth \
-    nova-novncproxy nova-scheduler
+    nova-novncproxy nova-scheduler nova-placement-api
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Reduce memory usage (not in install-guide)
+conf=/etc/apache2/sites-enabled/nova-placement-api.conf
+sudo sed -i --follow-symlinks '/WSGIDaemonProcess/ s/processes=[0-9]*/processes=1/' $conf
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 conf=/etc/nova/nova.conf
 
@@ -90,8 +133,8 @@ echo "Configuring nova services."
 echo "Configuring RabbitMQ message queue access."
 iniset_sudo $conf DEFAULT transport_url "rabbit://openstack:$RABBIT_PASS@controller"
 
-# Configure [DEFAULT] section.
-iniset_sudo $conf DEFAULT auth_strategy keystone
+# Configure [api] section.
+iniset_sudo $conf api auth_strategy keystone
 
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
@@ -110,6 +153,7 @@ iniset_sudo $conf DEFAULT use_neutron True
 iniset_sudo $conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 
 # Configure [VNC] section.
+iniset_sudo $conf vnc enabled true
 iniset_sudo $conf vnc vncserver_listen '$my_ip'
 iniset_sudo $conf vnc vncserver_proxyclient_address '$my_ip'
 
@@ -119,15 +163,44 @@ iniset_sudo $conf glance api_servers http://controller:9292
 # Configure [oslo_concurrency] section.
 iniset_sudo $conf oslo_concurrency lock_path /var/lib/nova/tmp
 
-# Delete log-dir line
-# According to the install-guide, "Due to a packaging bug, remove the log-dir
+# Delete log_dir line
+# According to the install-guide, "Due to a packaging bug, remove the log_dir
 # option from the [DEFAULT] section."
-sudo grep "^log-dir" $conf
-sudo sed -i "/^log-dir/ d" $conf
+sudo grep "^log_dir" $conf
+sudo sed -i "/^log_dir/ d" $conf
 
-echo "Populating the Compute databases."
+echo "Configuring Placement services."
+iniset_sudo $conf placement os_region_name RegionOne
+iniset_sudo $conf placement project_domain_name Default
+iniset_sudo $conf placement project_name "$SERVICE_PROJECT_NAME"
+iniset_sudo $conf placement auth_type password
+iniset_sudo $conf placement user_domain_name Default
+iniset_sudo $conf placement auth_url http://controller:35357/v3
+iniset_sudo $conf placement username "$placement_admin_user"
+iniset_sudo $conf placement password "$PLACEMENT_PASS"
+
+echo "Populating the nova-api databases."
 sudo nova-manage api_db sync
+
+echo "Registering the cell0 database."
+sudo nova-manage cell_v2 map_cell0
+
+echo "Creating the cell1 cell."
+sudo nova-manage cell_v2 create_cell --name=cell1 --verbose
+
+echo "Populating the nova database."
 sudo nova-manage db sync
+
+echo "Verifying nova cell0 and cell1 are registered correctly."
+sudo nova-manage cell_v2 list_cells
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+echo "Sourcing the admin credentials."
+source "$CONFIG_DIR/admin-openstackrc.sh"
+
+# Wait for keystone to come up
+wait_for_keystone
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Finalize installation
@@ -150,7 +223,7 @@ sudo rm -v /var/lib/nova/nova.sqlite
 # Verify the Compute controller installation (not in install-guide)
 #------------------------------------------------------------------------------
 
-echo -n "Verifying operation of the Compuyte service."
+echo -n "Verifying operation of the Compute service."
 until openstack service list 2>/dev/null; do
     sleep 1
     echo -n .

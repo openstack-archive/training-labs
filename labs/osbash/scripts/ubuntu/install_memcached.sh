@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Memcached
-# http://docs.openstack.org/newton/install-guide-ubuntu/environment-memcached.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/environment-memcached.html
 #------------------------------------------------------------------------------
 
 echo "Installing memcache packages."

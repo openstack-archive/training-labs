@@ -133,7 +133,7 @@ cat << WSGI | sudo tee -a /etc/apache2/sites-available/wsgi-ceilometer.conf
 Listen 8777
 
 <VirtualHost *:8777>
-    WSGIDaemonProcess ceilometer-api processes=2 threads=10 user=ceilometer group=ceilometer display-name=%{GROUP}
+    WSGIDaemonProcess ceilometer-api processes=1 threads=5 user=ceilometer group=ceilometer display-name=%{GROUP}
     WSGIProcessGroup ceilometer-api
     WSGIScriptAlias / "/var/www/cgi-bin/ceilometer/app"
     WSGIApplicationGroup %{GLOBAL}

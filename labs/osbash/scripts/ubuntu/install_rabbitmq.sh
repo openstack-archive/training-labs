@@ -14,7 +14,7 @@ indicate_current_auto
 
 #-------------------------------------------------------------------------------
 # Install the message broker service (RabbitMQ).
-# http://docs.openstack.org/newton/install-guide-ubuntu/environment-messaging.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/environment-messaging.html
 #-------------------------------------------------------------------------------
 
 echo "Installing RabbitMQ."

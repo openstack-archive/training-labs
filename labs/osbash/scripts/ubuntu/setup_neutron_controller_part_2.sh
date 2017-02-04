@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for controller node.
-# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-controller-install.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-controller-install.html
 #------------------------------------------------------------------------------
 
 source "$CONFIG_DIR/admin-openstackrc.sh"
@@ -48,7 +48,7 @@ iniset_sudo $conf neutron region_name "$REGION"
 iniset_sudo $conf neutron project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf neutron username "$neutron_admin_user"
 iniset_sudo $conf neutron password "$NEUTRON_PASS"
-iniset_sudo $conf neutron service_metadata_proxy True
+iniset_sudo $conf neutron service_metadata_proxy true
 iniset_sudo $conf neutron metadata_proxy_shared_secret "$METADATA_SECRET"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -84,14 +84,14 @@ fi
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for controller node.
-# http://docs.openstack.org/newton/install-guide-ubuntu/neutron-verify.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-verify.html
 #------------------------------------------------------------------------------
 
 echo -n "Verifying operation."
-until neutron ext-list >/dev/null 2>&1; do
+until openstack extension list --network >/dev/null 2>&1; do
     sleep 1
     echo -n .
 done
 echo
 
-neutron ext-list
+openstack extension list --network

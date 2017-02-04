@@ -39,6 +39,9 @@ apt_download glance python-glanceclient
 apt_download nova-api nova-conductor nova-consoleauth \
     nova-novncproxy nova-scheduler
 
+# Placement Controller
+apt_download nova-placement-api
+
 # Neutron Controller
 apt_download neutron-server neutron-plugin-ml2 \
     neutron-linuxbridge-agent neutron-dhcp-agent \

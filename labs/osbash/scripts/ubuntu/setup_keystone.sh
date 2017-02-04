@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up keystone for controller node
-# http://docs.openstack.org/newton/install-guide-ubuntu/keystone-install.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/keystone-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for keystone."
@@ -69,7 +69,7 @@ sudo keystone-manage credential_setup \
 echo "Bootstrapping the Identity service."
 sudo keystone-manage bootstrap --bootstrap-password "$ADMIN_PASS" \
     --bootstrap-admin-url http://controller:35357/v3/ \
-    --bootstrap-internal-url http://controller:35357/v3/ \
+    --bootstrap-internal-url http://controller:5000/v3/ \
     --bootstrap-public-url http://controller:5000/v3/ \
     --bootstrap-region-id "$REGION"
 
@@ -84,12 +84,15 @@ echo "ServerName controller" | sudo tee -a $conf
 
 conf=/etc/apache2/sites-enabled/keystone.conf
 if [ -f $conf ]; then
-    echo "Identity service virtual hosts enabled already."
+    echo "Identity service virtual hosts enabled."
 else
-    echo "Enabling the Identity service virtual hosts."
-    sudo ln -s /etc/apache2/sites-available/keystone.conf \
-        /etc/apache2/sites-enabled
+    echo "Identity service virtual hosts not enabled."
+    exit 1
 fi
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Reduce memory usage (not in install-guide)
+sudo sed -i --follow-symlinks '/WSGIDaemonProcess/ s/processes=[0-9]*/processes=1/' $conf
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Finalize the installation
@@ -112,7 +115,7 @@ export OS_IDENTITY_API_VERSION=3
 
 #------------------------------------------------------------------------------
 # Create a domain, projects, users, and roles
-# http://docs.openstack.org/newton/install-guide-ubuntu/keystone-users.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/keystone-users.html
 #------------------------------------------------------------------------------
 
 # Wait for keystone to come up
@@ -145,7 +148,7 @@ openstack role add \
 
 #------------------------------------------------------------------------------
 # Verify operation
-# http://docs.openstack.org/newton/install-guide-ubuntu/keystone-verify.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/keystone-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying keystone installation."
@@ -157,10 +160,11 @@ sudo ls -l $conf
 sudo sed -i '/^pipeline = / s/admin_token_auth //' $conf
 sudo ls -l $conf
 
-# XXX still in install-guide, but no longer necessary
 # From this point on, we are going to use keystone for authentication
-unset OS_URL
+unset OS_AUTH_URL OS_PASSWORD
 
+# XXX If the default domain ID is default and the default domain name is
+#     Default, why are we using default here?
 echo "Requesting an authentication token as an admin user."
 openstack \
     --os-auth-url http://controller:35357/v3 \

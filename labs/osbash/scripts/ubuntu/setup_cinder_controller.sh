@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up Block Storage service controller (cinder controller node)
-# http://docs.openstack.org/newton/install-guide-ubuntu/cinder-controller-install.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/cinder-controller-install.html
 #------------------------------------------------------------------------------
 
 echo "Setting up database for cinder."
@@ -137,12 +137,18 @@ iniset_sudo $conf cinder os_region_name "$REGION"
 # Finalize installation
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Reduce memory usage (not in install-guide)
+conf=/etc/apache2/conf-available/cinder-wsgi.conf
+sudo sed -i --follow-symlinks '/WSGIDaemonProcess/ s/processes=[0-9]*/processes=1/' $conf
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 echo "Restarting the Compute API service."
 sudo service nova-api restart
 
 echo "Restarting the Block Storage services."
 sudo service cinder-scheduler restart
-sudo service cinder-api restart
+sudo service apache2 restart
 
 # Not in the install-guide:
 echo "Removing unused SQLite database file."

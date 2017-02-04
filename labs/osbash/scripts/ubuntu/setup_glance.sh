@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the Image Service (glance).
-# http://docs.openstack.org/newton/install-guide-ubuntu/glance-install.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/glance-install.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -49,7 +49,7 @@ openstack service create \
     --description "OpenStack Image" \
     image
 
-# Create glance endpoints.
+echo "Creating the Image service API endpoints."
 openstack endpoint create \
     --region "$REGION" \
     image public http://controller:9292
@@ -133,7 +133,7 @@ sudo service glance-api restart
 
 #------------------------------------------------------------------------------
 # Verify the Image Service installation
-# http://docs.openstack.org/newton/install-guide-ubuntu/glance-verify.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/glance-verify.html
 #------------------------------------------------------------------------------
 
 echo -n "Waiting for glance to start."

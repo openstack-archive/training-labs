@@ -22,7 +22,7 @@ echo "Will bind MySQL server to $DB_IP."
 
 #------------------------------------------------------------------------------
 # Install and configure the database server
-# http://docs.openstack.org/newton/install-guide-ubuntu/environment-sql-database.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/environment-sql-database.html
 #------------------------------------------------------------------------------
 
 echo "Sourced MySQL password from credentials: $DATABASE_PASSWORD"
@@ -50,7 +50,7 @@ echo "Configuring MySQL to accept requests from management network ($DB_IP)."
 iniset_sudo $conf mysqld bind-address "$DB_IP"
 
 iniset_sudo $conf mysqld default-storage-engine innodb
-iniset_sudo $conf mysqld innodb_file_per_table ""
+iniset_sudo $conf mysqld innodb_file_per_table on
 iniset_sudo $conf mysqld max_connections 4096
 iniset_sudo $conf mysqld collation-server utf8_general_ci
 iniset_sudo $conf mysqld character-set-server utf8

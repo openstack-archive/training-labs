@@ -1,10 +1,10 @@
 # This file contains OpenStack configuration data. It is used by both
 # host (osbash, Windows batch) and VM guest scripts.
 
-# newton                (production release; cloud-archive:newton)
-# newton-proposed       (pre-release testing: cloud-archive:newton-proposed)
-# newton-staging        (ppa:openstack-ubuntu-testing/newton)
-: ${OPENSTACK_RELEASE:=newton}
+# ocata                (production release; cloud-archive:ocata)
+# ocata-proposed       (pre-release testing: cloud-archive:ocata-proposed)
+# ocata-staging        (ppa:openstack-ubuntu-testing/ocata)
+: ${OPENSTACK_RELEASE:=ocata}
 
 # CirrOS image URL
 if [ "$(uname -m)" = "x86_64" ]; then
@@ -12,7 +12,7 @@ if [ "$(uname -m)" = "x86_64" ]; then
 else
     arch=i386
 fi
-CIRROS_URL="http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-$arch-disk.img"
+CIRROS_URL="http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-$arch-disk.img"
 unset arch
 
 # Name used for CirrOS image in glance
@@ -31,7 +31,7 @@ NETWORK_2="provider 203.0.113.0"
 PXE_INITIAL_NODE_IP="10.0.0.240"
 
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/newton/install-guide-ubuntu/launch-instance-networks-provider.html
+# http://docs.openstack.org/ocata/install-guide-ubuntu/launch-instance-networks-provider.html
 #------------------------------------------------------------------------------
 
 # Public network
