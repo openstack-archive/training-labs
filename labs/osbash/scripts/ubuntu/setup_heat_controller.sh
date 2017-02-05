@@ -124,7 +124,7 @@ echo "manual" | sudo tee /etc/init/heat-api.override
 echo "manual" | sudo tee /etc/init/heat-api-cfn.override
 echo "manual" | sudo tee /etc/init/heat-engine.override
 
-sudo apt-get install -y heat-api heat-api-cfn heat-engine
+sudo apt install -y heat-api heat-api-cfn heat-engine
 
 function get_database_url {
     local db_user=$HEAT_DB_USER

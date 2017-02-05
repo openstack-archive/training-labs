@@ -70,7 +70,7 @@ openstack endpoint create \
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing nova for controller node."
-sudo apt-get install -y nova-api nova-conductor nova-consoleauth \
+sudo apt install -y nova-api nova-conductor nova-consoleauth \
     nova-novncproxy nova-scheduler
 
 conf=/etc/nova/nova.conf

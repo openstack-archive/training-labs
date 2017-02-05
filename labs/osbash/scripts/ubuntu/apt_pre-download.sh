@@ -14,7 +14,7 @@ indicate_current_auto
 
 function apt_download {
     echo "apt_download: $*"
-    sudo apt-get install -y --download-only "$@"
+    sudo apt install -y --download-only "$@"
 }
 
 # Download packages for all nodes

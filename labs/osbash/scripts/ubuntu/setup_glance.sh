@@ -67,7 +67,7 @@ openstack endpoint create \
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing glance."
-sudo apt-get install -y glance
+sudo apt install -y glance
 
 function get_database_url {
     local db_user=$GLANCE_DB_USER

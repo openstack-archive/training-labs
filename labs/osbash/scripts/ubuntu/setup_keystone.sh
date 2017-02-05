@@ -34,7 +34,7 @@ mysql -u keystone -p"$KEYSTONE_DBPASS" keystone -h controller -e quit
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing keystone."
-sudo apt-get install -y keystone
+sudo apt install -y keystone
 
 conf=/etc/keystone/keystone.conf
 echo "Editing $conf."

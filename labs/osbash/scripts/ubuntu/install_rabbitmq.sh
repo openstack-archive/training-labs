@@ -18,7 +18,7 @@ indicate_current_auto
 #-------------------------------------------------------------------------------
 
 echo "Installing RabbitMQ."
-sudo apt-get install -y rabbitmq-server
+sudo apt install -y rabbitmq-server
 
 echo -n "Waiting for RabbitMQ to start."
 while ! sudo rabbitmqctl status >/dev/null; do

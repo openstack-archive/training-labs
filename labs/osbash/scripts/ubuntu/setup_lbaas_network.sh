@@ -19,7 +19,7 @@ indicate_current_auto
 #------------------------------------------------------------------------------
 
 echo "Installing neutron lbaas agent for network node."
-sudo apt-get install -y neutron-lbaas-agent
+sudo apt install -y neutron-lbaas-agent
 
 echo "Configuring LBaaS agent for network node."
 conf=/etc/neutron/lbaas_agent.ini
