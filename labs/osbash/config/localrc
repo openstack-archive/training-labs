@@ -15,14 +15,14 @@
 #           ubuntu-14.04-server-amd64
 #           ubuntu-14.04-server-i386
 #
-# ex:- DISTRO=ubuntu-16.04-server-i386
+# example: DISTRO=ubuntu-16.04-server-i386
 : ${DISTRO:=ubuntu-16.04-server-amd64}
 
 # PROVIDER: virtualbox or kvm (defaults to virtualbox)
 # KVM tends to give better performance (on Linux), but may be harder to set up
 # and osbash does not (yet) support all features with a KVM backend.
 #
-# ex:- PROVIDER=kvm
+# example: PROVIDER=kvm
 : ${PROVIDER:=virtualbox}
 
 # vim: set ai ts=4 sw=4 et ft=sh:
