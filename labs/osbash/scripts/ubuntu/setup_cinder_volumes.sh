@@ -22,14 +22,14 @@ MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
 echo "IP address of this node's interface in management network: $MY_MGMT_IP."
 
 echo "Installing qemu support package for non-raw image types."
-sudo apt-get install -y qemu
+sudo apt install -y qemu
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Prerequisites
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing the Logical Volume Manager (LVM)."
-sudo apt-get install -y lvm2
+sudo apt install -y lvm2
 
 echo "Configuring LVM physical and logical volumes."
 
@@ -61,7 +61,7 @@ grep "^[[:space:]]\{1,\}filter" $conf
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing cinder."
-sudo apt-get install -y cinder-volume
+sudo apt install -y cinder-volume
 
 conf=/etc/cinder/cinder.conf
 echo "Configuring $conf."

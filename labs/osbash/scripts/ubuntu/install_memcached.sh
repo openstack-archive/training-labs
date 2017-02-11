@@ -18,7 +18,7 @@ indicate_current_auto
 #------------------------------------------------------------------------------
 
 echo "Installing memcache packages."
-sudo apt-get install -y memcached python-memcache
+sudo apt install -y memcached python-memcache
 
 MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
 echo "Binding memcached server to $MGMT_IP."

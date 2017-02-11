@@ -23,7 +23,7 @@ indicate_current_auto
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing the MongoDB packages."
-sudo apt-get install -y mongodb-server mongodb-clients python-pymongo
+sudo apt install -y mongodb-server mongodb-clients python-pymongo
 
 echo "Configuring mongodb.conf."
 conf=/etc/mongodb.conf

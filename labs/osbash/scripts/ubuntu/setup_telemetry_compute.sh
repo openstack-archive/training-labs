@@ -23,7 +23,7 @@ indicate_current_auto
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing ceilometer."
-sudo apt-get install -y ceilometer-agent-compute
+sudo apt install -y ceilometer-agent-compute
 
 ceilometer_admin_user=ceilometer
 

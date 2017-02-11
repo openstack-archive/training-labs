@@ -77,7 +77,7 @@ openstack endpoint create \
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing ceilometer."
-sudo apt-get install -y ceilometer-api ceilometer-collector \
+sudo apt install -y ceilometer-api ceilometer-collector \
                         ceilometer-agent-central \
                         ceilometer-agent-notification \
                         python-ceilometerclient

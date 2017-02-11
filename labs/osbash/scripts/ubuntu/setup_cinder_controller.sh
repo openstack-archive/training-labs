@@ -79,7 +79,7 @@ openstack endpoint create \
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing cinder."
-sudo apt-get install -y cinder-api cinder-scheduler \
+sudo apt install -y cinder-api cinder-scheduler \
     qemu-utils
 # Note: The package 'qemu-utils' is required for 'qemu-img' which allows cinder
 #       to convert additional image types to bootable volumes. By default only

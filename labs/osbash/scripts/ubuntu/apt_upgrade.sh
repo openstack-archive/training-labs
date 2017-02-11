@@ -20,11 +20,11 @@ exec_logfile
 # Note: We assume that apt_init.sh set up repos and updated the apt index files
 
 # Upgrade installed packages and the kernel
-# Keep our changes to /etc/sudoers from tripping up apt-get
-sudo DEBIAN_FRONTEND=noninteractive apt-get \
+# Keep our changes to /etc/sudoers from tripping up apt
+sudo DEBIAN_FRONTEND=noninteractive apt \
     -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
     -y upgrade
-sudo apt-get -y dist-upgrade
+sudo apt -y dist-upgrade
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Extra work not documented in install-guide
@@ -45,12 +45,12 @@ if [[ $INSTALLED_KERNEL != $RUNNING_KERNEL ]]; then
 fi
 
 # Clean apt cache
-sudo apt-get -y autoremove
-sudo apt-get -y clean
+sudo apt -y autoremove
+sudo apt -y clean
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Install OpenStack client (install-guide)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing OpenStack client."
-sudo apt-get install -y python-openstackclient
+sudo apt install -y python-openstackclient

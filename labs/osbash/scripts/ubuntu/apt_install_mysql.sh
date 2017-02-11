@@ -31,7 +31,7 @@ echo "Sourced MySQL password from credentials: $DATABASE_PASSWORD"
 #sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password '$DATABASE_PASSWORD''
 
 echo "Installing MySQL (MariaDB)."
-sudo apt-get install -y mariadb-server python-mysqldb
+sudo apt install -y mariadb-server python-mysqldb
 
 # Not in the install-guide
 echo "Sanity check: distro default is socket auth."

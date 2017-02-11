@@ -19,7 +19,7 @@ indicate_current_auto
 #------------------------------------------------------------------------------
 
 echo "Installing networking components for compute node."
-sudo apt-get install -y neutron-linuxbridge-agent
+sudo apt install -y neutron-linuxbridge-agent
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Configure the common component

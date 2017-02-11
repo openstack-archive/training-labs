@@ -24,10 +24,10 @@ indicate_current_auto
 #       Below, we are also changing the configuration and reloading it once we
 #       are done. This race can result in a stopped apache (which also means
 #       stopped keystone services). We can either sleep for a second
-#       after the "apt-get install" call below or do a restart instead
+#       after the "apt install" call below or do a restart instead
 #       of a reload when we are done changing the configuration files.
 echo "Installing horizon."
-sudo apt-get install -y openstack-dashboard
+sudo apt install -y openstack-dashboard
 
 # Edit the /etc/openstack-dashboard/local_settings.py file.
 conf=/etc/openstack-dashboard/local_settings.py
@@ -103,7 +103,7 @@ iniset_sudo_no_section $conf "TIME_ZONE" '"UTC"'
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Removing default Ubuntu theme."
-sudo apt-get remove --auto-remove -y openstack-dashboard-ubuntu-theme
+sudo apt remove --auto-remove -y openstack-dashboard-ubuntu-theme
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Finalize installation

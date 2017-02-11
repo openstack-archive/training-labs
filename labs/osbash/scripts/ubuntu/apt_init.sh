@@ -35,7 +35,7 @@ function set_apt_proxy {
 set_apt_proxy
 
 # Get apt index files
-sudo apt-get update
+sudo apt update
 
 # ---------------------------------------------------------------------------
 # Enable the OpenStack repository
@@ -46,7 +46,7 @@ sudo apt-get update
 #--------------------------------------------------------------------------
 
 echo "Installing packages needed for add-apt-repository."
-sudo apt-get -y install software-properties-common
+sudo apt -y install software-properties-common
 
 case "$OPENSTACK_RELEASE" in
     newton)
@@ -72,7 +72,7 @@ sudo add-apt-repository "$REPO"
 
 # Get index files only for ubuntu-cloud repo but keep standard lists
 if [ -f "/etc/apt/sources.list.d/$SRC_FILE" ]; then
-    sudo apt-get update \
+    sudo apt update \
         -o Dir::Etc::sourcelist="sources.list.d/$SRC_FILE" \
         -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
 else

@@ -46,7 +46,7 @@ elif which curl &> /dev/null; then
     REQUEST_TOOL="curl"
 else
     echo "ERROR: neither wget nor curl were found. Please install one with:"
-    echo " apt-get -y install wget"
+    echo " apt -y install wget"
     exit 1
 fi
 

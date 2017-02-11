@@ -23,7 +23,7 @@ indicate_current_auto
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing additional packages for self-service networks."
-sudo apt-get install -y \
+sudo apt install -y \
     neutron-server neutron-plugin-ml2 \
     neutron-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent \
     neutron-metadata-agent

@@ -29,7 +29,7 @@ echo "Editing /etc/hosts to include pxeserver"
 echo "$PXE_NET_IP  pxeserver" | sudo tee -a /etc/hosts
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 echo "Installing the dhcp server."
-sudo apt-get install -y isc-dhcp-server
+sudo apt install -y isc-dhcp-server
 
 echo "Setting dhcp server interface to $PXE_NET_IFACE."
 sudo sed -i "s/^INTERFACES=.*/INTERFACES='$PXE_NET_IFACE'/" /etc/default/isc-dhcp-server
@@ -60,7 +60,7 @@ sudo service isc-dhcp-server restart
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Setup the tftp server with inetd and apache
 echo "Installing apache, tftpd, and inetd."
-sudo apt-get install -y apache2 tftpd-hpa inetutils-inetd
+sudo apt install -y apache2 tftpd-hpa inetutils-inetd
 
 TMPF=/etc/default/tftpd-hpa
 echo "Editing $TMPF."
@@ -87,7 +87,7 @@ sudo cp -fr /mnt/* /var/www/html/ubuntu/
 sudo rm -f /var/lib/tftpboot/pxelinux.cfg/default
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 echo "Configuring DNS server."
-sudo apt-get -y install bind9
+sudo apt -y install bind9
 
 sudo cp /etc/bind/named.conf.options /etc/bind/named.conf.options.BK
 sudo sed -i 's|// forwarders {|forwarders {\n\
@@ -102,7 +102,7 @@ set_iface_list
 IFACE_0=$(ifnum_to_ifname 0)
 IFACE_1=$(ifnum_to_ifname 1)
 echo "Creating a VLAN IP as gateway (interfaces $IFACE_0, $IFACE_1)."
-sudo apt-get -y install vlan
+sudo apt -y install vlan
 sudo modprobe 8021q
 sudo vconfig add "$IFACE_1" 10
 sudo su -c 'echo "8021q" >> /etc/modules'
@@ -141,4 +141,4 @@ sudo iptables --append FORWARD --in-interface $IFACE_1 -j ACCEPT
 echo "Making iptable rules persistent."
 echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
 echo iptables-persistent iptables-persistent/autosave_v6 boolean true | sudo debconf-set-selections
-sudo apt-get -y install iptables-persistent
+sudo apt -y install iptables-persistent
