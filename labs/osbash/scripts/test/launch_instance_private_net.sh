@@ -364,20 +364,24 @@ openstack security group list
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Settings for $PRIVATE_SUBNET:"
-neutron subnet-show $PRIVATE_SUBNET
+openstack subnet show $PRIVATE_SUBNET
 echo
 
 if [ "$EXT_DNS" = true ]; then
     echo "Setting DNS name server for subnet (passed to booting instance VMs)."
-    neutron subnet-update $PRIVATE_SUBNET --dns_nameservers list=true 8.8.4.4
+    openstack subnet set $PRIVATE_SUBNET --dns-nameserver 8.8.4.4
     echo
 else
     echo "Clearing DNS name server for subnet (passed to booting instance VMs)."
-    neutron subnet-update $PRIVATE_SUBNET --dns_nameservers action=clear
+    dns_servers=$(openstack subnet show -f value -c dns_nameservers \
+                    $PRIVATE_SUBNET | tr ' ,' '\n')
+    for server in $dns_servers; do
+        openstack subnet unset --dns-nameserver $server $PRIVATE_SUBNET
+    done
 fi
 
 echo "Settings for $PRIVATE_SUBNET:"
-neutron subnet-show $PRIVATE_SUBNET
+openstack subnet show $PRIVATE_SUBNET
 echo
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
