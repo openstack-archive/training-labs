@@ -25,7 +25,7 @@ function wait_for_agent {
     echo -n "Waiting for neutron agent $agent."
     (
     source "$CONFIG_DIR/admin-openstackrc.sh"
-    while neutron agent-list|grep "$agent" | grep "xxx" >/dev/null; do
+    while openstack network agent-list|grep "$agent"|grep "xxx" >/dev/null; do
         sleep 1
         echo -n .
     done
@@ -44,18 +44,15 @@ wait_for_agent neutron-dhcp-agent
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Creating the public network."
-neutron net-create \
-    --shared \
-    --provider:physical_network provider \
-    --provider:network_type flat \
-    provider
+openstack network create --share \
+    --provider-physical-network provider \
+    --provider-network-type flat provider
 
 echo "Creating a subnet on the public network."
-neutron subnet-create --name provider  \
+openstack subnet create --network provider  \
     --allocation-pool start="$START_IP_ADDRESS,end=$END_IP_ADDRESS" \
-    --dns-nameserver "$DNS_RESOLVER" \
-    --gateway "$PROVIDER_NETWORK_GATEWAY" \
-    provider "$PROVIDER_NETWORK_CIDR"
+    --dns-nameserver "$DNS_RESOLVER" --gateway "$PROVIDER_NETWORK_GATEWAY" \
+    --subnet-range "$PROVIDER_NETWORK_CIDR" provider
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Not in install-guide:
