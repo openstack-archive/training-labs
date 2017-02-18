@@ -118,7 +118,7 @@ function run_test {
         fi
 
         echo "################################################################"
-        if [ $rc -eq 0 ]; then
+        if grep -q "$script_name returned status: 0" "$log_path"; then
             echo "# Test passed: $script_name"
         else
             echo "# ERROR: Test failed: $script_name"

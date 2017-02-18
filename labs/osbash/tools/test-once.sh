@@ -60,3 +60,4 @@ fi
 vm_ssh "$VM_SSH_PORT" "bash -c $REMOTE_TOP_DIR/$EXE_DIR_NAME/$SCRIPT" || \
     rc=$?
 echo "$SCRIPT returned status: ${rc:-0}"
+exit ${rc:-0}
