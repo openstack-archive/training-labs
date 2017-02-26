@@ -38,7 +38,7 @@ function update_iso_variables {
     # Get matching line from distro repo's MD5SUMS file, e.g.
     # "9e5fecc94b3925bededed0fdca1bd417 *ubuntu-14.04.5-server-i386.iso"
     local distro_info=$(wget -O - "$ISO_URL_BASE/MD5SUMS" | \
-                        grep server-i386 | tail -n1)
+                        grep "server-i386.*\.iso" | tail -n1)
 
     # First part (removing everything after first space) is the md5sum
     ISO_MD5=${distro_info%% *}
