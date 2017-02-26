@@ -40,12 +40,12 @@ echo "Sourcing the demo credentials."
 source "$CONFIG_DIR/demo-openstackrc.sh"
 
 echo "Creating the private network."
-neutron net-create selfservice
+openstack network create selfservice
 
 echo "Creating a subnet on the private network."
-neutron subnet-create --name selfservice \
+openstack subnet create --network selfservice \
     --dns-nameserver "$DNS_RESOLVER" --gateway "$SELFSERVICE_NETWORK_GATEWAY" \
-    selfservice "$SELFSERVICE_NETWORK_CIDR"
+    --subnet-range "$SELFSERVICE_NETWORK_CIDR" selfservice
 )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -84,7 +84,7 @@ echo "Sourcing the demo credentials."
 source "$CONFIG_DIR/demo-openstackrc.sh"
 
 echo "Creating a router."
-neutron router-create router
+openstack router create router
 )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
