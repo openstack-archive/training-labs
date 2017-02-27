@@ -7,7 +7,7 @@
 # Installation from ISO image
 #-------------------------------------------------------------------------------
 
-readonly ISO_URL_BASE=http://releases.ubuntu.com/16.04/
+readonly ISO_URL_BASE=http://releases.ubuntu.com/16.04
 
 ISO_URL=$ISO_URL_BASE/ubuntu-16.04.1-server-amd64.iso
 #ISO_MD5=23e97cd5d4145d4105fbf29878534049

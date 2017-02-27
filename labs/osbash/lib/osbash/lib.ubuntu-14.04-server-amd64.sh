@@ -7,7 +7,7 @@
 # Installation from ISO image
 #-------------------------------------------------------------------------------
 
-readonly ISO_URL_BASE=http://releases.ubuntu.com/14.04/
+readonly ISO_URL_BASE=http://releases.ubuntu.com/14.04
 
 ISO_URL=$ISO_URL_BASE/ubuntu-14.04.5-server-amd64.iso
 ISO_MD5=dd54dc8cfc2a655053d19813c2f9aa9f
