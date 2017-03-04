@@ -367,14 +367,21 @@ echo "Settings for $PRIVATE_SUBNET:"
 openstack subnet show $PRIVATE_SUBNET
 echo
 
+echo "Checking for DNS name servers in subnet $PRIVATE_SUBNET" \
+     "(passed to booting instance VMs)."
+current_dns_string=$(openstack subnet show -c dns_nameservers \
+                        -fvalue $PRIVATE_SUBNET)
 if [ "$EXT_DNS" = true ]; then
-    echo "Setting DNS name server for subnet (passed to booting instance VMs)."
-    openstack subnet set $PRIVATE_SUBNET --dns-nameserver 8.8.4.4
-    echo
+    if [ -n "$current_dns_string" ]; then
+        echo "DNS name server already set ($current_dns_string)."
+    else
+        echo "Setting DNS name server for subnet $PRIVATE_SUBNET."
+        openstack subnet set $PRIVATE_SUBNET --dns-nameserver 8.8.8.8
+    fi
 else
-    echo "Clearing DNS name server for subnet (passed to booting instance VMs)."
-    dns_servers=$(openstack subnet show -f value -c dns_nameservers \
-                    $PRIVATE_SUBNET | tr ' ,' '\n')
+    echo "Clearing DNS name server(s) for subnet $PRIVATE_SUBNET."
+    # Servers are comma separated (e.g., "8.8.4.4, 8.8.8.8")
+    dns_servers=$(echo $current_dns_string | tr ' ,' '\n')
     for server in $dns_servers; do
         openstack subnet unset --dns-nameserver $server $PRIVATE_SUBNET
     done
