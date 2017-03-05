@@ -100,12 +100,8 @@ conf=/etc/cinder/cinder.conf
 echo "Setting database connection: $database_url."
 iniset_sudo $conf database connection "$database_url"
 
-# Configure [DEFAULT] section to use RabbitMQ message broker.
-iniset_sudo $conf DEFAULT rpc_backend rabbit
-
-iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
-iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
-iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
+echo "Configuring RabbitMQ message queue access."
+iniset_sudo $conf DEFAULT transport_url "rabbit://openstack:$RABBIT_PASS@controller"
 
 iniset_sudo $conf DEFAULT auth_strategy keystone
 

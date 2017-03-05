@@ -75,9 +75,6 @@ sudo apt install -y nova-api nova-conductor nova-consoleauth \
 
 conf=/etc/nova/nova.conf
 
-# Configure [DEFAULT] section.
-iniset_sudo $conf DEFAULT enabled_apis osapi_compute,metadata
-
 # Configure [api_database] section.
 database_url="mysql+pymysql://$NOVA_DB_USER:$NOVA_DBPASS@controller/nova_api"
 echo "Setting API database connection: $database_url."
@@ -90,13 +87,8 @@ iniset_sudo $conf database connection "$database_url"
 
 echo "Configuring nova services."
 
-# Configure [DEFAULT] section.
-iniset_sudo $conf DEFAULT rpc_backend rabbit
-
-# Configure [oslo_messaging_rabbit] section.
-iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
-iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
-iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
+echo "Configuring RabbitMQ message queue access."
+iniset_sudo $conf DEFAULT transport_url "rabbit://openstack:$RABBIT_PASS@controller"
 
 # Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT auth_strategy keystone
@@ -127,10 +119,11 @@ iniset_sudo $conf glance api_servers http://controller:9292
 # Configure [oslo_concurrency] section.
 iniset_sudo $conf oslo_concurrency lock_path /var/lib/nova/tmp
 
-# Delete logdir line
-# According to install-guide, "Due to a packaging bug, remove the logdir option
-# from the [DEFAULT] section."
-sudo sed -i "/^logdir/ d" $conf
+# Delete log-dir line
+# According to the install-guide, "Due to a packaging bug, remove the log-dir
+# option from the [DEFAULT] section."
+sudo grep "^log-dir" $conf
+sudo sed -i "/^log-dir/ d" $conf
 
 echo "Populating the Compute databases."
 sudo nova-manage api_db sync

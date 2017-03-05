@@ -30,12 +30,8 @@ echo "Configuring neutron for compute node."
 conf=/etc/neutron/neutron.conf
 echo "Configuring $conf."
 
-# Configure AMQP parameters
-iniset_sudo $conf DEFAULT rpc_backend rabbit
-
-iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
-iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
-iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
+echo "Configuring RabbitMQ message queue access."
+iniset_sudo $conf DEFAULT transport_url "rabbit://openstack:$RABBIT_PASS@controller"
 
 # Configuring [DEFAULT] section
 iniset_sudo $conf DEFAULT auth_strategy keystone
