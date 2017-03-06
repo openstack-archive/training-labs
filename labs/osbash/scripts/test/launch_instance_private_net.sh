@@ -580,7 +580,7 @@ while : ; do
                         echo
                         echo "SUM ERROR console status remains 409."
                         echo "Restarting nova-compute on compute node."
-                        ssh_no_chk_node compute-mgmt \
+                        ssh_no_chk_node compute1 \
                             sudo service nova-compute restart
                         echo "SUM ERROR nova-compute restart (status 409)"
                     fi
@@ -628,7 +628,7 @@ while : ; do
             echo "SUM ERROR RetryFilter returned 0 hosts"
             show_compute_resource_usage
             echo "Restarting nova-compute on compute node."
-            ssh_no_chk_node compute-mgmt \
+            ssh_no_chk_node compute1 \
                 sudo service nova-compute restart
             echo "SUM ERROR nova-compute restart (RetryFilter)"
         fi
