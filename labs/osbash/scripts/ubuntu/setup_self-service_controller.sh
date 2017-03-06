@@ -53,12 +53,8 @@ iniset_sudo $conf DEFAULT core_plugin ml2
 iniset_sudo $conf DEFAULT service_plugins router
 iniset_sudo $conf DEFAULT allow_overlapping_ips True
 
-iniset_sudo $conf DEFAULT rpc_backend rabbit
-
-# Configure [oslo_messaging_rabbit] section.
-iniset_sudo $conf oslo_messaging_rabbit rabbit_host controller
-iniset_sudo $conf oslo_messaging_rabbit rabbit_userid openstack
-iniset_sudo $conf oslo_messaging_rabbit rabbit_password "$RABBIT_PASS"
+echo "Configuring RabbitMQ message queue access."
+iniset_sudo $conf DEFAULT transport_url "rabbit://openstack:$RABBIT_PASS@controller"
 
 # Configuring [DEFAULT] section.
 iniset_sudo $conf DEFAULT auth_strategy keystone
