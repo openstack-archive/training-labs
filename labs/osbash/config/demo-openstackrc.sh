@@ -1,8 +1,9 @@
 # The variables in this file are exported for use by OpenStack client
 # applications.
 
-# Use BASH_SOURCE so the file works when sourced from a shell, too
-CONFIG_DIR=$(dirname "$BASH_SOURCE")
+# Use BASH_SOURCE so the file works when sourced from a shell, too; use
+# $0 to make it work on zsh
+CONFIG_DIR=$(dirname "${BASH_SOURCE[0]:-$0}")
 source "$CONFIG_DIR/openstack"
 source "$CONFIG_DIR/credentials"
 
