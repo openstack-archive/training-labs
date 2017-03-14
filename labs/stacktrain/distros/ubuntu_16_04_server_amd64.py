@@ -85,9 +85,9 @@ PRESEED_HOST_DIR = ("http://git.openstack.org/cgit/openstack/training-labs/"
                     "plain/labs/osbash/lib/osbash/netboot/")
 
 PRESEED_URL = {}
-PRESEED_URL['ssh'] = PRESEED_HOST_DIR + "preseed-ssh-v4.cfg"
-PRESEED_URL['shared_folder'] = PRESEED_HOST_DIR + "preseed-vbadd-v3.cfg"
-PRESEED_URL['all'] = PRESEED_HOST_DIR + "preseed-all-v2.cfg"
+PRESEED_URL['ssh'] = PRESEED_HOST_DIR + "preseed-ssh-v6.cfg"
+PRESEED_URL['shared_folder'] = PRESEED_HOST_DIR + "preseed-vbadd-v6.cfg"
+PRESEED_URL['all'] = PRESEED_HOST_DIR + "preseed-all-v6.cfg"
 
 # Arguments for ISO image installer
 _BOOT_ARGS = ("/install/vmlinuz"
