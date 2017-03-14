@@ -173,8 +173,12 @@ def process_snap_files(ls_snap_files, args):
             dest_subdir = get_destdir(resultdir, snap_name)
 
             for ls_line in ls_snap_content:
-                new_size, log_rpath = get_size_and_path(ls_line)
-                result_path = os.path.join(dest_subdir, log_rpath)
+                new_size, log_path = get_size_and_path(ls_line)
+                # If the path in the "ls -l" files is absolute, make it
+                # relative; os.path.join would ignore the target directory path
+                # otherwise
+                log_rpath = log_path.strip("/")
+
 
                 if args.verbose:
                     print("\t", log_rpath)
@@ -192,6 +196,7 @@ def process_snap_files(ls_snap_files, args):
 
                 log_size[log_rpath] = new_size
 
+                result_path = os.path.join(dest_subdir, log_rpath)
                 write_results(result_path, new_lines)
 
     if not args.verbose:
