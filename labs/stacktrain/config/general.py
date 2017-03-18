@@ -174,7 +174,7 @@ for index, value in networks_cfg.items():
         sys.exit(1)
 
 # -----------------------------------------------------------------------------
-snapshot_cycle = True
+snapshot_cycle = False
 
 # Base disk size in MB
 base_disk_size = 10000

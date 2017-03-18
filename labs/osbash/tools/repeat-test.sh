@@ -32,7 +32,7 @@ function usage {
     echo ""
     echo "-h        Help"
     echo "-c        Restore node VMs to current snapshot for each test"
-    echo "-q        Disable snapshot cycles during build"
+    echo "-e        Enable snapshot cycles during build"
     echo "-t SNAP   Restore cluster to target snapshot for each test"
     echo "-r REP    Number of repetitions (default: endless loop)"
     echo "-s NODES  Start each named node VM after restoring the cluster"
@@ -40,7 +40,7 @@ function usage {
     echo "          ($(basename $BUILD_EXE) -b cluster [...])"
 }
 
-while getopts :bchqr:s:t: opt; do
+while getopts :bcehqr:s:t: opt; do
     case $opt in
         b)
             REBUILD=yes
@@ -53,10 +53,13 @@ while getopts :bchqr:s:t: opt; do
             exit 0
             ;;
         q)
+            echo "Ignoring -q, it is the default now."
+            ;;
+        e)
             if [ -f "$TOP_DIR/osbash.sh" ]; then
-                export SNAP_CYCLE=no
+                export SNAP_CYCLE=yes
             else
-                ST_OPT="$ST_OPT -q"
+                ST_OPT="$ST_OPT -e"
             fi
             ;;
         r)
