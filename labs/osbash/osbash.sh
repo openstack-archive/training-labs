@@ -26,6 +26,9 @@ source "$OSBASH_LIB_DIR/$PROVIDER-functions.sh"
 source "$OSBASH_LIB_DIR/$PROVIDER-install_base.sh"
 source "$LIB_DIR/osbash/lib-color.sh"
 
+# Skip snap cycles by default (SNAP_CYCLE=no)
+: ${SNAP_CYCLE="no"}
+
 function usage {
     echo "Usage: $0 {-b|-w} [-g GUI] [--no-color] [-n] [-t SNAP] {TARGET}"
     # Don't advertise export until it is working properly

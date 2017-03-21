@@ -88,7 +88,9 @@ def parse_args():
     parser.add_argument('-b', '--build', action='store_true',
                         help='Build cluster on local machine')
     parser.add_argument('-q', '--quick', action='store_true',
-                        help='Disable snapshot cycles during build')
+                        help='Enable snapshot cycles during build (default)')
+    parser.add_argument('-e', '--enable-snap-cycles', action='store_true',
+                        help='Enable snapshot cycles during build')
     parser.add_argument('-t', '--jump-snapshot', metavar='TARGET_SNAPSHOT',
                         help='Jump to target snapshot and continue build')
     parser.add_argument('-g', '--gui', metavar='GUI_TYPE',
@@ -153,12 +155,12 @@ def set_conf_vars(args):
         logger.error('Invalid gui option: "%s". Aborting.', args.gui)
         sys.exit(1)
 
-    if os.environ.get('SNAP_CYCLE') == 'no':
-        logger.info("Picked up SNAP_CYCLE=no from environment.")
-        conf.snapshot_cycle = False
+    if os.environ.get('SNAP_CYCLE') == 'yes':
+        logger.info("Picked up SNAP_CYCLE=yes from environment.")
+        conf.snapshot_cycle = True
 
-    if args.quick:
-        conf.snapshot_cycle = False
+    if args.enable_snap_cycles:
+        conf.snapshot_cycle = True
 
     if args.jump_snapshot:
         conf.jump_snapshot = args.jump_snapshot
