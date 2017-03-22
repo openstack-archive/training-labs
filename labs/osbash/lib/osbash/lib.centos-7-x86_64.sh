@@ -10,7 +10,7 @@ VM_BASE_MEM=1024
 # Booting the operating system installer
 #-------------------------------------------------------------------------------
 
-readonly ISO_URL=http://buildlogs.centos.org/rolling/7/isos/x86_64/CentOS-7-x86_64-DVD-1511.iso
+readonly ISO_URL=https://buildlogs.centos.org/rolling/7/isos/x86_64/CentOS-7-x86_64-DVD-1511.iso
 readonly ISO_MD5=c875b0f1dabda14f00a3e261d241f63e
 
 readonly _KS_ssh=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/ks-ssh-v2.cfg
