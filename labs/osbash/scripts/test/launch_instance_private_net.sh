@@ -806,6 +806,9 @@ function test_internet {
 
 test_internet
 
+# Log memory use
+sed 's|^|SUM MEM |' <<< "$(free -m) "
+
 echo
 echo "Summary"
 echo "======="
