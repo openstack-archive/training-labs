@@ -31,7 +31,9 @@ see the `OpenStack wiki <https://wiki.openstack.org/wiki/Documentation/training-
 * Source: http://git.openstack.org/cgit/openstack/training-labs
 * Bugs: http://bugs.launchpad.net/labs
 
-**Note:** Please note that the python port is optionally available but unstable at present.
+**Note:** Please note that the python port is optionally available, but only works with
+          python2.7 at present. Running the python scripts is recommended as it is more
+          stable than the BASH version and also under active development.
 
 OpenStack Release
 -----------------
