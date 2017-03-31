@@ -26,7 +26,8 @@ echo "Verifying heat installation."
 echo "Waiting for heat-engine to start."
 
 AUTH="source $CONFIG_DIR/demo-openstackrc.sh"
-if openstack stack list 2>&1|grep "orchestration service not found"; then
+if node_ssh controller "$AUTH; openstack stack list 2>&1 | " \
+        "grep 'orchestration service not found'"; then
     echo "SUM HEAT NOT INSTALLED"
     exit 1
 fi
