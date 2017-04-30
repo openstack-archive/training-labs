@@ -65,9 +65,6 @@ def get_next_prefix(dir_path, suffix, digits=3):
 
 
 def create_host_networks():
-    if conf.do_build and not conf.leave_vms_running:
-        vm.stop_running_cluster_vms()
-
     if conf.wbatch:
         wbatch.wbatch_begin_hostnet()
     cnt = 0
