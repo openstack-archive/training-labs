@@ -381,8 +381,11 @@ function disk_compress {
     sudo ls -lh "$disk_path"
     sudo du -sh "$disk_path"
 
-    # Sparsify and compress basedisk image
-    sudo "$spexe" --compress "$disk_path" "$pool_dir/.$disk_name"
+    # virt-sparsify uses about 10 GB additional, temporary work space.
+    # The default (/tmp) is often too small (especially if it is a RAM
+    # disk). We use the pool_dir instead.
+    sudo "$spexe" --tmp "$pool_dir" --compress "$disk_path" \
+        "$pool_dir/.$disk_name"
 
     # Copy owner and file modes from original file
     sudo chown -v --reference="$disk_path" "$pool_dir/.$disk_name"
