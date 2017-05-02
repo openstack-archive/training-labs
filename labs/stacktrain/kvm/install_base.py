@@ -7,6 +7,7 @@ from __future__ import print_function
 import importlib
 import logging
 import os
+import re
 import time
 
 import stacktrain.config.general as conf
@@ -27,6 +28,23 @@ def base_disk_exists():
     return vm.disk_exists(conf.get_base_disk_name())
 
 
+def base_disk_delete():
+    base_disk_name = conf.get_base_disk_name()
+
+    base_disk_path = vm.get_disk_path(base_disk_name)
+    output = vm.virsh("list", "--uuid", "--name", "--all")
+    for line in output.splitlines():
+        if line == "":
+            continue
+        uuid, name = line.rstrip().split(' ')
+        logger.debug("Candidate for deletion: %s %s", uuid, name)
+        domstats = vm.virsh("domstats", uuid, "--block", "--backing")
+        if re.search("block.*path.*{}".format(base_disk_path), domstats):
+          logger.info("Deleting VM %s %s", uuid, name)
+          vm.vm_delete(uuid)
+    vm.disk_delete(base_disk_name)
+
+
 def vm_install_base():
     vm_name = "base"
 
@@ -35,7 +53,10 @@ def vm_install_base():
     base_disk_name = conf.get_base_disk_name()
 
     vm.vm_delete(vm_name)
-    vm.disk_delete(base_disk_name)
+
+    if base_disk_exists():
+        logger.info("Deleting existing basedisk.")
+        base_disk_delete()
 
     vm_config = conf.vm[vm_name]
 
