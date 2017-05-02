@@ -88,7 +88,7 @@ def parse_args():
     parser.add_argument('-b', '--build', action='store_true',
                         help='Build cluster on local machine')
     parser.add_argument('-q', '--quick', action='store_true',
-                        help='Enable snapshot cycles during build (default)')
+                        help='Disable snapshot cycles during build (default)')
     parser.add_argument('-e', '--enable-snap-cycles', action='store_true',
                         help='Enable snapshot cycles during build')
     parser.add_argument('-t', '--jump-snapshot', metavar='TARGET_SNAPSHOT',
