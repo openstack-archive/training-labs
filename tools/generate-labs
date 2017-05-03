@@ -31,7 +31,7 @@ tar --exclude=*.iso \
     --exclude=*.vdi \
     --exclude=*.log \
     --exclude=*.auto \
-    -czf build/dist/labs-${release}.tgz labs/osbash
+    -czf build/dist/labs-${release}.tgz labs/
 
 
 # Generate Windows batch scripts
