@@ -101,16 +101,45 @@ function exec_logfile {
 # Functions that need to run as root
 #-------------------------------------------------------------------------------
 
+# /sbin/mount.vboxsf often ends up as a broken symlink, resulting in errors
+# when trying to mount the share in osbashauto.
 function as_root_fix_mount_vboxsf_link {
     local file=/sbin/mount.vboxsf
     if [ -L $file -a ! -e $file ]; then
-        echo "$file is a broken symlink. Trying to fix it."
-        shopt -s nullglob
-        local new=(/opt/VBoxGuestAdditions*/lib/VBoxGuestAdditions)
-        if [ -n "$new" ]; then
-            ln -sv "$new" /usr/lib/VBoxGuestAdditions
-        else
-            return 1
+        echo "$file is a broken symlink:"
+        ls -l "$file"
+        echo "Trying to fix it."
+
+        sdir="/usr/lib/VBoxGuestAdditions"
+        if [ -L "$sdir" -a ! -e "$sdir" ]; then
+          # /usr/lib/VBoxGuestAdditions is a convenient link into a directory
+          # under /opt that changes its name with VirtualBox versions.
+          # In some cases, the link was missing but /sbin/mount.vboxsf
+          # pointed there.
+          echo "$sdir is a broken symlink:"
+          ls -l "sdir"
+          shopt -s nullglob
+          local new=(/opt/VBoxGuestAdditions*/lib/VBoxGuestAdditions)
+          if [ -n "$new" ]; then
+              ln -sv "$new" "$sdir"
+          else
+              echo "as_root_fix_mount_vboxsf_link: no VGA dir, aborting."
+              return 1
+          fi
+        fi
+
+        if [ -L $file -a ! -e $file ]; then
+          # In some cases, /sbin/mount.vboxsf gets the path in
+          # /usr/lib/VBoxGuestAdditions. Try to fix the link.
+          echo "Trying harder."
+          new_target=$(find "$sdir/" -name "mount.vboxsf")
+          if [ -z "$new_target" ]; then
+              echo "as_root_fix_mount_vboxsf_link: no mount.vboxsf, aborting."
+              return 1
+          else
+              echo "Found new target: $new_target"
+          fi
+          ln -svf "$new_target" "$file"
         fi
     fi
 }
