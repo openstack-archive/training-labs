@@ -89,15 +89,19 @@ cmd snapshot_cycle -n compute1 cinder-volume_installed
 #cmd snapshot_cycle -n compute1 telemetry-compute_installed
 
 cmd boot -n compute1
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Take snapshot of database changes on controller VM, too
-cmd shutdown -n controller
-
-cmd snapshot -n controller controller_-_compute1_node_installed
 #==============================================================================
+# Create networks
+cmd shutdown -n controller
 cmd queue config_public_network.sh
 cmd queue config_private_network.sh
-cmd snapshot_cycle -n controller public_private_networks
-#==============================================================================
-
 cmd boot -n controller
+#==============================================================================
+# Always take snapshots of finished cluster
+cmd shutdown -n controller
+cmd shutdown -n compute1
+cmd snapshot -n controller controller_-_cluster_installed
+cmd snapshot -n compute1 compute-_cluster_installed
+
+# Boot cluster nodes -- cluster is ready for use
+cmd boot -n controller
+cmd boot -n compute1
