@@ -17,7 +17,7 @@ exec_logfile
 # We replace the hostname "controller" with the equivalent IP address to
 # make the openrc file work on the user's host machine without them
 # changing their /etc/hosts
-MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
+MY_MGMT_IP=$(get_node_ip_in_network "controller" "mgmt")
 
 # Replace variables with constants and remove lines used to fill in variables
 
