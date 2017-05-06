@@ -150,7 +150,7 @@ def set_vm_group(vm_name):
     # produces an error if the VM is not running)
     virsh("desc", vm_name, "--config", "--title",
           "--new-desc", "{}: {}".format(vm_name, vm_group))
-    long_desc = "All VMs with '{}' in their description title get shut down" \
+    long_desc = "All VMs with '{}' in their description title get shut down " \
                 "when a new cluster build starts."
     virsh("desc", vm_name, "--config",
           "--new-desc", long_desc.format(vm_group))
