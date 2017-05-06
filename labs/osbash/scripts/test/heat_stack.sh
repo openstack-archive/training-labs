@@ -146,6 +146,9 @@ node_ssh controller "$AUTH; openstack stack output show --all $TEST_STACK_NAME; 
 echo "Deleting the test stack."
 heat_stack_id=$(node_ssh controller "$AUTH; openstack stack list" | awk "/ $TEST_STACK_NAME / {print \$2}")
 
+# Log memory use
+sed 's|^|SUM HEAT MEM |' <<< "$(free -m) "
+
 node_ssh controller "$AUTH; openstack stack delete $heat_stack_id"
 
 echo -n "Waiting for test stack to disappear."
