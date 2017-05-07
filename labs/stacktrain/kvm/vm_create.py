@@ -607,6 +607,7 @@ def get_disk_path(disk_name):
 
 
 def vm_snapshot_list(vm_name):
+    output = None
     if vm_exists(vm_name):
         # try:
         output = virsh("snapshot-list", vm_name, show_err=False)

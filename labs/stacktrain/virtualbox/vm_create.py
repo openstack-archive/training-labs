@@ -607,13 +607,14 @@ def vm_attach_guestadd_iso(vm_name):
 
 
 def vm_snapshot_list(vm_name):
+    output = None
     if vm_exists(vm_name):
         try:
             output = vbm("snapshot", vm_name, "list", "--machinereadable",
                          show_err=False)
         except EnvironmentError:
             # No snapshots
-            output = None
+            pass
     return output
 
 
