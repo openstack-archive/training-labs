@@ -54,5 +54,5 @@ if vm_ssh "$VM_SSH_PORT" 'ls log/test-*.*' >/dev/null 2>&1; then
     vm_ssh "$VM_SSH_PORT" 'cd log; tar cf - test-*.*' | tar xf - -C "$RESULTS_DIR/controller"
     vm_ssh "$VM_SSH_PORT" 'rm log/test-*.*'
 else
-    echo "VM controller does not reply."
+    echo "VM controller does not reply or no test log files found."
 fi
