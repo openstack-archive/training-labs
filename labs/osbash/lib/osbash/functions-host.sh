@@ -635,8 +635,8 @@ function download {
     local rc=0
 
     if [ -n "${VM_PROXY:-""}" ]; then
-	echo "Using VM_PROXY as http_proxy: $VM_PROXY"
-	export http_proxy=$VM_PROXY
+        echo "Using VM_PROXY as http_proxy: $VM_PROXY"
+        export http_proxy=$VM_PROXY
     fi
 
     local wget_exe=$(which wget)
