@@ -2,7 +2,7 @@
 
 set -o errexit -o nounset
 
-TOP_DIR=$(cd "$(dirname "$0")/.." && pwd)
+TOP_DIR=$(cd $(cat "../TOP_DIR"||echo $(dirname "$0"))/.. && pwd)
 
 source "$TOP_DIR/config/paths"
 source "$LIB_DIR/functions.guest.sh"
