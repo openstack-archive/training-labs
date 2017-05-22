@@ -16,6 +16,7 @@ import os
 import re
 
 from string import Template
+from shutil import copyfile
 
 import stacktrain.config.general as conf
 import stacktrain.core.helpers as hf
@@ -32,7 +33,8 @@ OUT_FILE = None
 def wbatch_reset():
     """Clean Windows batch directory"""
     hf.clean_dir(WBATCH_OUT_DIR)
-
+    copyfile(os.path.join(TPLT_DIR, "config_bat"),
+             os.path.join(WBATCH_OUT_DIR, "config.bat"))
 
 def init():
     """Initialize variables and directory for Windows batch script creation"""
@@ -249,7 +251,7 @@ def wbatch_log_vbm(*args):
     # Have Windows echo what we are about to do
     wbatch_write("ECHO VBoxManage " + " ". join(argl))
 
-    wbatch_write("VBoxManage " + " ". join(argl))
+    wbatch_write('"%VBM%" ' + " ". join(argl))
 
     # Abort if VBoxManage call raised errorlevel
     wbatch_write("IF %errorlevel% NEQ 0 GOTO :vbm_error")
