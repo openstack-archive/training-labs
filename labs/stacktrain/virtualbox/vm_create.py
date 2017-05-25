@@ -192,6 +192,8 @@ def vm_acpi_shutdown(vm_name):
 
 
 # Shut down all VMs in group VM_GROUP
+# Note: This function must be called when no Windows batch file is open for
+#       writing (wbatch_write will ignore all these calls).
 def stop_running_cluster_vms():
     # Get VM ID from a line looking like this:
     # "My VM" {0a13e26d-9543-460d-82d6-625fa657b7c4}

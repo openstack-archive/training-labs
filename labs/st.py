@@ -223,6 +223,9 @@ def main():
     if conf.wbatch:
         wbatch.wbatch_reset()
 
+    if conf.do_build and not conf.leave_vms_running:
+        vm.stop_running_cluster_vms()
+
     if conf.do_build and install_base.base_disk_exists():
         if args.target == "basedisk":
             print("Basedisk exists: %s" % conf.get_base_disk_name())
