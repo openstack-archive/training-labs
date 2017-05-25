@@ -58,7 +58,7 @@ function vm_install_base {
         --cdrom "$INSTALL_ISO" \
         --name $vm_name \
         --os-type linux \
-        --ram "${VM_BASE_MEM:=512}" \
+        --ram "${VM_BASE_MEM:=1024}" \
         --vcpus 1 \
         --virt-type kvm \
         $console_type \
