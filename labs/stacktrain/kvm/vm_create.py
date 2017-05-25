@@ -564,7 +564,12 @@ def disk_compress(disk_name):
     logger.debug("size\t%s", size)
 
     tmp_file = os.path.join(pool_dir, ".{}".format(disk_name))
-    subprocess.call(["sudo", spexe, "--compress", disk_path, tmp_file])
+
+    # virt-sparsify uses about 10 GB additional, temporary work space.
+    # The default (/tmp) is often too small (especially if it is a RAM
+    # disk). We use the pool_dir instead.
+    subprocess.call(["sudo", spexe, "--tmp", pool_dir, "--compress",
+                    disk_path, tmp_file])
 
     logger.info("Restoring owner.")
     # No root wrapper, so use sudo with shell commands
