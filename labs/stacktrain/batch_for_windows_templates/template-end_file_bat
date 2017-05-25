@@ -41,13 +41,13 @@ TIMEOUT /T 5 /NOBREAK
 GOTO :wait_auto
 REM - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 :wait_poweroff
-VBoxManage showvminfo %~1 --machinereadable|findstr poweroff
+"%VBM%" showvminfo %~1 --machinereadable|findstr poweroff
 IF %errorlevel% EQU 0 GOTO :eof
 TIMEOUT /T 2 /NOBREAK
 GOTO :wait_poweroff
 REM - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 :vm_exists
-VBoxManage list vms|findstr %~1
+"%VBM%" list vms|findstr %~1
 IF %errorlevel% NEQ 0 GOTO :eof
 ECHO.
 ECHO %time% VM %~1 already exists. Aborting.
