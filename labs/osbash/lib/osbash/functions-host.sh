@@ -85,6 +85,7 @@ function keyboard_send_f6 {
 function keyboard_send_string {
     local vm_name=$1
     local str=$2
+    local cnt=0
 
     # This loop is inefficient enough that we don't overrun the keyboard input
     # buffer when pushing scancodes to the VM.
@@ -97,6 +98,14 @@ function keyboard_send_string {
                 echo >&2 "not found: $char"
             fi
         fi
+
+        # Inject sleep into the wbatch files because the Windows batch file
+        # is sometimes _too_ efficient and overruns the keyboard input buffer
+        if [[ $((cnt % 50)) -eq 0 ]]; then
+            OSBASH= ${WBATCH:-:} conditional_sleep 1
+        fi
+        cnt=$((cnt + 1))
+
     done <<< "$str"
 }
 
