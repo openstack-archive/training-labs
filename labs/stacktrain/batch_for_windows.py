@@ -190,13 +190,13 @@ def wbatch_mkdirs():
 def wbatch_begin_hostnet():
     wbatch_new_file("create_hostnet.bat")
     wbatch_file_header("host-only networks")
+    wbatch_write_template("template-begin_hostnet_bat")
     # Creating networks requires elevated privileges
     wbatch_elevate_privileges()
     wbatch_find_vbm()
 
 
 def wbatch_create_hostnet(if_ip, adapter):
-    adapter = vboxnet_to_win_adapter_num(adapter)
     replace = {"IFNAME": adapter,
                "IFIP": if_ip}
     wbatch_write_template("template-create_hostnet_bat", replace)
@@ -237,9 +237,11 @@ def wbatch_log_vbm(*args):
     argl = list(*args)
     for index, arg in enumerate(argl):
         if re.match("--hostonlyadapter", arg):
-            # The next arg is the host-only interface name -> change it
-            argl[index+1] = '"' + vboxnet_to_win_adapter_num(argl[index+1]) + \
-                            '"'
+            # The next arg is the host-only interface name -> change it.
+            # We use the vboxnet interface name as a variable name for the
+            # Windows batch scripts. This is a reference to the variable,
+            # therefore the string must be somethin like "%vboxnet0%".
+            argl[index+1] = '"' + "%{}%".format(argl[index+1]) + '"'
         elif re.match("--hostpath", arg):
             # The next arg is the shared dir -> change it
             argl[index+1] = r'%SHAREDIR%'
@@ -262,20 +264,6 @@ def wbatch_log_vbm(*args):
 # -----------------------------------------------------------------------------
 # Windows path name helpers
 # -----------------------------------------------------------------------------
-
-
-def vboxnet_to_win_adapter_num(vboxname):
-    win_if = "VirtualBox Host-Only Ethernet Adapter"
-
-    # Remove leading "vboxnet" to get interface number
-    if_num = int(vboxname.replace("vboxnet", ""))
-
-    if if_num > 0:
-        # The first numbered "VirtualBox Host-Only Ethernet Adapter" is #2
-        win_if += " #{}".format(str(if_num + 1))
-    logger.debug("vboxnet_to_win_adapter_num returns: %s", win_if)
-
-    return win_if
 
 
 def wbatch_path_to_windows(full_path):

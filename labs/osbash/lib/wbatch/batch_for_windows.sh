@@ -171,6 +171,7 @@ function wbatch_mkdirs {
 function wbatch_create_hostnet {
     wbatch_new_file "create_hostnet.bat"
     wbatch_file_header "host-only networks"
+    cat "$WBATCH_TEMPLATE_DIR/template-begin_hostnet_bat" | wbatch_write_stdin
     # Creating networks requires elevated privileges
     wbatch_elevate_privileges
     wbatch_find_vbm
@@ -183,7 +184,7 @@ function wbatch_create_hostnet {
         # The host-side interface is the default gateway of the network
         if_ip=${NET_GW[index]}
         # Translate if_name to Windows-type interface name
-        win_adapter=$(vboxnet_to_win_adapter_num "$if_name")
+        win_adapter=$if_name
         sed -e "
             s,%IFNAME%,${win_adapter},g;
             s,%IFIP%,${if_ip},g;
@@ -237,7 +238,7 @@ function wbatch_log_vbm {
         case "${ARGS[i]}" in
             --hostonlyadapter*)
                 # The next arg is the host-only interface name -> change it
-                ARGS[i+1]=\"$(vboxnet_to_win_adapter_num "${ARGS[i+1]}")\"
+                ARGS[i+1]=\"%${ARGS[i+1]}%\"
                 ;;
             --hostpath)
                 # The next arg is the shared dir -> change it
@@ -270,20 +271,6 @@ function wbatch_log_vbm {
 #-------------------------------------------------------------------------------
 # Windows path name helpers
 #-------------------------------------------------------------------------------
-
-# Translate Unix-style vboxnetX to Windows-type interface name
-function vboxnet_to_win_adapter_num {
-    local vboxname=$1
-    local win_if="VirtualBox Host-Only Ethernet Adapter"
-
-    # Remove leading "vboxnet" to get interface number
-    local ifnum=${vboxname#vboxnet}
-
-    if [ "$ifnum" -ne 0 ]; then
-        win_if+=" #$((ifnum + 1))"
-    fi
-    echo "$win_if"
-}
 
 # On Windows, all paths are relative to TOP_DIR
 function wbatch_path_to_windows {
