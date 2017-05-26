@@ -53,17 +53,20 @@ function vm_install_base {
     fi
 
     # Boot VM into distribution installer
+    (
+    source "$CONFIG_DIR/config.$vm_name"
     $VIRT_INSTALL \
         --disk "vol=$KVM_VOL_POOL/$base_disk_name,cache=none" \
         --cdrom "$INSTALL_ISO" \
         --name $vm_name \
         --os-type linux \
-        --ram "${VM_BASE_MEM:=1024}" \
+        --ram "${VM_MEM}" \
         --vcpus 1 \
         --virt-type kvm \
         $console_type \
         --wait=-1 \
         &
+    )
 
     local delay=10
     echo >&2 "Waiting $delay seconds for VM \"$vm_name\" to come up."

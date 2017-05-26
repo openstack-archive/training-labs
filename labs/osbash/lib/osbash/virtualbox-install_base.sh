@@ -14,7 +14,11 @@ function vm_install_base {
     ${WBATCH:-:} wbatch_delete_disk "$base_build_disk"
 
     vm_create "$vm_name"
-    vm_mem "$vm_name" "${VM_BASE_MEM:=1024}"
+    (
+    source "$CONFIG_DIR/config.$vm_name"
+
+    vm_mem "$vm_name" "${VM_MEM}"
+    )
 
     if [ -z "${INSTALL_ISO-}" ]; then
 

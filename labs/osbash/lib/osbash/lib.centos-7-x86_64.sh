@@ -3,9 +3,6 @@
 # Default scripts for all Fedora base disks
 : ${BASE_INSTALL_SCRIPTS:=scripts.centos_base}
 
-# Give CentOS 7 installer sufficient RAM
-VM_BASE_MEM=1024
-
 #-------------------------------------------------------------------------------
 # Booting the operating system installer
 #-------------------------------------------------------------------------------

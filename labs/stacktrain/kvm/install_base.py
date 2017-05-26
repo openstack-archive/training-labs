@@ -81,11 +81,9 @@ def vm_install_base():
     libvirt_connect_uri = "qemu:///system"
     virt_install_call = ["sudo", "virt-install",
                          "--connect={}".format(libvirt_connect_uri)]
-    vm_base_mem = 1024
-
     call_args = virt_install_call
     call_args.extend(["--name", vm_name])
-    call_args.extend(["--ram", str(vm_base_mem)])
+    call_args.extend(["--ram", str(vm_config.vm_mem)])
     call_args.extend(["--vcpus", str(1)])
     call_args.extend(["--os-type", "linux"])
     call_args.extend(["--cdrom", install_iso])
