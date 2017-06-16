@@ -1,3 +1,6 @@
+ECHO %time% Loading network interface names
+CALL "%~dp0\iface_config.bat"
+
 ECHO %time% Cleaning up autostart and log directories
 DEL /S /Q %AUTODIR%
 DEL /S /Q %LOGDIR%
