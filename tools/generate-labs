@@ -35,7 +35,7 @@ tar --exclude=*.iso \
 
 
 # Generate Windows batch scripts
-labs/osbash/osbash.sh -w cluster
+labs/st.py -w cluster
 
 #labs/osbash/osbash.sh -w cluster
 # Create zip file of labs scripts for Windows users
