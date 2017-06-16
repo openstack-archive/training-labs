@@ -3,6 +3,12 @@ CALL "%~dp0\CONFIG.BAT"
 
 IF EXIST "%VBM%" GOTO vbm_found
 
+REM Before searching, try a likely alternative
+
+SET VBM=d:\Program Files\Oracle\VirtualBox\VBoxManage.exe
+
+IF EXIST "%VBM%" GOTO vbm_found
+
 ECHO.
 ECHO %time% Searching %SystemDrive% for VBoxManage, this may take a while
 ECHO.
