@@ -34,6 +34,11 @@ function set_apt_proxy {
 
 set_apt_proxy
 
+# Use repository redirection for faster repository access.
+# The mirror 'archive.ubuntu.com' points to the closest to your location
+# instead of the 'us.archive.ubuntu.com' ones in United States
+sudo sed  -i 's/us.archive.ubuntu.com/archive.ubuntu.com/g' /etc/apt/sources.list
+
 # Get apt index files
 sudo apt update
 
