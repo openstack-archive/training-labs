@@ -61,8 +61,12 @@ def ssh_process_autostart(vm_name):
     logger.info("    Connected to ssh server.")
     sys.stdout.flush()
 
-    ssh.vm_ssh(vm_name, "rm -rf osbash lib config autostart")
-    ssh.vm_scp_to_vm(vm_name, conf.lib_dir, conf.config_dir)
+    if conf.vm[vm_name].updated:
+        ssh.vm_ssh(vm_name, "rm -rf autostart")
+    else:
+        logging.debug("Updating config, lib directories for VM %s.", vm_name)
+        ssh.vm_ssh(vm_name, "rm -rf autostart config lib")
+        ssh.vm_scp_to_vm(vm_name, conf.config_dir, conf.lib_dir)
 
     for script_path in sorted(glob(join(conf.autostart_dir, "*.sh"))):
         ssh_exec_script(vm_name, script_path)
@@ -138,6 +142,8 @@ def autostart_and_wait(vm_name):
             logger.exception("ssh_process_autostart")
             raise
 
+    # ssh_process_autostart has updated the directories
+    conf.vm[vm_name].updated = True
     wait_for_autofiles()
 
     if not conf.wbatch:
