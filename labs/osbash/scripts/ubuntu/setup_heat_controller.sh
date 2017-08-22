@@ -17,7 +17,7 @@ wait_for_keystone
 
 #------------------------------------------------------------------------------
 # Install the Orchestration Service (heat)
-# http://docs.openstack.org/project-install-guide/orchestration/ocata/install-ubuntu.html
+# https://docs.openstack.org/heat/pike/install/install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -205,8 +205,8 @@ ENDTIME=$(date +%s)
 echo "Restarting heat servies took $((ENDTIME - STARTTIME)) seconds."
 
 #------------------------------------------------------------------------------
-# Verify operation of Orchestration Service (heat).
-# http://docs.openstack.org/project-install-guide/orchestration/ocata/verify.html
+# Verify operation
+# https://docs.openstack.org/heat/pike/install/verify.html
 #------------------------------------------------------------------------------
 
 echo "Listing service components."

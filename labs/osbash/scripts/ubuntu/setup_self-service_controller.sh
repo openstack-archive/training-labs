@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-controller-install-option2.html
+# https://docs.openstack.org/neutron/pike/install/controller-install-option2-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -136,6 +136,8 @@ echo "Configuring the layer-3 agent."
 conf=/etc/neutron/l3_agent.ini
 iniset_sudo $conf DEFAULT interface_driver linuxbridge
 
+# FIXME The following block (comment and change to external_network_bridge
+# disappeared in the docs transition to Pike. Intentionally?
 # The external_network_bridge option intentionally lacks a value to enable
 # multiple external networks on a single agent.
 iniset_sudo $conf DEFAULT external_network_bridge ""

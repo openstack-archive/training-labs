@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install and configure a storage node
-# http://docs.openstack.org/ocata/install-guide-ubuntu/cinder-storage-install.html
+# https://docs.openstack.org/cinder/pike/install/cinder-storage-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
@@ -23,6 +23,10 @@ echo "IP address of this node's interface in management network: $MY_MGMT_IP."
 
 echo "Installing qemu support package for non-raw image types."
 sudo apt install -y qemu
+
+# not in install-guide (needed to prevent lvcreate error):
+echo "Installing thin-provisioning-tools."
+sudo apt install -y thin-provisioning-tools
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Prerequisites
@@ -115,12 +119,9 @@ echo "Restarting cinder service."
 sudo service tgt restart
 sudo service cinder-volume restart
 
-# Not in the install-guide:
-sudo rm -v /var/lib/cinder/cinder.sqlite
-
 #------------------------------------------------------------------------------
-# Verify the Block Storage installation
-# http://docs.openstack.org/ocata/install-guide-ubuntu/cinder-verify.html
+# Verify Cinder operation
+# https://docs.openstack.org/cinder/pike/install/cinder-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying Block Storage installation on controller node."
@@ -182,7 +183,7 @@ check_cinder_services
 
 #------------------------------------------------------------------------------
 # Verify the Block Storage installation
-# http://docs.openstack.org/ocata/install-guide-ubuntu/launch-instance-cinder.html
+# https://docs.openstack.org/install-guide/launch-instance-cinder.html
 # (partial implementation without instance)
 #------------------------------------------------------------------------------
 

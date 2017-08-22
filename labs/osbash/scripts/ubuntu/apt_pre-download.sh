@@ -54,7 +54,7 @@ apt_download cinder-api cinder-scheduler python-cinderclient
 apt_download openstack-dashboard
 
 # Cinder Volumes
-apt_download lvm2 cinder-volume
+apt_download lvm2 cinder-volume thin-provisioning-tools
 
 # Nova Compute
 apt_download nova-compute nova-compute-qemu qemu sysfsutils

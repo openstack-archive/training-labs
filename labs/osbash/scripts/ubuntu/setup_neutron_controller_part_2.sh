@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for controller node.
-# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-controller-install.html
+# https://docs.openstack.org/neutron/pike/install/controller-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 source "$CONFIG_DIR/admin-openstackrc.sh"
@@ -34,7 +34,7 @@ iniset_sudo $conf DEFAULT nova_metadata_ip controller
 iniset_sudo $conf DEFAULT metadata_proxy_shared_secret "$METADATA_SECRET"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Configure Compute to use Networking
+# Configure the Compute service to use the Networking service
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Configuring Compute to use Networking."
@@ -84,14 +84,14 @@ fi
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for controller node.
-# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-verify.html
+# https://docs.openstack.org/neutron/pike/install/verify-option2.html
 #------------------------------------------------------------------------------
 
 echo -n "Verifying operation."
-until openstack extension list --network >/dev/null 2>&1; do
+until openstack network agent list >/dev/null 2>&1; do
     sleep 1
     echo -n .
 done
 echo
 
-openstack extension list --network
+openstack network agent list

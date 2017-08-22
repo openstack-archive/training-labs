@@ -14,14 +14,14 @@ indicate_current_auto
 
 #-------------------------------------------------------------------------------
 # Install the message broker service (RabbitMQ).
-# http://docs.openstack.org/ocata/install-guide-ubuntu/environment-messaging.html
+# https://docs.openstack.org/install-guide/environment-messaging-ubuntu.html
 #-------------------------------------------------------------------------------
 
 echo "Installing RabbitMQ."
 sudo apt install -y rabbitmq-server
 
 echo -n "Waiting for RabbitMQ to start."
-while ! sudo rabbitmqctl status >/dev/null; do
+until sudo rabbitmqctl status >/dev/null; do
     sleep 1
     echo -n .
 done

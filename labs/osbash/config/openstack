@@ -1,10 +1,10 @@
 # This file contains OpenStack configuration data. It is used by both
 # host (osbash, Windows batch) and VM guest scripts.
 
-# ocata                (production release; cloud-archive:ocata)
-# ocata-proposed       (pre-release testing: cloud-archive:ocata-proposed)
-# ocata-staging        (ppa:openstack-ubuntu-testing/ocata)
-: ${OPENSTACK_RELEASE:=ocata}
+# pike                (production release; cloud-archive:pike)
+# pike-proposed       (pre-release testing: cloud-archive:pike-proposed)
+# pike-staging        (ppa:openstack-ubuntu-testing/pike)
+: ${OPENSTACK_RELEASE:=pike}
 
 # CirrOS image URL
 if [ "$(uname -m)" = "x86_64" ]; then
@@ -19,7 +19,7 @@ unset arch
 CIRROS_IMG_NAME="cirros"
 
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-networking.html
+# https://docs.openstack.org/install-guide/environment-networking.html
 #------------------------------------------------------------------------------
 
 # Networks used by OpenStack training-labs setup
@@ -31,7 +31,7 @@ NETWORK_2="provider 203.0.113.0"
 PXE_INITIAL_NODE_IP="10.0.0.240"
 
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/ocata/install-guide-ubuntu/launch-instance-networks-provider.html
+# https://docs.openstack.org/install-guide/launch-instance-networks-provider.html
 #------------------------------------------------------------------------------
 
 # Public network
@@ -42,7 +42,7 @@ PXE_INITIAL_NODE_IP="10.0.0.240"
 : ${END_IP_ADDRESS:=203.0.113.200}
 
 #------------------------------------------------------------------------------
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-networks-private.html
+# https://docs.openstack.org/install-guide/launch-instance-selfservice.html
 #------------------------------------------------------------------------------
 
 # Private demo network

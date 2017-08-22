@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-compute-install-option2.html
+# https://docs.openstack.org/neutron/pike/install/compute-install-option2-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

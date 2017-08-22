@@ -22,7 +22,7 @@ echo "Will bind MySQL server to $DB_IP."
 
 #------------------------------------------------------------------------------
 # Install and configure the database server
-# http://docs.openstack.org/ocata/install-guide-ubuntu/environment-sql-database.html
+# https://docs.openstack.org/install-guide/environment-sql-database-ubuntu.html
 #------------------------------------------------------------------------------
 
 echo "Sourced MySQL password from credentials: $DATABASE_PASSWORD"

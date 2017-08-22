@@ -13,7 +13,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Dashboard (horizon)
-# http://docs.openstack.org/ocata/install-guide-ubuntu/horizon-install.html
+# https://docs.openstack.org/horizon/pike/install/install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -30,17 +30,6 @@ echo "Installing horizon."
 sudo apt install -y openstack-dashboard
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# XXX changing owner/permissions (work-around for packaging bug -- the
-#     Dashboard will not work without it)
-sudo ls -l /var/lib/openstack-dashboard/
-sudo namei -l /var/lib/openstack-dashboard/
-
-sudo chown www-data:www-data /var/lib/openstack-dashboard
-sudo chown www-data:www-data /var/lib/openstack-dashboard/secret_key
-sudo chmod 700 /var/lib/openstack-dashboard
-sudo chmod 600 /var/lib/openstack-dashboard/secret_key
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 # Edit the /etc/openstack-dashboard/local_settings.py file.
 conf=/etc/openstack-dashboard/local_settings.py
 auth_host=controller
@@ -71,7 +60,7 @@ echo "memcached listening on $interface_ip:$port."
 interface_name=$(getent hosts "$auth_host" | awk '{ print $2 }')
 
 # Line should read something like: 'LOCATION' : 'controller:11211',
-if grep "LOCATION.*$interface_name:$port" $conf; then
+if sudo grep "LOCATION.*$interface_name:$port" $conf; then
     echo "$conf agrees."
 else
     echo >&2 "$conf disagrees. Aborting."
@@ -79,7 +68,7 @@ else
 fi
 
 echo "CACHES configuration in $conf:"
-awk '/^CACHES =/,/^}/' $conf
+sudo awk '/^CACHES =/,/^}/' $conf
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Enabling Identity API version 3."

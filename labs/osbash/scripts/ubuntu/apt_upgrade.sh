@@ -14,7 +14,7 @@ exec_logfile
 
 #------------------------------------------------------------------------------
 # Finalize the installation
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-packages.html
+# https://docs.openstack.org/install-guide/environment-packages-ubuntu.html
 #------------------------------------------------------------------------------
 
 # Note: We assume that apt_init.sh set up repos and updated the apt index files
