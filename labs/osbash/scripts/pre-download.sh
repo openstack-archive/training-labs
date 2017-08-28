@@ -19,6 +19,13 @@ if [ -n "${VM_PROXY:-""}" ]; then
     export https_proxy=$VM_PROXY
 fi
 
+# FIXME Temporary fix because DNS registration for cirros-cloud.net expired
+#       on 2017-08-27
+if ! $(host download.cirros-cloud.net); then
+  echo "Adding download.cirros-cloud.net to /etc/hosts (temporary fix)."
+  echo "64.90.42.85 download.cirros-cloud.net" | sudo tee -a /etc/hosts
+fi
+
 # Download CirrOS image
 function get_cirros {
     local file_name=$(basename $CIRROS_URL)
