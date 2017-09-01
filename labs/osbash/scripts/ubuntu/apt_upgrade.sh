@@ -54,3 +54,6 @@ sudo apt -y clean
 
 echo "Installing OpenStack client."
 sudo apt install -y python-openstackclient
+
+echo "Installing curl, tree (they are small and useful)."
+sudo apt install -y curl tree
