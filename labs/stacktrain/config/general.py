@@ -196,6 +196,8 @@ class VMconfig(object):
         self._ssh_port = None
         self.http_port = None
         self.get_config_from_file()
+        # Did this run already update VM's config, lib directories?
+        self.updated = False
         self.pxe_tmp_ip = None
         if provider == "virtualbox":
             # TODO is IPaddress class worth using?
