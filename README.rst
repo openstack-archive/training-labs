@@ -46,28 +46,50 @@ Pre-requisite
 
 * Download and install `VirtualBox <https://www.virtualbox.org/wiki/Downloads>`_.
 
-How to run the scripts
-----------------------
+How to run the scripts for GNU/Linux and macOS
+----------------------------------------------
 
-Clone the training-labs repository:
+Clone the training-labs repository::
 
     $ git clone git://git.openstack.org/openstack/training-labs.git
 
-Change directory:
+Change directory::
 
-    $ cd training-labs/labs/osbash/
+    $ cd training-labs/labs/
 
-Run the script by:
+By default, the cluster is built on Virtualbox VMs.
 
-    $ ./osbash.sh -g gui -b cluster
+Run the script by::
+
+    $ ./st.py -b cluster
+
+How to run the scripts for Windows
+----------------------------------
+
+The easiest and recommended way to get everything you need besides
+VirtualBox is to download a zip file for Windows from the
+`Training Labs page <https://docs.openstack.org/training_labs/>`_.
+
+The zip files include pre-generated Windows batch files.
+
+Creates the host-only networks used by the node VMs to communicate::
+
+    > create_hostnet.bat
+
+Creates the base disk::
+
+    > create_base.bat
+
+Creates the node VMs based on the base disk::
+
+    > create_ubuntu_cluster_node.bat
 
 What the script installs
 ------------------------
 
-Running this will automatically spin up 3 virtual machines in VirtualBox/KVM:
+Running this will automatically spin up 2 virtual machines in VirtualBox/KVM:
 
 * Controller node
-* Network node
 * Compute node
 
 Now you have a multi-node deployment of OpenStack running with the below services installed.
@@ -86,16 +108,11 @@ OpenStack services installed on Controller node:
   * nova-novncproxy
   * python-novaclient
 
+* Cinder
+
 * Neutron
 
   * neutron-server
-
-* Cinder
-
-Openstack services installed on Network node:
-
-* Neutron
-
   * neutron-plugin-openvswitch-agent
   * neutron-l3-agent
   * neutron-dhcp-agent
@@ -118,7 +135,7 @@ There are two ways to access the services:
 
 * OpenStack Dashboard (horizon)
 
-You can access the dashboard at: http://192.168.100.51/horizon
+You can access the dashboard at: http://10.0.0.11/horizon
 
 Admin Login:
 
