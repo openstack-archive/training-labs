@@ -14,8 +14,12 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up Block Storage service controller (cinder controller node)
-# http://docs.openstack.org/ocata/install-guide-ubuntu/cinder-controller-install.html
+# https://docs.openstack.org/cinder/pike/install/cinder-controller-install-ubuntu.html
 #------------------------------------------------------------------------------
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Prerequisites
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Setting up database for cinder."
 setup_database cinder "$CINDER_DB_USER" "$CINDER_DBPASS"
@@ -41,41 +45,41 @@ openstack role add \
 
 echo "Registering cinder with keystone so that other services can locate it."
 openstack service create \
-    --name cinder \
-    --description "OpenStack Block Storage" \
-    volume
-
-openstack service create \
     --name cinderv2 \
     --description "OpenStack Block Storage" \
     volumev2
 
-openstack endpoint create \
-    --region "$REGION" \
-    volume public http://controller:8776/v1/%\(tenant_id\)s
+openstack service create \
+    --name cinderv3 \
+    --description "OpenStack Block Storage" \
+    volumev3
 
 openstack endpoint create \
     --region "$REGION" \
-    volume internal http://controller:8776/v1/%\(tenant_id\)s
+    volumev2 public http://controller:8776/v2/%\(project_id\)s
 
 openstack endpoint create \
     --region "$REGION" \
-    volume admin http://controller:8776/v1/%\(tenant_id\)s
+    volumev2 internal http://controller:8776/v2/%\(project_id\)s
 
 openstack endpoint create \
     --region "$REGION" \
-    volumev2 public http://controller:8776/v2/%\(tenant_id\)s
+    volumev2 admin http://controller:8776/v2/%\(project_id\)s
 
 openstack endpoint create \
     --region "$REGION" \
-    volumev2 internal http://controller:8776/v2/%\(tenant_id\)s
+    volumev3 public http://controller:8776/v3/%\(project_id\)s
 
 openstack endpoint create \
     --region "$REGION" \
-    volumev2 admin http://controller:8776/v2/%\(tenant_id\)s
+    volumev3 internal http://controller:8776/v3/%\(project_id\)s
+
+openstack endpoint create \
+    --region "$REGION" \
+    volumev3 admin http://controller:8776/v3/%\(project_id\)s
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Install and configure cinder
+# Install and configure components
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing cinder."
@@ -143,6 +147,16 @@ conf=/etc/apache2/conf-available/cinder-wsgi.conf
 sudo sed -i --follow-symlinks '/WSGIDaemonProcess/ s/processes=[0-9]*/processes=1/' $conf
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+# not in install-guide: as of 2017-08-22, cinder wsgi processes can not
+# read /etc/cinder due to permission problem introduced with Pike packages
+# (drwxr-x--- root cinder) vs. cinder:www-data
+if ls -ld /etc/cinder | grep "root cinder"; then
+    echo "Setting owner for /etc/cinder."
+    sudo chown cinder:cinder /etc/cinder
+else
+    echo "XXX Workaround for /etc/cinder owner no longer needed."
+fi
+
 echo "Restarting the Compute API service."
 sudo service nova-api restart
 
@@ -150,6 +164,11 @@ echo "Restarting the Block Storage services."
 sudo service cinder-scheduler restart
 sudo service apache2 restart
 
-# Not in the install-guide:
-echo "Removing unused SQLite database file."
-sudo rm -v /var/lib/cinder/cinder.sqlite
+AUTH="source $CONFIG_DIR/admin-openstackrc.sh"
+echo -n "Waiting for cinder to start."
+until node_ssh controller "$AUTH; openstack volume service list" >/dev/null \
+        2>&1; do
+    echo -n .
+    sleep 1
+done
+echo

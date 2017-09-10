@@ -44,27 +44,27 @@ sudo apt update
 
 # ---------------------------------------------------------------------------
 # Enable the OpenStack repository
-# http://docs.openstack.org/ocata/install-guide-ubuntu/environment-packages.html
+# https://docs.openstack.org/install-guide/environment-packages-ubuntu.html
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # NOTE: Using pre-release staging ppa is not documented in install-guide
-# https://launchpad.net/~ubuntu-cloud-archive/+archive/ubuntu/ocata-staging
+# https://launchpad.net/~ubuntu-cloud-archive/+archive/ubuntu/pike-staging
 #--------------------------------------------------------------------------
 
 echo "Installing packages needed for add-apt-repository."
 sudo apt -y install software-properties-common
 
 case "$OPENSTACK_RELEASE" in
-    ocata)
-        REPO=cloud-archive:ocata
-        SRC_FILE=cloudarchive-ocata.list
+    pike)
+        REPO=cloud-archive:pike
+        SRC_FILE=cloudarchive-pike.list
         ;;
-    ocata-proposed)
-        REPO=cloud-archive:ocata-proposed
-        SRC_FILE=cloudarchive-ocata-proposed.list
+    pike-proposed)
+        REPO=cloud-archive:pike-proposed
+        SRC_FILE=cloudarchive-pike-proposed.list
         ;;
-    ocata-staging)
-        REPO=ppa:ubuntu-cloud-archive/ocata-staging
-        SRC_FILE=ubuntu-cloud-archive-ubuntu-ocata-staging-xenial.list
+    pike-staging)
+        REPO=ppa:ubuntu-cloud-archive/pike-staging
+        SRC_FILE=ubuntu-cloud-archive-ubuntu-pike-staging-xenial.list
         ;;
     *)
         echo >&2 "Unknown OpenStack release: $OPENSTACK_RELEASE. Aborting."

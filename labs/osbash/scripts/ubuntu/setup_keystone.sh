@@ -15,8 +15,12 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up keystone for controller node
-# http://docs.openstack.org/ocata/install-guide-ubuntu/keystone-install.html
+# https://docs.openstack.org/keystone/pike/install/keystone-install-ubuntu.html
 #------------------------------------------------------------------------------
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Prerequisites
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Setting up database for keystone."
 setup_database keystone "$KEYSTONE_DB_USER" "$KEYSTONE_DBPASS"
@@ -34,7 +38,7 @@ mysql -u keystone -p"$KEYSTONE_DBPASS" keystone -h controller -e quit
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing keystone."
-sudo apt install -y keystone
+sudo apt install -y keystone apache2 libapache2-mod-wsgi
 
 conf=/etc/keystone/keystone.conf
 echo "Editing $conf."
@@ -101,9 +105,6 @@ sudo sed -i --follow-symlinks '/WSGIDaemonProcess/ s/processes=[0-9]*/processes=
 echo "Restarting apache."
 sudo service apache2 restart
 
-echo "Removing default SQLite database."
-sudo rm -f /var/lib/keystone/keystone.db
-
 # Set environment variables for authentication
 export OS_USERNAME=$ADMIN_USER_NAME
 export OS_PASSWORD=$ADMIN_PASS
@@ -115,7 +116,7 @@ export OS_IDENTITY_API_VERSION=3
 
 #------------------------------------------------------------------------------
 # Create a domain, projects, users, and roles
-# http://docs.openstack.org/ocata/install-guide-ubuntu/keystone-users.html
+# https://docs.openstack.org/keystone/pike/install/keystone-users.html
 #------------------------------------------------------------------------------
 
 # Wait for keystone to come up
@@ -148,7 +149,7 @@ openstack role add \
 
 #------------------------------------------------------------------------------
 # Verify operation
-# http://docs.openstack.org/ocata/install-guide-ubuntu/keystone-verify.html
+# https://docs.openstack.org/keystone/pike/install/keystone-verify-ubuntu.html
 #------------------------------------------------------------------------------
 
 echo "Verifying keystone installation."
@@ -163,13 +164,11 @@ sudo ls -l $conf
 # From this point on, we are going to use keystone for authentication
 unset OS_AUTH_URL OS_PASSWORD
 
-# XXX If the default domain ID is default and the default domain name is
-#     Default, why are we using default here?
 echo "Requesting an authentication token as an admin user."
 openstack \
     --os-auth-url http://controller:35357/v3 \
-    --os-project-domain-name default \
-    --os-user-domain-name default \
+    --os-project-domain-name Default \
+    --os-user-domain-name Default \
     --os-project-name "$ADMIN_PROJECT_NAME" \
     --os-username "$ADMIN_USER_NAME" \
     --os-auth-type password \
@@ -179,8 +178,8 @@ openstack \
 echo "Requesting an authentication token for the demo user."
 openstack \
     --os-auth-url http://controller:5000/v3 \
-    --os-project-domain-name default \
-    --os-user-domain-name default \
+    --os-project-domain-name Default \
+    --os-user-domain-name Default \
     --os-project-name "$DEMO_PROJECT_NAME" \
     --os-username "$DEMO_USER_NAME" \
     --os-auth-type password \

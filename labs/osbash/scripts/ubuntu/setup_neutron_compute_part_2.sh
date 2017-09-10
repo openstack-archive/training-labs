@@ -14,12 +14,12 @@ exec_logfile
 indicate_current_auto
 
 #------------------------------------------------------------------------------
-# Set up OpenStack Networking (neutron) for compute node.
-# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-compute-install.html
+# Install and configure compute node
+# https://docs.openstack.org/neutron/pike/install/compute-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Configure Compute to use Networking
+# Configure the Compute service to use the Networking service
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 neutron_admin_user=neutron
@@ -48,7 +48,7 @@ sudo service neutron-linuxbridge-agent restart
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-verify-option2.html
+# https://docs.openstack.org/neutron/pike/install/verify-option2.html
 #------------------------------------------------------------------------------
 
 echo "Sourcing the admin credentials."
@@ -56,5 +56,5 @@ source "$CONFIG_DIR/admin-openstackrc.sh"
 
 echo "Listing agents to verify successful launch of the neutron agents."
 
-echo "neutron agent-list"
-neutron agent-list
+echo "openstack network agent list"
+openstack network agent list

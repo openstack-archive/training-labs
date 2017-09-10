@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install Compute controller services
-# http://docs.openstack.org/ocata/install-guide-ubuntu/nova-controller-install.html
+# https://docs.openstack.org/nova/pike/install/controller-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -14,8 +14,8 @@ exec_logfile
 indicate_current_auto
 
 #------------------------------------------------------------------------------
-# Set up OpenStack Networking (neutron) for compute node.
-# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-compute-install.html
+# Install and configure compute node
+# https://docs.openstack.org/neutron/pike/install/compute-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 echo "Installing networking components for compute node."

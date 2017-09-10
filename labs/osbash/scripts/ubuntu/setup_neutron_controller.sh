@@ -13,9 +13,13 @@ exec_logfile
 indicate_current_auto
 
 #------------------------------------------------------------------------------
-# Set up OpenStack Networking (neutron) for controller node.
-# http://docs.openstack.org/ocata/install-guide-ubuntu/neutron-controller-install.html
+# Install and configure controller node
+# https://docs.openstack.org/neutron/pike/install/controller-install-ubuntu.html
 #------------------------------------------------------------------------------
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Prerequisites
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Setting up database for neutron."
 setup_database neutron "$NEUTRON_DB_USER" "$NEUTRON_DBPASS"

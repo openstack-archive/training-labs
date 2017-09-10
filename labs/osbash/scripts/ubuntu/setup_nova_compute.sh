@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install and configure a compute node
-# http://docs.openstack.org/ocata/install-guide-ubuntu/nova-compute-install.html
+# https://docs.openstack.org/nova/pike/install/compute-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -118,12 +118,12 @@ sudo service nova-compute restart
 echo
 echo -n "Confirming that the compute host is in the database."
 AUTH="source $CONFIG_DIR/admin-openstackrc.sh"
-node_ssh controller "$AUTH; openstack hypervisor list"
-until node_ssh controller "$AUTH; openstack hypervisor list | grep 'compute1.*up'" >/dev/null 2>&1; do
+node_ssh controller "$AUTH; openstack compute service list --service nova-compute"
+until node_ssh controller "$AUTH; openstack compute service list --service nova-compute | grep 'compute1.*up'" >/dev/null 2>&1; do
     sleep 2
     echo -n .
 done
-node_ssh controller "$AUTH; openstack hypervisor list"
+node_ssh controller "$AUTH; openstack compute service list --service nova-compute"
 
 echo
 echo "Discovering compute hosts."
@@ -131,13 +131,9 @@ echo "Run this command on controller every time compute hosts are added to" \
      "the cluster."
 node_ssh controller "sudo nova-manage cell_v2 discover_hosts --verbose"
 
-# Not in install-guide:
-# Remove SQLite database created by Ubuntu package for nova.
-sudo rm -v /var/lib/nova/nova.sqlite
-
 #------------------------------------------------------------------------------
 # Verify operation
-# http://docs.openstack.org/ocata/install-guide-ubuntu/nova-verify.html
+# https://docs.openstack.org/nova/pike/install/verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying operation of the Compute service."
@@ -152,3 +148,7 @@ openstack catalog list
 echo "Listing images to verify connectivity with the Image service."
 echo "openstack image list"
 openstack image list
+
+echo "Checking the cells and placement API are working successfully."
+echo "on controller node: nova-status upgrade check"
+node_ssh controller "sudo nova-status upgrade check"
