@@ -32,15 +32,14 @@ def base_disk_delete():
     base_disk_name = conf.get_base_disk_name()
 
     base_disk_path = vm.get_disk_path(base_disk_name)
-    output = vm.virsh("list", "--uuid", "--name", "--all")
-    for line in output.splitlines():
-        if line == "":
+    output = vm.virsh("list", "--uuid", "--all")
+    for uuid in output.splitlines():
+        if uuid == "":
             continue
-        uuid, name = line.rstrip().split(' ')
-        logger.debug("Candidate for deletion: %s %s", uuid, name)
+        logger.debug("Candidate for deletion: %s", uuid)
         domstats = vm.virsh("domstats", uuid, "--block", "--backing")
         if re.search("block.*path.*{}".format(base_disk_path), domstats):
-          logger.info("Deleting VM %s %s", uuid, name)
+          logger.info("Deleting VM %s", uuid)
           vm.vm_delete(uuid)
     vm.disk_delete(base_disk_name)
 
