@@ -39,11 +39,10 @@ def keyboard_send_string(vm_name, string):
         scancode = kc.char2scancode(letter)
         kc.keyboard_push_scancode(vm_name, scancode)
 
-        # Inject sleep into the wbatch files because the Windows batch file
-        # is sometimes _too_ efficient and overruns the keyboard input buffer
-        if conf.wbatch:
-            keyboard_send_string.cnt += 1
-            if keyboard_send_string.cnt % 50 == 0:
-                cs.conditional_sleep(1)
+        # Sleep occasionally to keep us from overruning the keyboard input
+        # buffer
+        keyboard_send_string.cnt += 1
+        if keyboard_send_string.cnt % 50 == 0:
+            cs.conditional_sleep(1)
 
 keyboard_send_string.cnt = 0
