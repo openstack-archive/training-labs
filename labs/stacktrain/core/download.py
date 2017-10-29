@@ -36,9 +36,9 @@ class Downloader(object):
 
     @vm_proxy.setter
     def vm_proxy(self, value):
-        if self._vm_proxy:
-            proxy_handler = urllib2.ProxyHandler({'http': self._vm_proxy})
+        if value:
             self._vm_proxy = value
+            proxy_handler = urllib2.ProxyHandler({'http': self._vm_proxy})
         else:
             # Remove existing proxy setting
             logger.debug("Downloader unsetting vm_proxy.")
