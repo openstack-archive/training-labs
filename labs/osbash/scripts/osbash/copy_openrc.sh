@@ -4,7 +4,7 @@ set -o errexit -o nounset
 # This script copies the openrc.sh credentials files to the home directory
 # in order to make them easier to find for the user.
 
-TOP_DIR=$(cd $(cat "../TOP_DIR"||echo $(dirname "$0"))/.. && pwd)
+TOP_DIR=$(cd $(cat "../TOP_DIR" 2>/dev/null||echo $(dirname "$0"))/.. && pwd)
 source "$TOP_DIR/config/paths"
 source "$LIB_DIR/functions.guest.sh"
 source "$CONFIG_DIR/openstack"

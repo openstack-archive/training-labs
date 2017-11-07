@@ -3,7 +3,7 @@
 # This scripts executes on the pxeserver and configures the service
 set -o errexit -o nounset
 
-TOP_DIR=$(cd $(cat "../TOP_DIR"||echo $(dirname "$0"))/.. && pwd)
+TOP_DIR=$(cd $(cat "../TOP_DIR" 2>/dev/null||echo $(dirname "$0"))/.. && pwd)
 
 source "$TOP_DIR/config/paths"
 source "$CONFIG_DIR/credentials"
