@@ -67,6 +67,9 @@ function request_cmd {
         REFERER=$4
     fi
 
+    POST_ARG=""
+    REFERER_ARG=""
+
     if [ "$REQUEST_TOOL" = "wget" ]; then
 
         if [ -f "$COOKIE_FILE" ];then
@@ -77,14 +80,10 @@ function request_cmd {
 
         if [[ -v DATA ]]; then
             POST_ARG="--post-data=$DATA"
-        else
-            POST_ARG=""
         fi
 
         if [[ -v REFERER ]]; then
             REFERER_ARG="--referer=$REFERER"
-        else
-            REFERER_ARG=""
         fi
 
         #echo "wget --quiet --keep-session-cookies --save-cookies $COOKIE_FILE \
@@ -97,11 +96,11 @@ function request_cmd {
 
     elif [ "$REQUEST_TOOL" = "curl" ]; then
 
-        [[ -n "$DATA" ]] && POST_ARG="-d $DATA"
-        [[ -n "$REFERER" ]] && REFERER_ARG="--referer $REFERER"
+        [[ -v DATA ]] && POST_ARG="-d $DATA"
+        [[ -v REFERER ]] && REFERER_ARG="--referer $REFERER"
 
-        curl -L -c $COOKIE_FILE -b $COOKIE_FILE "$POST_ARG" --output "$OUTPUT_FILE"\
-            "$REFERER_ARG" -s "$URL"
+        curl -L -c $COOKIE_FILE -b $COOKIE_FILE $POST_ARG --output "$OUTPUT_FILE"\
+            $REFERER_ARG -s "$URL"
     fi
 }
 
