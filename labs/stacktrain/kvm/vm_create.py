@@ -33,6 +33,13 @@ def init():
         logger.error("Failed to connect to libvirt/KVM. Is service running?"
                      " Aborting.")
         sys.exit(1)
+    try:
+        virsh("pool-info", kvm_vol_pool, show_err=False)
+    except EnvironmentError:
+        logger.error("Storage pool '%s' not found. It should be created"
+                     " automatically when the virt-manager GUI is started"
+                     " for the first time.", kvm_vol_pool)
+        sys.exit(1)
 
 
 def virsh_log(call_args, err_code=None):
