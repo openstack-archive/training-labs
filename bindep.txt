@@ -4,8 +4,10 @@ asciidoc
 build-essential [platform:dpkg]
 curl
 gawk
-gettext
-graphviz
+# gettext and graphviz are needed by doc builds only. For transition,
+# have them in both doc and test.
+gettext [doc test]
+graphviz [doc test]
 language-pack-en [platform:ubuntu]
 libcurl-devel [platform:rpm]
 libcurl4-gnutls-dev [platform:dpkg]
