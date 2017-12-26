@@ -1,0 +1,15 @@
+- project:
+    name: openstack/training-labs
+    check:
+      jobs:
+        - training-labs-scripts
+    gate:
+      jobs:
+        - training-labs-scripts
+
+- job:
+    name: training-labs-scripts
+    description: |
+      Build scripts for training-labs repository.
+    parent: unittests
+    run: playbooks/scripts/run.yaml
