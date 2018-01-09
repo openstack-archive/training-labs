@@ -30,7 +30,7 @@ wait_for_keystone
 
 echo "Configuring the metadata agent."
 conf=/etc/neutron/metadata_agent.ini
-iniset_sudo $conf DEFAULT nova_metadata_ip controller
+iniset_sudo $conf DEFAULT nova_metadata_host controller
 iniset_sudo $conf DEFAULT metadata_proxy_shared_secret "$METADATA_SECRET"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
