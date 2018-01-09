@@ -42,8 +42,8 @@ cmd queue ubuntu/setup_cinder_controller.sh
 cmd snapshot_cycle -n controller cinder_installed
 
 # Orchestration
-#cmd queue ubuntu/setup_heat_controller.sh
-#cmd snapshot_cycle -n controller heat_controller_installed
+cmd queue ubuntu/setup_heat_controller.sh
+cmd snapshot_cycle -n controller heat_controller_installed
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Telemetry (currently unsupported)
