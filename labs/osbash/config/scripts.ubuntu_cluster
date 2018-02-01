@@ -45,15 +45,6 @@ cmd snapshot_cycle -n controller cinder_installed
 cmd queue ubuntu/setup_heat_controller.sh
 cmd snapshot_cycle -n controller heat_controller_installed
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Telemetry (currently unsupported)
-# NoSQL DB (mongo) needed for Telemetry
-#cmd queue ubuntu/apt_nosql_database.sh
-# Note: Disable Telemetry service if it overloads the cluster.
-#cmd queue ubuntu/setup_telemetry_controller.sh
-#cmd snapshot_cycle -n controller telemetry-controller_installed
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 cmd boot -n controller
 #==============================================================================
 # Scripts for compute1 node
@@ -78,10 +69,6 @@ cmd snapshot_cycle -n compute1 neutron-compute_installed
 # Block Storage
 cmd queue ubuntu/setup_cinder_volumes.sh
 cmd snapshot_cycle -n compute1 cinder-volume_installed
-
-# Telemetry
-#cmd queue ubuntu/setup_telemetry_compute.sh
-#cmd snapshot_cycle -n compute1 telemetry-compute_installed
 
 cmd boot -n compute1
 #==============================================================================
