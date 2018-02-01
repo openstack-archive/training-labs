@@ -89,5 +89,6 @@ cmd boot -n compute1
 
 # Enable extra services as needed:
 #cmd queue ubuntu/barbican/setup_barbican_server.sh
+#cmd queue ubuntu/mistral/setup_mistral_server.sh
 
 cmd boot -n controller
