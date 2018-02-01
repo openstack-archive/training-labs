@@ -53,7 +53,7 @@ def vm_scp_to_vm(vm_name, *args):
         try:
             full_target = "{}@{}:{}".format(conf.vm_shell_user,
                                             conf.vm[vm_name].ssh_ip,
-                                            target_path)
+                                            target_dir)
             logger.debug("Copying from\n\t%s\n\tto\n\t%s (port: %s)",
                          src_path, full_target, target_port)
             # To avoid getting stuck on broken ssh connection, disable

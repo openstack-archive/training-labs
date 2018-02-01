@@ -206,7 +206,7 @@ function vm_scp_to_vm {
             -o ConnectTimeout=10 \
             -o ControlPath=none \
             -P "$ssh_port" \
-            "$src_path" "$VM_SHELL_USER@$ssh_ip:$target_path"
+            "$src_path" "$VM_SHELL_USER@$ssh_ip:$target_dir"
     done
 }
 
