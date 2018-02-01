@@ -52,11 +52,6 @@ cmd snapshot_cycle -n controller heat_controller_installed
 # Note: Disable Telemetry service if it overloads the cluster.
 #cmd queue ubuntu/setup_telemetry_controller.sh
 #cmd snapshot_cycle -n controller telemetry-controller_installed
-
-# FIXME Our LBaaS support is broken; the configuration edits
-#       in setup_lbaas_controller.sh break neutron
-#cmd queue ubuntu/setup_lbaas_controller.sh
-#cmd snapshot_cycle -n controller lbaas-controller_installed
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 cmd boot -n controller
