@@ -64,9 +64,11 @@ def ssh_process_autostart(vm_name):
     if conf.vm[vm_name].updated:
         ssh.vm_ssh(vm_name, "rm -rf autostart")
     else:
-        logging.debug("Updating config, lib directories for VM %s.", vm_name)
-        ssh.vm_ssh(vm_name, "rm -rf autostart config lib")
-        ssh.vm_scp_to_vm(vm_name, conf.config_dir, conf.lib_dir)
+        logging.debug("Updating config, lib, scripts directories for VM %s.",
+                      vm_name)
+        ssh.vm_ssh(vm_name, "rm -rf autostart config lib scripts")
+        ssh.vm_scp_to_vm(vm_name, conf.config_dir, conf.lib_dir,
+                         conf.scripts_dir)
 
     for script_path in sorted(glob(join(conf.autostart_dir, "*.sh"))):
         ssh_exec_script(vm_name, script_path)
