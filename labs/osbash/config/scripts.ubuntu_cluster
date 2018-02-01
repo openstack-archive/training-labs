@@ -85,5 +85,5 @@ cmd snapshot -n controller controller_-_cluster_installed
 cmd snapshot -n compute1 compute-_cluster_installed
 
 # Boot cluster nodes -- cluster is ready for use
-cmd boot -n controller
 cmd boot -n compute1
+cmd boot -n controller
