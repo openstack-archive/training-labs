@@ -88,82 +88,82 @@ function char2scancode {
             echo -n " KEY_Z"
             ;;
         'A')
-            echo -n " KEY_SHIFT KEY_A"
+            echo -n " KEY_LEFTSHIFT KEY_A"
             ;;
         'B')
-            echo -n " KEY_SHIFT KEY_B"
+            echo -n " KEY_LEFTSHIFT KEY_B"
             ;;
         'C')
-            echo -n " KEY_SHIFT KEY_C"
+            echo -n " KEY_LEFTSHIFT KEY_C"
             ;;
         'D')
-            echo -n " KEY_SHIFT KEY_D"
+            echo -n " KEY_LEFTSHIFT KEY_D"
             ;;
         'E')
-            echo -n " KEY_SHIFT KEY_E"
+            echo -n " KEY_LEFTSHIFT KEY_E"
             ;;
         'F')
-            echo -n " KEY_SHIFT KEY_F"
+            echo -n " KEY_LEFTSHIFT KEY_F"
             ;;
         'G')
-            echo -n " KEY_SHIFT KEY_G"
+            echo -n " KEY_LEFTSHIFT KEY_G"
             ;;
         'H')
-            echo -n " KEY_SHIFT KEY_H"
+            echo -n " KEY_LEFTSHIFT KEY_H"
             ;;
         'I')
-            echo -n " KEY_SHIFT KEY_I"
+            echo -n " KEY_LEFTSHIFT KEY_I"
             ;;
         'J')
-            echo -n " KEY_SHIFT KEY_J"
+            echo -n " KEY_LEFTSHIFT KEY_J"
             ;;
         'K')
-            echo -n " KEY_SHIFT KEY_K"
+            echo -n " KEY_LEFTSHIFT KEY_K"
             ;;
         'L')
-            echo -n " KEY_SHIFT KEY_L"
+            echo -n " KEY_LEFTSHIFT KEY_L"
             ;;
         'M')
-            echo -n " KEY_SHIFT KEY_M"
+            echo -n " KEY_LEFTSHIFT KEY_M"
             ;;
         'N')
-            echo -n " KEY_SHIFT KEY_N"
+            echo -n " KEY_LEFTSHIFT KEY_N"
             ;;
         'O')
-            echo -n " KEY_SHIFT KEY_O"
+            echo -n " KEY_LEFTSHIFT KEY_O"
             ;;
         'P')
-            echo -n " KEY_SHIFT KEY_P"
+            echo -n " KEY_LEFTSHIFT KEY_P"
             ;;
         'Q')
-            echo -n " KEY_SHIFT KEY_Q"
+            echo -n " KEY_LEFTSHIFT KEY_Q"
             ;;
         'R')
-            echo -n " KEY_SHIFT KEY_R"
+            echo -n " KEY_LEFTSHIFT KEY_R"
             ;;
         'S')
-            echo -n " KEY_SHIFT KEY_S"
+            echo -n " KEY_LEFTSHIFT KEY_S"
             ;;
         'T')
-            echo -n " KEY_SHIFT KEY_T"
+            echo -n " KEY_LEFTSHIFT KEY_T"
             ;;
         'U')
-            echo -n " KEY_SHIFT KEY_U"
+            echo -n " KEY_LEFTSHIFT KEY_U"
             ;;
         'V')
-            echo -n " KEY_SHIFT KEY_V"
+            echo -n " KEY_LEFTSHIFT KEY_V"
             ;;
         'W')
-            echo -n " KEY_SHIFT KEY_W"
+            echo -n " KEY_LEFTSHIFT KEY_W"
             ;;
         'X')
-            echo -n " KEY_SHIFT KEY_X"
+            echo -n " KEY_LEFTSHIFT KEY_X"
             ;;
         'Y')
-            echo -n " KEY_SHIFT KEY_Y"
+            echo -n " KEY_LEFTSHIFT KEY_Y"
             ;;
         'Z')
-            echo -n " KEY_SHIFT KEY_Z"
+            echo -n " KEY_LEFTSHIFT KEY_Z"
             ;;
         '1')
             echo -n " KEY_1"
@@ -196,46 +196,46 @@ function char2scancode {
             echo -n " KEY_0"
             ;;
         '!')
-            echo -n " KEY_SHIFT KEY_1"
+            echo -n " KEY_LEFTSHIFT KEY_1"
             ;;
         '@')
-            echo -n " KEY_SHIFT KEY_2"
+            echo -n " KEY_LEFTSHIFT KEY_2"
             ;;
         '#')
-            echo -n " KEY_SHIFT KEY_3"
+            echo -n " KEY_LEFTSHIFT KEY_3"
             ;;
         '$')
-            echo -n " KEY_SHIFT KEY_4"
+            echo -n " KEY_LEFTSHIFT KEY_4"
             ;;
         '%')
-            echo -n " KEY_SHIFT KEY_5"
+            echo -n " KEY_LEFTSHIFT KEY_5"
             ;;
         '^')
-            echo -n " KEY_SHIFT KEY_6"
+            echo -n " KEY_LEFTSHIFT KEY_6"
             ;;
         '&')
-            echo -n " KEY_SHIFT KEY_7"
+            echo -n " KEY_LEFTSHIFT KEY_7"
             ;;
         '*')
-            echo -n " KEY_SHIFT KEY_8"
+            echo -n " KEY_LEFTSHIFT KEY_8"
             ;;
         '(')
-            echo -n " KEY_SHIFT KEY_9"
+            echo -n " KEY_LEFTSHIFT KEY_9"
             ;;
         ')')
-            echo -n " KEY_SHIFT KEY_0"
+            echo -n " KEY_LEFTSHIFT KEY_0"
             ;;
         '-')
             echo -n " KEY_MINUS"
             ;;
         '_')
-            echo -n " KEY_SHIFT KEY_MINUS"
+            echo -n " KEY_LEFTSHIFT KEY_MINUS"
             ;;
         '=')
             echo -n " KEY_EQUAL"
             ;;
         '+')
-            echo -n " KEY_SHIFT KEY_EQUAL"
+            echo -n " KEY_LEFTSHIFT KEY_EQUAL"
             ;;
         ' ')
             echo -n " KEY_SPACE"
@@ -247,16 +247,16 @@ function char2scancode {
             echo -n " KEY_RIGHTBRACE"
             ;;
         '{')
-            echo -n " KEY_SHIFT KEY_LEFTBRACE"
+            echo -n " KEY_LEFTSHIFT KEY_LEFTBRACE"
             ;;
         '}')
-            echo -n " KEY_SHIFT KEY_RIGHTBRACE"
+            echo -n " KEY_LEFTSHIFT KEY_RIGHTBRACE"
             ;;
         ';')
             echo -n " KEY_SEMICOLON"
             ;;
         ':')
-            echo -n " KEY_SHIFT KEY_SEMICOLON"
+            echo -n " KEY_LEFTSHIFT KEY_SEMICOLON"
             ;;
         ',')
             echo -n " KEY_COMMA"
@@ -271,22 +271,22 @@ function char2scancode {
             echo -n " KEY_BACKSLASH"
             ;;
         '|')
-            echo -n " KEY_SHIFT KEY_BACKSLASH"
+            echo -n " KEY_LEFTSHIFT KEY_BACKSLASH"
             ;;
         '?')
-            echo -n " KEY_SHIFT KEY_SLASH"
+            echo -n " KEY_LEFTSHIFT KEY_SLASH"
             ;;
         '"')
-            echo -n " KEY_SHIFT KEY_APOSTROPHE"
+            echo -n " KEY_LEFTSHIFT KEY_APOSTROPHE"
             ;;
         "'")
             echo -n " KEY_APOSTROPHE"
             ;;
         ">")
-            echo -n " KEY_SHIFT KEY_DOT"
+            echo -n " KEY_LEFTSHIFT KEY_DOT"
             ;;
         "<")
-            echo -n " KEY_SHIFT KEY_COMMA"
+            echo -n " KEY_LEFTSHIFT KEY_COMMA"
             ;;
     esac
 }
