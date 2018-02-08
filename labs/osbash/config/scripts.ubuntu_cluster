@@ -86,4 +86,8 @@ cmd snapshot -n compute1 compute-_cluster_installed
 
 # Boot cluster nodes -- cluster is ready for use
 cmd boot -n compute1
+
+# Enable extra services as needed:
+#cmd queue ubuntu/barbican/setup_barbican_server.sh
+
 cmd boot -n controller
