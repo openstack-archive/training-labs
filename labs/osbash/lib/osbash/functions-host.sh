@@ -297,8 +297,8 @@ function ssh_process_autostart {
     fi
 
     wait_for_ssh "$ssh_port"
-    vm_ssh "$ssh_port" "rm -rf lib config autostart"
-    vm_scp_to_vm "$ssh_port" "$TOP_DIR/lib" "$TOP_DIR/config"
+    vm_ssh "$ssh_port" "rm -rf lib config autostart scripts"
+    vm_scp_to_vm "$ssh_port" "$TOP_DIR/lib" "$TOP_DIR/config" "$TOP_DIR/scripts"
 
     local script_path=""
     for script_path in "$AUTOSTART_DIR/"*.sh; do

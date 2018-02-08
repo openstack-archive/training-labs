@@ -55,6 +55,9 @@ cp -f "$SCRIPT_SRC" "$TOP_DIR/$EXE_DIR_NAME"
 if [[ "$REMOTE_TOP_DIR" = "/home/osbash" ]]; then
     # Not using a shared folder, we need to scp the script to the target node
     vm_scp_to_vm "$VM_SSH_PORT" "$TOP_DIR/$EXE_DIR_NAME/$SCRIPT"
+    # The script may need access to extra files in the scripts directory, so
+    # copy that over.
+    vm_scp_to_vm "$VM_SSH_PORT" "$TOP_DIR/scripts"
 fi
 
 vm_ssh "$VM_SSH_PORT" "bash -c $REMOTE_TOP_DIR/$EXE_DIR_NAME/$SCRIPT" || \
