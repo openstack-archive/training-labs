@@ -95,5 +95,7 @@ cmd boot -n compute1
 #
 # Note: tacker depends on mistral and barbican
 #cmd queue ubuntu/tacker/setup_tacker_server.sh
+#cmd queue ubuntu/tacker/create_vim.sh
+#cmd queue ubuntu/tacker/create_vnf.sh
 
 cmd boot -n controller
