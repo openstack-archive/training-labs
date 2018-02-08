@@ -1,0 +1,23 @@
+# tacker-server
+#
+# OpenStack Tacker provides NFV orchestration
+#
+# Purpose: systemd service file (Ubuntu 16.04)
+# Location: /etc/systemd/system/tacker-server.service
+# Logs: journalctl -u tacker-server
+
+[Unit]
+Description=OpenStack Tacker
+After=syslog.target network.target auditd.service
+
+[Service]
+Type=simple
+User=tacker
+Group=tacker
+ExecStart=%VENV_PATH%/bin/tacker-server --config-file %VENV_PATH%/etc/tacker/tacker.conf --debug
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+TimeoutSec=10
+
+[Install]
+WantedBy=multi-user.target

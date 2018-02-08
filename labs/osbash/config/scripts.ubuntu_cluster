@@ -88,7 +88,12 @@ cmd snapshot -n compute1 compute-_cluster_installed
 cmd boot -n compute1
 
 # Enable extra services as needed:
+#
 #cmd queue ubuntu/barbican/setup_barbican_server.sh
+#
 #cmd queue ubuntu/mistral/setup_mistral_server.sh
+#
+# Note: tacker depends on mistral and barbican
+#cmd queue ubuntu/tacker/setup_tacker_server.sh
 
 cmd boot -n controller
