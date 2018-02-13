@@ -10,7 +10,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Create private network
-# http://docs.openstack.org/newton/install-guide-ubuntu/launch-instance-networks-selfservice.html
+# https://docs.openstack.org/install-guide/launch-instance-networks-selfservice.html
 #------------------------------------------------------------------------------
 
 echo -n "Waiting for first DHCP namespace."
@@ -70,14 +70,6 @@ echo "Bridges are:"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Create a router
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-(
-echo "Sourcing the admin credentials."
-source "$CONFIG_DIR/admin-openstackrc.sh"
-
-echo "Adding 'router:external' option to the public provider network."
-neutron net-update provider --router:external
-)
 
 (
 echo "Sourcing the demo credentials."

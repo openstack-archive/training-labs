@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# https://docs.openstack.org/neutron/pike/install/controller-install-option2-ubuntu.html
+# https://docs.openstack.org/neutron/queens/install/controller-install-option2-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -61,7 +61,7 @@ iniset_sudo $conf DEFAULT auth_strategy keystone
 
 # Configuring [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
-iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
+iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
 iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password
 iniset_sudo $conf keystone_authtoken project_domain_name default
@@ -75,7 +75,7 @@ iniset_sudo $conf DEFAULT notify_nova_on_port_status_changes true
 iniset_sudo $conf DEFAULT notify_nova_on_port_data_changes true
 
 # Configure [nova] section.
-iniset_sudo $conf nova auth_url http://controller:35357
+iniset_sudo $conf nova auth_url http://controller:5000
 iniset_sudo $conf nova auth_type password
 iniset_sudo $conf nova project_domain_name default
 iniset_sudo $conf nova user_domain_name default
@@ -127,6 +127,13 @@ iniset_sudo $conf vxlan l2_population true
 # Edit the [securitygroup] section.
 iniset_sudo $conf securitygroup enable_security_group true
 iniset_sudo $conf securitygroup firewall_driver neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+
+echo "Ensuring that the kernel supports network bridge filters."
+if ! sudo sysctl net.bridge.bridge-nf-call-iptables; then
+    sudo modprobe br_netfilter
+    echo "# bridge support module added by training-labs" >> /etc/modules
+    echo br_netfilter >> /etc/modules
+fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Configure the layer-3 agent

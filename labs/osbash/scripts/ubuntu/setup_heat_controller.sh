@@ -17,7 +17,7 @@ wait_for_keystone
 
 #------------------------------------------------------------------------------
 # Install the Orchestration Service (heat)
-# https://docs.openstack.org/heat/pike/install/install-ubuntu.html
+# https://docs.openstack.org/heat/queens/install/install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -147,7 +147,7 @@ iniset_sudo $conf DEFAULT transport_url "rabbit://openstack:$RABBIT_PASS@control
 
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
-iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
+iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
 iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password
 iniset_sudo $conf keystone_authtoken project_domain_name default
@@ -158,16 +158,13 @@ iniset_sudo $conf keystone_authtoken password "$HEAT_PASS"
 
 # Configure [trustee] section.
 iniset_sudo $conf trustee auth_type password
-iniset_sudo $conf trustee auth_url http://controller:35357
+iniset_sudo $conf trustee auth_url http://controller:5000
 iniset_sudo $conf trustee username "$heat_admin_user"
 iniset_sudo $conf trustee password "$HEAT_PASS"
 iniset_sudo $conf trustee user_domain_name default
 
 # Configure [clients_keystone] section.
-iniset_sudo $conf clients_keystone auth_uri http://controller:35357
-
-# Configure [ec2authtoken] section.
-iniset_sudo $conf ec2authtoken auth_uri http://controller:5000
+iniset_sudo $conf clients_keystone auth_uri http://controller:5000
 
 # Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT heat_metadata_server_url http://controller:8000
@@ -206,7 +203,7 @@ echo "Restarting heat servies took $((ENDTIME - STARTTIME)) seconds."
 
 #------------------------------------------------------------------------------
 # Verify operation
-# https://docs.openstack.org/heat/pike/install/verify.html
+# https://docs.openstack.org/heat/queens/install/verify.html
 #------------------------------------------------------------------------------
 
 echo "Listing service components."

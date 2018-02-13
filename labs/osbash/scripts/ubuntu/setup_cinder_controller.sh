@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up Block Storage service controller (cinder controller node)
-# https://docs.openstack.org/cinder/pike/install/cinder-controller-install-ubuntu.html
+# https://docs.openstack.org/cinder/queens/install/cinder-controller-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -111,11 +111,11 @@ iniset_sudo $conf DEFAULT auth_strategy keystone
 
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
-iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
+iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
 iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password
-iniset_sudo $conf keystone_authtoken project_domain_name default
-iniset_sudo $conf keystone_authtoken user_domain_name default
+iniset_sudo $conf keystone_authtoken project_domain_id default
+iniset_sudo $conf keystone_authtoken user_domain_id default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$cinder_admin_user"
 iniset_sudo $conf keystone_authtoken password "$CINDER_PASS"
@@ -152,9 +152,10 @@ sudo sed -i --follow-symlinks '/WSGIDaemonProcess/ s/processes=[0-9]*/processes=
 # (drwxr-x--- root cinder) vs. cinder:www-data
 if ls -ld /etc/cinder | grep "root cinder"; then
     echo "Setting owner for /etc/cinder."
-    sudo chown cinder:cinder /etc/cinder
+    sudo chown -v cinder:cinder /etc/cinder
 else
     echo "XXX Workaround for /etc/cinder owner no longer needed."
+    exit 2
 fi
 
 echo "Restarting the Compute API service."

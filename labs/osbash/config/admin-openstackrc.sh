@@ -9,13 +9,13 @@ source "$CONFIG_DIR/credentials"
 
 #------------------------------------------------------------------------------
 # OpenStack client environment scripts
-# http://docs.openstack.org/newton/install-guide-ubuntu/keystone-openrc.html
+# https://docs.openstack.org/keystone/queens/install/keystone-openrc-ubuntu.html
 #------------------------------------------------------------------------------
 export OS_USERNAME=$ADMIN_USER_NAME
 export OS_PASSWORD=$ADMIN_PASS
 export OS_PROJECT_NAME=$ADMIN_PROJECT_NAME
 export OS_USER_DOMAIN_NAME=Default
 export OS_PROJECT_DOMAIN_NAME=Default
-export OS_AUTH_URL=http://controller:35357/v3
+export OS_AUTH_URL=http://controller:5000/v3
 export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2

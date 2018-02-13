@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install and configure a storage node
-# https://docs.openstack.org/cinder/pike/install/cinder-storage-install-ubuntu.html
+# https://docs.openstack.org/cinder/queens/install/cinder-storage-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
@@ -90,11 +90,11 @@ iniset_sudo $conf DEFAULT auth_strategy keystone
 
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
-iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
+iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
 iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password
-iniset_sudo $conf keystone_authtoken project_domain_name default
-iniset_sudo $conf keystone_authtoken user_domain_name default
+iniset_sudo $conf keystone_authtoken project_domain_id default
+iniset_sudo $conf keystone_authtoken user_domain_id default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$cinder_admin_user"
 iniset_sudo $conf keystone_authtoken password "$CINDER_PASS"
@@ -121,7 +121,7 @@ sudo service cinder-volume restart
 
 #------------------------------------------------------------------------------
 # Verify Cinder operation
-# https://docs.openstack.org/cinder/pike/install/cinder-verify.html
+# https://docs.openstack.org/cinder/queens/install/cinder-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying Block Storage installation on controller node."

@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install Compute controller services
-# https://docs.openstack.org/nova/pike/install/controller-install-ubuntu.html
+# https://docs.openstack.org/nova/queens/install/controller-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -138,7 +138,7 @@ iniset_sudo $conf api auth_strategy keystone
 
 # Configure [keystone_authtoken] section.
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
-iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
+iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
 iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password
 iniset_sudo $conf keystone_authtoken project_domain_name default
@@ -175,7 +175,7 @@ iniset_sudo $conf placement project_domain_name Default
 iniset_sudo $conf placement project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf placement auth_type password
 iniset_sudo $conf placement user_domain_name Default
-iniset_sudo $conf placement auth_url http://controller:35357/v3
+iniset_sudo $conf placement auth_url http://controller:5000/v3
 iniset_sudo $conf placement username "$placement_admin_user"
 iniset_sudo $conf placement password "$PLACEMENT_PASS"
 

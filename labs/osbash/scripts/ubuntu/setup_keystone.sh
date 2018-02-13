@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up keystone for controller node
-# https://docs.openstack.org/keystone/pike/install/keystone-install-ubuntu.html
+# https://docs.openstack.org/keystone/queens/install/keystone-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -72,7 +72,7 @@ sudo keystone-manage credential_setup \
 
 echo "Bootstrapping the Identity service."
 sudo keystone-manage bootstrap --bootstrap-password "$ADMIN_PASS" \
-    --bootstrap-admin-url http://controller:35357/v3/ \
+    --bootstrap-admin-url http://controller:5000/v3/ \
     --bootstrap-internal-url http://controller:5000/v3/ \
     --bootstrap-public-url http://controller:5000/v3/ \
     --bootstrap-region-id "$REGION"
@@ -111,16 +111,20 @@ export OS_PASSWORD=$ADMIN_PASS
 export OS_PROJECT_NAME=$ADMIN_PROJECT_NAME
 export OS_USER_DOMAIN_NAME=Default
 export OS_PROJECT_DOMAIN_NAME=Default
-export OS_AUTH_URL=http://controller:35357/v3
+export OS_AUTH_URL=http://controller:5000/v3
 export OS_IDENTITY_API_VERSION=3
 
 #------------------------------------------------------------------------------
 # Create a domain, projects, users, and roles
-# https://docs.openstack.org/keystone/pike/install/keystone-users.html
+# https://docs.openstack.org/keystone/queens/install/keystone-users-ubuntu.html
 #------------------------------------------------------------------------------
 
 # Wait for keystone to come up
 wait_for_keystone
+
+# Not creating domain because default domain has already been created by
+# keystone-manage bootstrap
+# openstack domain create --description "An Example Domain" example
 
 echo "Creating service project."
 openstack project create --domain default \
@@ -149,7 +153,7 @@ openstack role add \
 
 #------------------------------------------------------------------------------
 # Verify operation
-# https://docs.openstack.org/keystone/pike/install/keystone-verify-ubuntu.html
+# https://docs.openstack.org/keystone/queens/install/keystone-verify-ubuntu.html
 #------------------------------------------------------------------------------
 
 echo "Verifying keystone installation."
@@ -166,7 +170,7 @@ unset OS_AUTH_URL OS_PASSWORD
 
 echo "Requesting an authentication token as an admin user."
 openstack \
-    --os-auth-url http://controller:35357/v3 \
+    --os-auth-url http://controller:5000/v3 \
     --os-project-domain-name Default \
     --os-user-domain-name Default \
     --os-project-name "$ADMIN_PROJECT_NAME" \

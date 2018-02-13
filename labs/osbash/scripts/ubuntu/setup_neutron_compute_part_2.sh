@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install and configure compute node
-# https://docs.openstack.org/neutron/pike/install/compute-install-ubuntu.html
+# https://docs.openstack.org/neutron/queens/install/compute-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -27,7 +27,7 @@ neutron_admin_user=neutron
 echo "Configuring Compute to use Networking."
 conf=/etc/nova/nova.conf
 iniset_sudo $conf neutron url http://controller:9696
-iniset_sudo $conf neutron auth_url http://controller:35357
+iniset_sudo $conf neutron auth_url http://controller:5000
 iniset_sudo $conf neutron auth_type password
 iniset_sudo $conf neutron project_domain_name default
 iniset_sudo $conf neutron user_domain_name default
@@ -48,7 +48,7 @@ sudo service neutron-linuxbridge-agent restart
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# https://docs.openstack.org/neutron/pike/install/verify-option2.html
+# https://docs.openstack.org/neutron/queens/install/verify-option2.html
 #------------------------------------------------------------------------------
 
 echo "Sourcing the admin credentials."
