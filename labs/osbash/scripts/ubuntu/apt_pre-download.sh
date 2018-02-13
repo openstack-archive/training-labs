@@ -65,21 +65,6 @@ apt_download neutron-linuxbridge-agent
 # Heat
 apt_download heat-api heat-api-cfn heat-engine python-heatclient
 
-# ceilometer-install
-apt_download ceilometer-api ceilometer-collector \
-    ceilometer-agent-central ceilometer-agent-notification \
-    python-ceilometerclient
-
-# ceilometer-aodh
-apt_download aodh-api aodh-evaluator aodh-notifier \
-    aodh-listener aodh-expirer python-ceilometerclient
-
-# ceilometer-nova
-apt_download ceilometer-agent-compute
-
-# ceilometer-swift
-apt_download python-ceilometermiddleware
-
 # Swift Controller
 apt_download swift swift-proxy python-swiftclient \
     python-keystoneclient python-keystonemiddleware \
