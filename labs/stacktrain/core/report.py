@@ -22,8 +22,8 @@ def get_git_info():
         logger.debug("No git executable found. Unable to log git status.")
         return None
 
-    summary_args = [ "git", "describe", "--all", "--long", "--dirty" ]
-    diff_args = [ "git", "--no-pager", "diff", "HEAD", "-p", "--stat" ]
+    summary_args = ["git", "describe", "--all", "--long", "--dirty"]
+    diff_args = ["git", "--no-pager", "diff", "HEAD", "-p", "--stat"]
     try:
         result = "git status: "
         result += subprocess.check_output(summary_args)
