@@ -15,7 +15,7 @@ indicate_current_auto
 # http://docs.openstack.org/mitaka/install-guide-ubuntu/keystone-openrc.html
 #------------------------------------------------------------------------------
 
-# Test in subshell enviroment to keep our environment clean
+# Test in subshell environment to keep our environment clean
 (
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"

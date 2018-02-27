@@ -17,7 +17,7 @@ function _vm_boot_with_autostart {
 # Create a new node VM
 function vm_create_node {
     # XXX Run this function in sub-shell to protect our caller's environment
-    #     (which might be _our_ enviroment if we get called again)
+    #     (which might be _our_ environment if we get called again)
     (
     source "$CONFIG_DIR/config.$vm_name"
 

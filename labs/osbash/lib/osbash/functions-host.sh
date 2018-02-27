@@ -282,7 +282,7 @@ function ssh_process_autostart {
     local vm_name=$1
 
     # Run this function in sub-shell to protect our caller's environment
-    # (which might be _our_ enviroment if we get called again)
+    # (which might be _our_ environment if we get called again)
     (
     source "$CONFIG_DIR/config.$vm_name"
     ssh_env_for_node "$vm_name"
@@ -548,7 +548,7 @@ function command_from_config {
             get_cmd_options $args
             local iso_name=$(get_iso_name)
             # Run this function in sub-shell to protect our caller's environment
-            # (which might be _our_ enviroment if we get called again)
+            # (which might be _our_ environment if we get called again)
             (
             source "$CONFIG_DIR/config.$vm_name"
             ssh_env_for_node "$vm_name"
