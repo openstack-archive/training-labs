@@ -204,23 +204,23 @@ function show_compute_resource_usage {
 function wait_for_neutron_agents {
     local agent_list=$LOG_DIR/test-agent.list
     local start=$(date +%s)
-    echo -n "Waiting for agents in neutron agent-list."
+    echo -n "Waiting for agents in openstack network agent list."
     (
     source "$CONFIG_DIR/admin-openstackrc.sh"
-    neutron agent-list | sort > "$agent_list"
+    openstack network agent list | sort > "$agent_list"
     local out=$(grep " :-)  " "$agent_list" || rc=$?)
     if [ -n "$out" ]; then
         echo
         echo "$out"
     fi
     while : ; do
-        neutron agent-list | sort > "$agent_list.new"
+        openstack network agent list | sort > "$agent_list.new"
         out=$(comm -13 "$agent_list" "$agent_list.new")
         if [ -n "$out" ]; then
             echo
             echo "$out"
         fi
-        if ! grep -q " xxx  " "$agent_list"; then
+        if ! grep -q " XXX  " "$agent_list"; then
             break
         fi
         mv "$agent_list.new" "$agent_list"
@@ -229,7 +229,7 @@ function wait_for_neutron_agents {
     done
     echo
     echo "All agents are ready."
-    neutron agent-list
+    openstack network agent list
     echo
     )
     echo "SUM wait for neutron agents: $(($(date +%s) - start))"
