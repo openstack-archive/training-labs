@@ -763,7 +763,7 @@ ssh_no_chk "cirros@$floating_ip" uptime
 
 echo
 echo "Interface configuration on instance VM."
-ssh_no_chk "cirros@$floating_ip" ip addr
+ssh_no_chk "cirros@$floating_ip" /sbin/ip addr
 
 echo
 echo "Routing information on instance VM."
