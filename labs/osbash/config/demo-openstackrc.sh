@@ -9,7 +9,7 @@ source "$CONFIG_DIR/credentials"
 
 #------------------------------------------------------------------------------
 # OpenStack client environment scripts
-# http://docs.openstack.org/newton/install-guide-ubuntu/keystone-openrc.html
+# https://docs.openstack.org/keystone/queens/install/keystone-openrc-ubuntu.html
 #------------------------------------------------------------------------------
 export OS_USERNAME=$DEMO_USER_NAME
 export OS_PASSWORD=$DEMO_PASS

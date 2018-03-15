@@ -88,7 +88,7 @@ HEAT
 # Create m1.nano flavor
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# Newton does no longer create default flavors:
+# Nova does no longer create default flavors:
 # http://docs.openstack.org/releasenotes/nova/unreleased.html 2016-09-25
 (
 echo

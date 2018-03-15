@@ -47,24 +47,24 @@ sudo apt update
 # https://docs.openstack.org/install-guide/environment-packages-ubuntu.html
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # NOTE: Using pre-release staging ppa is not documented in install-guide
-# https://launchpad.net/~ubuntu-cloud-archive/+archive/ubuntu/pike-staging
+# https://launchpad.net/~ubuntu-cloud-archive/+archive/ubuntu/queens-staging
 #--------------------------------------------------------------------------
 
 echo "Installing packages needed for add-apt-repository."
 sudo apt -y install software-properties-common
 
 case "$OPENSTACK_RELEASE" in
-    pike)
-        REPO=cloud-archive:pike
-        SRC_FILE=cloudarchive-pike.list
+    queens)
+        REPO=cloud-archive:queens
+        SRC_FILE=cloudarchive-queens.list
         ;;
-    pike-proposed)
-        REPO=cloud-archive:pike-proposed
-        SRC_FILE=cloudarchive-pike-proposed.list
+    queens-proposed)
+        REPO=cloud-archive:queens-proposed
+        SRC_FILE=cloudarchive-queens-proposed.list
         ;;
-    pike-staging)
-        REPO=ppa:ubuntu-cloud-archive/pike-staging
-        SRC_FILE=ubuntu-cloud-archive-ubuntu-pike-staging-xenial.list
+    queens-staging)
+        REPO=ppa:ubuntu-cloud-archive/queens-staging
+        SRC_FILE=ubuntu-cloud-archive-ubuntu-queens-staging-xenial.list
         ;;
     *)
         echo >&2 "Unknown OpenStack release: $OPENSTACK_RELEASE. Aborting."

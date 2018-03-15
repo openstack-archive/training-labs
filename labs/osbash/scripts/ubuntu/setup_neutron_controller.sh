@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install and configure controller node
-# https://docs.openstack.org/neutron/pike/install/controller-install-ubuntu.html
+# https://docs.openstack.org/neutron/queens/install/controller-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

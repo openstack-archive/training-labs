@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# https://docs.openstack.org/neutron/pike/install/compute-install-option2-ubuntu.html
+# https://docs.openstack.org/neutron/queens/install/compute-install-option2-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -39,3 +39,10 @@ iniset_sudo $conf vxlan l2_population true
 # Edit the [securitygroup] section.
 iniset_sudo $conf securitygroup enable_security_group true
 iniset_sudo $conf securitygroup firewall_driver neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+
+echo "Ensuring that the kernel supports network bridge filters."
+if ! sudo sysctl net.bridge.bridge-nf-call-iptables; then
+    sudo modprobe br_netfilter
+    echo "# bridge support module added by training-labs" >> /etc/modules
+    echo br_netfilter >> /etc/modules
+fi

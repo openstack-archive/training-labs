@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for controller node.
-# https://docs.openstack.org/neutron/pike/install/controller-install-ubuntu.html
+# https://docs.openstack.org/neutron/queens/install/controller-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 source "$CONFIG_DIR/admin-openstackrc.sh"
@@ -40,7 +40,7 @@ iniset_sudo $conf DEFAULT metadata_proxy_shared_secret "$METADATA_SECRET"
 echo "Configuring Compute to use Networking."
 conf=/etc/nova/nova.conf
 iniset_sudo $conf neutron url http://controller:9696
-iniset_sudo $conf neutron auth_url http://controller:35357
+iniset_sudo $conf neutron auth_url http://controller:5000
 iniset_sudo $conf neutron auth_type password
 iniset_sudo $conf neutron project_domain_name default
 iniset_sudo $conf neutron user_domain_name default
@@ -84,7 +84,7 @@ fi
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for controller node.
-# https://docs.openstack.org/neutron/pike/install/verify-option2.html
+# https://docs.openstack.org/neutron/queens/install/verify-option2.html
 #------------------------------------------------------------------------------
 
 echo -n "Verifying operation."

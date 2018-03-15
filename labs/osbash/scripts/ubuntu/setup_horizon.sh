@@ -13,7 +13,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Dashboard (horizon)
-# https://docs.openstack.org/horizon/pike/install/install-ubuntu.html
+# https://docs.openstack.org/horizon/queens/install/install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -89,7 +89,7 @@ API
 
 echo "Configuring 'default' as the default domain for users created via " \
     "dashboard."
-iniset_sudo_no_section $conf "OPENSTACK_KEYSTONE_DEFAULT_DOMAIN" '"default"'
+iniset_sudo_no_section $conf "OPENSTACK_KEYSTONE_DEFAULT_DOMAIN" '"Default"'
 
 echo "Configuring 'user' as the default role for users created via dashboard."
 iniset_sudo_no_section $conf "OPENSTACK_KEYSTONE_DEFAULT_ROLE" '"user"'
@@ -98,6 +98,10 @@ iniset_sudo_no_section $conf "OPENSTACK_KEYSTONE_DEFAULT_ROLE" '"user"'
 
 echo "Setting timezone to UTC."
 iniset_sudo_no_section $conf "TIME_ZONE" '"UTC"'
+
+conf=/etc/apache2/conf-available/openstack-dashboard.conf
+echo "Verifying presence of 'WSGIApplicationGroup %{GLOBAL}'."
+grep "WSGIApplicationGroup %{GLOBAL}" $conf
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Customize Horizon (not in install-guide)

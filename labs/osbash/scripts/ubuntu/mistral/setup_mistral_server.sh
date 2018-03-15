@@ -153,8 +153,8 @@ sudo sed -i '/^auth_/ s/^/#/' $conf
 # Configure [keystone_authtoken] section.
 #iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000/v3
 iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
-iniset_sudo $conf keystone_authtoken auth_url http://controller:35357
-#iniset_sudo $conf keystone_authtoken identity_uri http://controller:35357
+iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
+#iniset_sudo $conf keystone_authtoken identity_uri http://controller:5000
 
 #iniset_sudo $conf keystone_authtoken auth_verison v3
 

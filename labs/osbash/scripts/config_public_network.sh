@@ -10,7 +10,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Create the provier (external) network and a subnet on it
-# http://docs.openstack.org/newton/install-guide-ubuntu/launch-instance-networks-provider.html
+# https://docs.openstack.org/install-guide/launch-instance-networks-provider.html
 #------------------------------------------------------------------------------
 
 echo "Sourcing the admin credentials."
@@ -44,7 +44,7 @@ wait_for_agent neutron-dhcp-agent
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Creating the public network."
-openstack network create --share \
+openstack network create --share --external \
     --provider-physical-network provider \
     --provider-network-type flat provider
 
