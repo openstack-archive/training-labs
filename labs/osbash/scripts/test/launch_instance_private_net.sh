@@ -818,5 +818,5 @@ echo "SUM END"
 
 echo
 echo "Try this, it should work:"
-echo "Command: 'ssh cirros@$floating_ip' [ password: 'cubswin:)' ]"
+echo "Command: 'ssh cirros@$floating_ip' [ password: 'gocubsgo' ]"
 
