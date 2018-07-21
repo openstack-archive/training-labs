@@ -49,7 +49,7 @@ OpenStack release. Unless you have a reason to go with an older release,
 we recommend using master.
 
 For non-development purposes (training, etc.), the easiest way to get the code is through downloading the desired archive from
-`OpenStack Training Labs <https://docs.openstack.org/training_labs/>_`.
+`OpenStack Training Labs <https://docs.openstack.org/training_labs/>`_.
 Unpack the archive and you are good to go.
 
 How to run the scripts for GNU/Linux and macOS
