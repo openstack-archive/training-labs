@@ -16,7 +16,7 @@ About
 
 Training-labs provides an automated way to deploy Vanilla OpenStack, closely
 following the
-`OpenStack Install Guide <http://docs.openstack.org/install-guide>`_.
+`OpenStack Install Guide <https://docs.openstack.org/install-guide>`_.
 
 Training-labs offers an easy way to set up an OpenStack cluster which is a good
 starting point for beginners to learn OpenStack, and for advanced users to test
@@ -30,8 +30,8 @@ see the
 `OpenStack wiki <https://wiki.openstack.org/wiki/Documentation/training-labs>`_.
 
 * Free software: Apache license
-* Source: http://git.openstack.org/cgit/openstack/training-labs
-* Bugs: http://bugs.launchpad.net/labs
+* Source: https://git.openstack.org/cgit/openstack/training-labs
+* Bugs: https://bugs.launchpad.net/labs
 
 Pre-requisite
 -------------
