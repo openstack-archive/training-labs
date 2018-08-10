@@ -30,8 +30,8 @@ see the
 `OpenStack wiki <https://wiki.openstack.org/wiki/Documentation/training-labs>`_.
 
 * Free software: Apache license
-* Source: https://git.openstack.org/cgit/openstack/training-labs
-* Bugs: https://bugs.launchpad.net/labs
+* `Source:openstack/training-labs <https://git.openstack.org/cgit/openstack/training-labs>`_
+* `Bugs:openstack-training-labs <https://bugs.launchpad.net/labs>`_
 
 Pre-requisite
 -------------
