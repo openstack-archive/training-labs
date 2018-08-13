@@ -1,0 +1,6 @@
+- project:
+    templates:
+      - openstack-python-jobs
+    post:
+      jobs:
+        - publish-training-labs-scripts
