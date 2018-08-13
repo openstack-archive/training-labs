@@ -1,4 +1,6 @@
 - project:
+    templates:
+      - openstack-python-jobs
     check:
       jobs:
         - training-labs-scripts
@@ -6,6 +8,9 @@
       jobs:
         - training-labs-scripts
 
+    post:
+      jobs:
+        - publish-training-labs-scripts
 - job:
     name: training-labs-scripts
     description: |
