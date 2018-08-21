@@ -153,6 +153,7 @@ For Demo user privileges::
 
     $ source demo-openstackrc.sh
 
+Note: Instead 'source' you can use '.', or you define an alias.
 Now you can access the OpenStack services via CLI.
 
 Specs
