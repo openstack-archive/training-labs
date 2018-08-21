@@ -239,7 +239,7 @@ wait_for_neutron_agents
 
 #------------------------------------------------------------------------------
 # Launch an instance
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance.html
+# https://docs.openstack.org/install-guide/launch-instance.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -332,7 +332,7 @@ openstack security group show default
 
 #------------------------------------------------------------------------------
 # Launch an instance on the self-service network
-# http://docs.openstack.org/mitaka/install-guide-ubuntu/launch-instance-selfservice.html
+# https://docs.openstack.org/install-guide/launch-instance-selfservice.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
