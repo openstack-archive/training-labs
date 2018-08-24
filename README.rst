@@ -158,7 +158,7 @@ Now you can access the OpenStack services via CLI.
 Specs
 -----
 
-To review specifications, see http://specs.openstack.org/openstack/docs-specs/specs/liberty/traininglabs.html
+To review specifications, see http://specs.openstack.org/openstack/docs-specs/specs/liberty/training-labs.html
 
 Mailing lists, IRC
 ------------------
