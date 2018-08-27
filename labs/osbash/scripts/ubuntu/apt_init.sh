@@ -47,24 +47,24 @@ sudo apt update
 # https://docs.openstack.org/install-guide/environment-packages-ubuntu.html
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # NOTE: Using pre-release staging ppa is not documented in install-guide
-# https://launchpad.net/~ubuntu-cloud-archive/+archive/ubuntu/queens-staging
+# https://launchpad.net/~ubuntu-cloud-archive/+archive/ubuntu/rocky-staging
 #--------------------------------------------------------------------------
 
 echo "Installing packages needed for add-apt-repository."
 sudo apt -y install software-properties-common
 
 case "$OPENSTACK_RELEASE" in
-    queens)
-        REPO=cloud-archive:queens
-        SRC_FILE=cloudarchive-queens.list
+    rocky)
+        REPO=cloud-archive:rocky
+        SRC_FILE=cloudarchive-rocky.list
         ;;
-    queens-proposed)
-        REPO=cloud-archive:queens-proposed
-        SRC_FILE=cloudarchive-queens-proposed.list
+    rocky-proposed)
+        REPO=cloud-archive:rocky-proposed
+        SRC_FILE=cloudarchive-rocky-proposed.list
         ;;
-    queens-staging)
-        REPO=ppa:ubuntu-cloud-archive/queens-staging
-        SRC_FILE=ubuntu-cloud-archive-ubuntu-queens-staging-xenial.list
+    rocky-staging)
+        REPO=ppa:ubuntu-cloud-archive/rocky-staging
+        SRC_FILE=ubuntu-cloud-archive-ubuntu-rocky-staging-bionic.list
         ;;
     *)
         echo >&2 "Unknown OpenStack release: $OPENSTACK_RELEASE. Aborting."
