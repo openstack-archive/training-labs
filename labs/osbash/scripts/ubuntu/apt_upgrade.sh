@@ -26,24 +26,6 @@ sudo DEBIAN_FRONTEND=noninteractive apt \
     -y upgrade
 sudo apt -y dist-upgrade
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Extra work not documented in install-guide
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-# If we upgraded the kernel, remove the old one
-INSTALLED_KERNEL=$(readlink /vmlinuz)
-INSTALLED_KERNEL=${INSTALLED_KERNEL#boot/vmlinuz-}
-RUNNING_KERNEL=$(uname -r)
-
-if [[ $INSTALLED_KERNEL != $RUNNING_KERNEL ]]; then
-    echo "Kernel $INSTALLED_KERNEL installed. Removing $RUNNING_KERNEL."
-    if dpkg -s "linux-image-extra-$RUNNING_KERNEL" >/dev/null 2>&1; then
-        sudo dpkg --purge "linux-image-extra-$RUNNING_KERNEL"
-    fi
-    sudo dpkg --purge "linux-image-$RUNNING_KERNEL"
-    sudo dpkg --purge "linux-headers-$RUNNING_KERNEL"
-fi
-
 # Clean apt cache
 sudo apt -y autoremove
 sudo apt -y clean
