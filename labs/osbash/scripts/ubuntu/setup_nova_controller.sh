@@ -154,8 +154,8 @@ iniset_sudo $conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 
 # Configure [VNC] section.
 iniset_sudo $conf vnc enabled true
-iniset_sudo $conf vnc vncserver_listen '$my_ip'
-iniset_sudo $conf vnc vncserver_proxyclient_address '$my_ip'
+iniset_sudo $conf vnc server_listen '$my_ip'
+iniset_sudo $conf vnc server_proxyclient_address '$my_ip'
 
 # Configure [glance] section.
 iniset_sudo $conf glance api_servers http://controller:9292
