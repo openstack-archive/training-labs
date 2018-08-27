@@ -61,9 +61,9 @@ iniset_sudo $conf DEFAULT use_neutron True
 iniset_sudo $conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 
 # Configure [vnc] section.
-iniset_sudo $conf vnc vnc_enabled True
-iniset_sudo $conf vnc vncserver_listen 0.0.0.0
-iniset_sudo $conf vnc vncserver_proxyclient_address '$my_ip'
+iniset_sudo $conf vnc enabled true
+iniset_sudo $conf vnc server_listen 0.0.0.0
+iniset_sudo $conf vnc server_proxyclient_address '$my_ip'
 # Using IP address because the host running the browser may not be able to
 # resolve the host name "controller"
 iniset_sudo $conf vnc novncproxy_base_url http://"$(hostname_to_ip controller)":6080/vnc_auto.html
