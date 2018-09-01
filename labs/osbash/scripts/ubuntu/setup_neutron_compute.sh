@@ -39,7 +39,7 @@ iniset_sudo $conf DEFAULT auth_strategy keystone
 neutron_admin_user=neutron
 
 # Configuring [keystone_authtoken] section
-iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
+iniset_sudo $conf keystone_authtoken www_authenticate_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
 iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password

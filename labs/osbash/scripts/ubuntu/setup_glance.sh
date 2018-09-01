@@ -86,7 +86,7 @@ conf=/etc/glance/glance-api.conf
 iniset_sudo $conf database connection "$database_url"
 
 # Keystone_authtoken
-iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
+iniset_sudo $conf keystone_authtoken www_authenticate_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
 iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password
@@ -111,7 +111,7 @@ conf=/etc/glance/glance-registry.conf
 iniset_sudo $conf database connection "$database_url"
 
 # Keystone authtoken section
-iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
+iniset_sudo $conf keystone_authtoken www_authenticate_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
 iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password

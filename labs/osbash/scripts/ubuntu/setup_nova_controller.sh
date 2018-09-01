@@ -133,6 +133,12 @@ echo "Configuring nova services."
 echo "Configuring RabbitMQ message queue access."
 iniset_sudo $conf DEFAULT transport_url "rabbit://openstack:$RABBIT_PASS@controller"
 
+if sudo grep "^os_region_name" $conf; then
+    sudo sed -i '/^os_region_name/ s/os_region_name/region_name/' $conf
+else
+    echo "WARNING os_region_name change no longer needed for $conf"
+fi
+
 # Configure [api] section.
 iniset_sudo $conf api auth_strategy keystone
 
@@ -148,7 +154,7 @@ iniset_sudo $conf keystone_authtoken password "$NOVA_PASS"
 
 # Configure [DEFAULT] section.
 iniset_sudo $conf DEFAULT my_ip "$(hostname_to_ip controller)"
-iniset_sudo $conf DEFAULT use_neutron True
+iniset_sudo $conf DEFAULT use_neutron true
 iniset_sudo $conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
 
 # Configure [VNC] section.
@@ -169,7 +175,7 @@ sudo grep "^log_dir" $conf
 sudo sed -i "/^log_dir/ d" $conf
 
 echo "Configuring Placement services."
-iniset_sudo $conf placement os_region_name RegionOne
+iniset_sudo $conf placement region_name RegionOne
 iniset_sudo $conf placement project_domain_name Default
 iniset_sudo $conf placement project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf placement auth_type password
