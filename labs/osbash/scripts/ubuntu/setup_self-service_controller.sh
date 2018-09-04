@@ -84,6 +84,9 @@ iniset_sudo $conf nova project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf nova username "$nova_admin_user"
 iniset_sudo $conf nova password "$NOVA_PASS"
 
+# lock_path, not in install-guide:
+iniset_sudo $conf oslo_concurrency lock_path /var/lib/neutron/tmp
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Configure the Modular Layer 2 (ML2) plug-in
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
