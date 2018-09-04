@@ -148,4 +148,24 @@ openstack image list
 
 echo "Checking the cells and placement API are working successfully."
 echo "on controller node: nova-status upgrade check"
-node_ssh controller "sudo nova-status upgrade check"
+rc=0
+node_ssh controller "sudo nova-status upgrade check" || rc=$?
+if [ $rc -eq 1 ]; then
+    cat << EXPLAIN
+nova-status upgrade check returned $rc. We ignore this error because starting
+with OpenStack Rocky, we get an erroneous warning like this:
+
+  Check: Resource Providers
+  Result: Warning
+  Details: There are no compute resource providers in the Placement
+    service but there are 1 compute nodes in the deployment.
+    This means no compute nodes are reporting into the
+    Placement service and need to be upgraded and/or fixed.
+    See
+    https://docs.openstack.org/nova/latest/user/placement.html
+    for more details.
+
+The ability of the training cluster to allocate resources and launch
+VMs is not affected by this.
+EXPLAIN
+fi
