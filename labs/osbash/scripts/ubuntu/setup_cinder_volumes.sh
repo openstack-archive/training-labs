@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install and configure a storage node
-# https://docs.openstack.org/cinder/queens/install/cinder-storage-install-ubuntu.html
+# https://docs.openstack.org/cinder/rocky/install/cinder-storage-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
@@ -121,7 +121,7 @@ sudo service cinder-volume restart
 
 #------------------------------------------------------------------------------
 # Verify Cinder operation
-# https://docs.openstack.org/cinder/queens/install/cinder-verify.html
+# https://docs.openstack.org/cinder/rocky/install/cinder-verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying Block Storage installation on controller node."

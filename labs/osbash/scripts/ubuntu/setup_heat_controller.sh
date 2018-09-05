@@ -17,7 +17,7 @@ wait_for_keystone
 
 #------------------------------------------------------------------------------
 # Install the Orchestration Service (heat)
-# https://docs.openstack.org/heat/queens/install/install-ubuntu.html
+# https://docs.openstack.org/heat/rocky/install/install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -190,7 +190,7 @@ echo "Restarting heat servies took $((ENDTIME - STARTTIME)) seconds."
 
 #------------------------------------------------------------------------------
 # Verify operation
-# https://docs.openstack.org/heat/queens/install/verify.html
+# https://docs.openstack.org/heat/rocky/install/verify.html
 #------------------------------------------------------------------------------
 
 echo "Listing service components."

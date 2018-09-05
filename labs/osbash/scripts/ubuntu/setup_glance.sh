@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the Image Service (glance).
-# https://docs.openstack.org/glance/queens/install/install-ubuntu.html
+# https://docs.openstack.org/glance/rocky/install/install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -133,7 +133,7 @@ sudo service glance-api restart
 
 #------------------------------------------------------------------------------
 # Verify the Image Service installation
-# https://docs.openstack.org/glance/queens/install/verify.html
+# https://docs.openstack.org/glance/rocky/install/verify.html
 #------------------------------------------------------------------------------
 
 echo -n "Waiting for glance to start."

@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for controller node.
-# https://docs.openstack.org/neutron/queens/install/controller-install-ubuntu.html
+# https://docs.openstack.org/neutron/rocky/install/controller-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 source "$CONFIG_DIR/admin-openstackrc.sh"
@@ -84,7 +84,7 @@ fi
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Networking (neutron) for controller node.
-# https://docs.openstack.org/neutron/queens/install/verify-option2.html
+# https://docs.openstack.org/neutron/rocky/install/verify-option2.html
 #------------------------------------------------------------------------------
 
 echo -n "Verifying operation."
