@@ -88,7 +88,7 @@ function wait_for_agent {
     echo -n "Waiting for neutron agent $agent."
     (
     source "$CONFIG_DIR/admin-openstackrc.sh"
-    while neutron agent-list | grep "$agent" | grep "xxx" >/dev/null; do
+    while openstack network agent list | grep "$agent" | grep -q "XXX"; do
         sleep 1
         echo -n .
     done
@@ -107,7 +107,7 @@ wait_for_agent neutron-dhcp-agent
 source "$CONFIG_DIR/demo-openstackrc.sh"
 
 echo "Adding the private network subnet as an interface on the router."
-neutron router-interface-add router selfservice
+openstack router add subnet router selfservice
 )
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Not in install-guide:
@@ -132,7 +132,7 @@ done
 source "$CONFIG_DIR/demo-openstackrc.sh"
 
 echo "Setting a gateway on the public network on the router."
-neutron router-gateway-set router provider
+openstack router set router --external-gateway provider
 )
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Not in install-guide:
@@ -155,8 +155,8 @@ echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
 echo "Getting the router's IP address in the public network."
-echo "neutron router-port-list router"
-neutron router-port-list router
+echo "openstack port list --router router"
+openstack port list --router router
 
 # Get router IP address in given network
 function get_router_ip_address {
@@ -166,7 +166,7 @@ function get_router_ip_address {
     local line
 
     while : ; do
-        line=$(neutron router-port-list -F fixed_ips router|grep "$network_part")
+        line=$(openstack port list --router router -c"Fixed IP Addresses" | grep "$network_part")
         if [ -z "$line" ]; then
             # Wait for the network_part to appear in the list
             sleep 1
