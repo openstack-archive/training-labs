@@ -711,7 +711,7 @@ openstack console url show "$DEMO_INSTANCE_NAME"
 echo
 echo "Creating a floating IP address on the public network."
 floating_ip=$(openstack floating ip create provider | awk '/ floating_ip_address / {print $4}')
-openstack ip floating list
+openstack floating ip list
 
 echo
 echo "Associating the floating IP address with our instance."
