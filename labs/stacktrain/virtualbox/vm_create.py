@@ -530,7 +530,7 @@ def vm_detach_disk(vm_name, port=0):
 
 
 def vm_attach_dvd(vm_name, iso, port=0):
-    logger.info("Attaching to VM %s:\n\t%s", vm_name, iso)
+    logger.info("Attaching DVD to VM %s:\n\t%s", vm_name, iso)
     vbm("storageattach", vm_name,
         "--storagectl", "IDE",
         "--port", str(port),
@@ -541,7 +541,7 @@ def vm_attach_dvd(vm_name, iso, port=0):
 
 def vm_attach_disk(vm_name, disk, port=0):
     """disk can be either a path or a disk UUID"""
-    logger.info("Attaching to VM %s:\n\t%s", vm_name, disk)
+    logger.info("Attaching disk to VM %s:\n\t%s", vm_name, disk)
     vbm("storageattach", vm_name,
         "--storagectl", "SATA",
         "--port", str(port),
