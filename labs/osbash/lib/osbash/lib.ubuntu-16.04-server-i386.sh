@@ -9,8 +9,8 @@
 
 readonly ISO_URL_BASE=http://releases.ubuntu.com/16.04
 
-ISO_URL=$ISO_URL_BASE/ubuntu-16.04.4-server-i386.iso
-ISO_MD5=3825f06c23540bfd509bb63377f2848e
+ISO_URL=$ISO_URL_BASE/ubuntu-16.04.5-server-i386.iso
+ISO_MD5=9ba5fefe27685ae69f991c45396080af
 
 readonly _PS_ssh=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-ssh-v6.cfg
 readonly _PS_vbadd=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-vbadd-v6.cfg
