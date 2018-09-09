@@ -45,7 +45,6 @@ nova_admin_user=nova
 MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
 
 # Configure [keystone_authtoken] section.
-iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
 iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password
