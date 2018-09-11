@@ -16,11 +16,3 @@ and all installation ISO images it may download.
         please get the location by opening the VirtualBox GUI at this location
         "File>Preferences>General>Default Machine Folder"
 
-Windows
------
-
-For people using windows, you might have to download the iso image for the
-required distro and version manually.
-
-- Ubuntu 14.04 ISO
-  - http://releases.ubuntu.com/14.04/ubuntu-14.04.4-server-amd64.iso
