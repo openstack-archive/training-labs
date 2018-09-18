@@ -21,11 +21,9 @@ indicate_current_auto
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # NOTE We deviate slightly from the install-guide here because inside our VMs,
 #      we cannot use KVM inside VirtualBox.
-# TODO Add option to use nova-compute instead if we are inside a VM that allows
-#      using KVM.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 echo "Installing nova for compute node."
-sudo apt install -y nova-compute-qemu
+sudo apt install -y nova-compute nova-compute-qemu
 
 echo "Configuring nova for compute node."
 
