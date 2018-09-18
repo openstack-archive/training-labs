@@ -48,3 +48,6 @@ iniset_sudo $conf keystone_authtoken user_domain_name default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$neutron_admin_user"
 iniset_sudo $conf keystone_authtoken password "$NEUTRON_PASS"
+
+# lock_path, not in install-guide:
+iniset_sudo $conf oslo_concurrency lock_path /var/lib/neutron/tmp
