@@ -10,13 +10,15 @@
 #VM_PROXY="http://192.168.178.20:3128"
 
 # Options:
-#           ubuntu-16.04-server-amd64 (default)
+#           ubuntu-18.04-server-amd64 (default)
+#           ubuntu-18.04-server-i386
+#           ubuntu-16.04-server-amd64
 #           ubuntu-16.04-server-i386
 #           ubuntu-14.04-server-amd64
 #           ubuntu-14.04-server-i386
 #
-# example: DISTRO=ubuntu-16.04-server-i386
-: ${DISTRO:=ubuntu-16.04-server-amd64}
+# example: DISTRO=ubuntu-18.04-server-i386
+: ${DISTRO:=ubuntu-18.04-server-amd64}
 
 # PROVIDER: virtualbox or kvm (defaults to virtualbox)
 # KVM tends to give better performance (on Linux), but may be harder to set up
