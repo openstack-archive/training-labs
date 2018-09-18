@@ -116,14 +116,6 @@ openstack role create "heat_stack_user"
 
 echo "Installing heat."
 
-# Not in install-guide:
-# Prevent start of heat services here so they don't get confused by the default
-# configuration files. Otherwise, it takes up to 3 minutes for the heat
-# stack-list to appear after the heat services restart below.
-echo "manual" | sudo tee /etc/init/heat-api.override
-echo "manual" | sudo tee /etc/init/heat-api-cfn.override
-echo "manual" | sudo tee /etc/init/heat-engine.override
-
 sudo apt install -y heat-api heat-api-cfn heat-engine
 
 function get_database_url {
@@ -181,11 +173,6 @@ sudo heat-manage db_sync
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Finalize installation
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-# Not in install-guide: Re-enable automatic start of heat services
-sudo rm /etc/init/heat-api.override
-sudo rm /etc/init/heat-api-cfn.override
-sudo rm /etc/init/heat-engine.override
 
 echo "Restarting heat services."
 STARTTIME=$(date +%s)
