@@ -25,7 +25,7 @@ indicate_current_auto
 #      using KVM.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 echo "Installing nova for compute node."
-sudo apt install -y nova-compute-qemu
+sudo apt install -y nova-compute nova-compute-qemu
 
 echo "Configuring nova for compute node."
 
