@@ -1,10 +1,10 @@
 Contributing to replace-labs scripts
-=====================================
+====================================
 
 First things first
 ------------------
 
-Read the OpenStack Style Commandments http://docs.openstack.org/developer/hacking/
+Read the OpenStack Style Commandments https://docs.openstack.org/hacking/latest/
 
 General
 -------
