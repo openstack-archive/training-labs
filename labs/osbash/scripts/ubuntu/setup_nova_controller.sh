@@ -32,6 +32,9 @@ echo "Setting up first cell database."
 # https://docs.openstack.org/developer/nova/cells.html#fresh-install
 setup_database nova_cell0 "$NOVA_DB_USER" "$NOVA_DBPASS"
 
+echo "Setting up placement database."
+setup_database placement "$PLACEMENT_DB_USER" "$PLACEMENT_DBPASS"
+
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
@@ -128,6 +131,11 @@ database_url="mysql+pymysql://$NOVA_DB_USER:$NOVA_DBPASS@controller/nova"
 echo "Setting database connection: $database_url."
 iniset_sudo $conf database connection "$database_url"
 
+# Configure [placement_database] section.
+database_url="mysql+pymysql://$PLACEMENT_DB_USER:$PLACEMENT_DBPASS@controller/placement"
+echo "Setting placement database connection: $database_url."
+iniset_sudo $conf placement_database connection "$database_url"
+
 echo "Configuring nova services."
 
 echo "Configuring RabbitMQ message queue access."
@@ -184,7 +192,7 @@ iniset_sudo $conf placement auth_url http://controller:5000/v3
 iniset_sudo $conf placement username "$placement_admin_user"
 iniset_sudo $conf placement password "$PLACEMENT_PASS"
 
-echo "Populating the nova-api databases."
+echo "Populating the nova-api and placement databases."
 sudo nova-manage api_db sync
 
 echo "Registering the cell0 database."
