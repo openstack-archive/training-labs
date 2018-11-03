@@ -90,8 +90,8 @@ PRESEED_HOST_DIR = ("http://git.openstack.org/cgit/openstack/training-labs/"
 
 PRESEED_URL = {}
 PRESEED_URL['ssh'] = PRESEED_HOST_DIR + "preseed-ssh-v6.cfg"
-PRESEED_URL['shared_folder'] = PRESEED_HOST_DIR + "preseed-vbadd-v6.cfg"
-PRESEED_URL['all'] = PRESEED_HOST_DIR + "preseed-all-v6.cfg"
+PRESEED_URL['shared_folder'] = PRESEED_HOST_DIR + "preseed-vbadd-v7.cfg"
+PRESEED_URL['all'] = PRESEED_HOST_DIR + "preseed-all-v7.cfg"
 
 # Arguments for ISO image installer
 _BOOT_ARGS = ("/install/vmlinuz"
