@@ -161,7 +161,7 @@ Specs
 -----
 
 To review specifications, see `Training-labs
-<http://specs.openstack.org/openstack/docs-specs/specs/liberty/training-labs.html>`_
+<https://specs.openstack.org/openstack/docs-specs/specs/liberty/training-labs.html>`_
 
 Mailing lists, IRC
 ------------------
