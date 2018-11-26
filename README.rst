@@ -168,11 +168,11 @@ Mailing lists, IRC
 
 To contribute, join the IRC channel, ``#openstack-doc``, on IRC freenode
 or write an e-mail to the OpenStack Development Mailing List
-``openstack-dev@lists.openstack.org``. Please use ``[training-labs]`` tag in the
+``openstack-discuss@lists.openstack.org``. Please use ``[training-labs]`` tag in the
 subject of the email message.
 
 You may have to
-`subscribe to the OpenStack Development Mailing List <http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev>`_
+`subscribe to the OpenStack Development Mailing List <http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-discuss>`_
 to have your mail accepted by the mailing list software.
 
 Sub-team leads
