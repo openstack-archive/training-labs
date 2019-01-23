@@ -1179,7 +1179,7 @@ function get_pip_command {
     fi
 }
 
-# Get the path to the direcotry where python executables are installed.
+# Get the path to the directory where python executables are installed.
 # get_python_exec_prefix
 function get_python_exec_prefix {
     if is_fedora || is_suse; then
