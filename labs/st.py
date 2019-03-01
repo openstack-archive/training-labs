@@ -13,7 +13,6 @@ import importlib
 import logging
 import os
 import sys
-from six.moves import input
 import time
 
 import stacktrain.core.helpers as hf
@@ -231,7 +230,7 @@ def main():
         if args.target == "basedisk":
             print("Basedisk exists: %s" % conf.get_base_disk_name())
             print("\tDestroy and recreate? [y/N] ", end='')
-            ans = input().lower()
+            ans = raw_input().lower()
             if ans == 'y':
                 logger.info("Deleting existing basedisk.")
                 start_time = time.time()
