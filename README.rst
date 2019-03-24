@@ -51,7 +51,7 @@ How to run the scripts
 
 Clone the training-labs repository:
 
-    $ git clone git://git.openstack.org/openstack/training-labs.git
+    $ git clone https://git.openstack.org/openstack/training-labs.git
 
 Change directory:
 
