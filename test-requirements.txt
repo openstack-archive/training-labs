@@ -2,10 +2,5 @@
 # of appreance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
 
-# Dependencies for generating documentation.
-sphinx>=1.2.1,!=1.3b1,<1.4  # BSD
-sphinx-testing # BSD License
-oslosphinx>=4.7.0
-
 # For linting/profiling the code.
 bashate # pep8 equivalent for bash scripts
