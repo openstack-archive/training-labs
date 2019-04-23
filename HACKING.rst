@@ -46,7 +46,7 @@ Osbash is written in BASH and follows conventions of DevStack:
 `devstack <http://devstack.org/>`_.
 
 DevStack bash style guidelines can be found at the bottom of:
-https://git.openstack.org/cgit/openstack-dev/devstack/blob/master/HACKING.rst
+https://opendev.org/openstack/devstack/src/branch/master/HACKING.rst
 
 Structure
 ---------

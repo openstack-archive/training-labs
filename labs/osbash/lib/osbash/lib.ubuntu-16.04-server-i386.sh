@@ -12,9 +12,9 @@ readonly ISO_URL_BASE=http://releases.ubuntu.com/16.04
 ISO_URL=$ISO_URL_BASE/ubuntu-16.04.5-server-i386.iso
 ISO_MD5=9ba5fefe27685ae69f991c45396080af
 
-readonly _PS_ssh=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-ssh-v6.cfg
-readonly _PS_vbadd=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-vbadd-v6.cfg
-readonly _PS_all=http://git.openstack.org/cgit/openstack/training-labs/plain/labs/osbash/lib/osbash/netboot/preseed-all-v6.cfg
+readonly _PS_ssh=https://opendev.org/openstack/training-labs/raw/branch/master/labs/osbash/lib/osbash/netboot/preseed-ssh-v6.cfg
+readonly _PS_vbadd=https://opendev.org/openstack/training-labs/raw/branch/master/labs/osbash/lib/osbash/netboot/preseed-vbadd-v6.cfg
+readonly _PS_all=https://opendev.org/openstack/training-labs/raw/branch/master/labs/osbash/lib/osbash/netboot/preseed-all-v6.cfg
 
 # Arguments for ISO image installer
 readonly _BOOT_ARGS="/install/vmlinuz
