@@ -85,8 +85,8 @@ class ISOImage(distro.GenericISOImage):
 
         logger.info("New ISO URL:\n\t%s", self.url)
 
-PRESEED_HOST_DIR = ("http://git.openstack.org/cgit/openstack/training-labs/"
-                    "plain/labs/osbash/lib/osbash/netboot/")
+PRESEED_HOST_DIR = ("https://opendev.org/openstack/training-labs/raw/branch/"
+                     "master/labs/osbash/lib/osbash/netboot/")
 
 PRESEED_URL = {}
 PRESEED_URL['ssh'] = PRESEED_HOST_DIR + "preseed-ssh-v6.cfg"
@@ -96,6 +96,7 @@ PRESEED_URL['all'] = PRESEED_HOST_DIR + "preseed-all-v7.cfg"
 # Arguments for ISO image installer
 _BOOT_ARGS = ("/install/vmlinuz"
               " noapic"
+              " debian-installer/allow_unauthenticated_ssl=true"
               " preseed/url=%s"
               " debian-installer=en_US"
               " auto=true"
