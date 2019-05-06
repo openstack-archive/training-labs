@@ -43,11 +43,8 @@ class ISOImage(distro.GenericISOImage):
             # IOAPIC)
             conf.vbox_ostype = "Ubuntu_64"
         elif arch == "i386":
-            self.url = ("http://cloud-images.ubuntu.com/xenial/current/"
-                        "xenial-server-cloudimg-i386-disk1.img")
-            self.release_name = "ubuntu-18.04-i386"
-            self.md5 = "ff3ee93fd36d7d002a0b841eec7501e6"
-            conf.vbox_ostype = "Ubuntu"
+            logger.error("Arch: i386 unsupported in bionic. Aborting.")
+            sys.exit(1)
         else:
             logger.error("Unknown arch: %s. Aborting.", arch)
             sys.exit(1)
@@ -72,8 +69,6 @@ class ISOImage(distro.GenericISOImage):
 
         if self.arch == "amd64":
             ma = re.search(r"(.*) \*{0,1}(.*server-amd64.iso)", txt)
-        else:
-            ma = re.search(r"(.*) \*{0,1}(.*server-i386.iso)", txt)
         if ma:
             self.md5 = ma.group(1)
             self.name = ma.group(2)
