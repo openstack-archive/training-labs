@@ -38,7 +38,7 @@ mysql -u keystone -p"$KEYSTONE_DBPASS" keystone -h controller -e quit
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing keystone."
-sudo apt install -y keystone apache2 libapache2-mod-wsgi
+sudo apt install -y keystone apache2
 
 conf=/etc/keystone/keystone.conf
 echo "Editing $conf."
