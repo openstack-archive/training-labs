@@ -22,6 +22,7 @@ echo "Testing horizon."
 IP=$(echo "$NET_IF_1" |awk '{print $2}')
 AUTH_URL="http://$IP/horizon/auth/login/"
 DOMAIN="default"
+REGION="default"
 USER=${ADMIN_USER_NAME}
 PASSWORD=${ADMIN_PASS}
 OUTPUT_DIR="test_horizon_out"
@@ -113,7 +114,7 @@ request_cmd "$AUTH_URL" $OUTPUT_FILE1
 TOKEN=$(grep csrftoken $COOKIE_FILE | sed 's/^.*csrftoken\s*//')
 
 # This data is what is going to be passed as the $_POST of the http request
-DATA="username=$USER&password=$PASSWORD&domain=$DOMAIN&csrfmiddlewaretoken=$TOKEN"
+DATA="username=$USER&password=$PASSWORD&domain=$DOMAIN&region=$REGION&csrfmiddlewaretoken=$TOKEN"
 
 # Step 2: check the login credentials and obtains the session ID
 echo "Authenticating with the $USER credentials."
