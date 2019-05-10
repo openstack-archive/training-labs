@@ -24,8 +24,6 @@ conf.distro = "ubuntu"
 # Installation from ISO image
 # -----------------------------------------------------------------------------
 
-#http://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img
-
 class ISOImage(distro.GenericISOImage):
 
     def __init__(self, arch="amd64"):
@@ -33,9 +31,6 @@ class ISOImage(distro.GenericISOImage):
         self.arch = arch
         if arch == "amd64":
             self.release_name = "ubuntu-18.04-amd64"
-            #self.url = ("http://cloud-images.ubuntu.com/xenial/current/"
-            #            "xenial-server-cloudimg-amd64-disk1.img")
-            #self.md5 = "f4a9830fb482d07eec07c8532a1c265e"
             self.url = ("http://cdimage.ubuntu.com/releases/18.04/release/"
                         "ubuntu-18.04.2-server-amd64.iso")
             self.md5 = "34416ff83179728d54583bf3f18d42d2"
