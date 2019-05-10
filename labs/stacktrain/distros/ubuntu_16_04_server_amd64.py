@@ -33,16 +33,16 @@ class ISOImage(distro.GenericISOImage):
         if arch == "amd64":
             self.release_name = "ubuntu-16.04-amd64"
             self.url = ("http://releases.ubuntu.com/16.04/"
-                        "ubuntu-16.04.5-server-amd64.iso")
-            self.md5 = "24636fd103a2a43c95659f1c3c63718e"
+                        "ubuntu-16.04.6-server-amd64.iso")
+            self.md5 = "ac8a79a86a905ebdc3ef3f5dd16b7360"
             # ostype used by VirtualBox to choose icon and flags (64-bit,
             # IOAPIC)
             conf.vbox_ostype = "Ubuntu_64"
         elif arch == "i386":
             self.url = ("http://releases.ubuntu.com/16.04/"
-                        "ubuntu-16.04.5-server-i386.iso")
+                        "ubuntu-16.04.6-server-i386.iso")
             self.release_name = "ubuntu-16.04-i386"
-            self.md5 = "9ba5fefe27685ae69f991c45396080af"
+            self.md5 = "1817138b1a181507c5ebd5ec8a3f40ba"
             conf.vbox_ostype = "Ubuntu"
         else:
             logger.error("Unknown arch: %s. Aborting.", arch)
