@@ -70,7 +70,22 @@ def vm_create_node(vm_name):
         if disk is None:
             continue
         elif disk == "base":
-            vm.vm_attach_disk_multi(vm_name, cvb.get_base_disk_path())
+            base_disk_path = cvb.get_base_disk_path()
+
+            if conf.wbatch or not vm.vm_disk_is_multiattach(base_disk_path):
+                # Skip the following workaround if the base disk is already
+                # registered as a multiattach image to avoid creating orphaned
+                # COW images. Windows batch scripts use the workaround
+                # unconditionally and therefore create COW orphan images
+                # (visible in the VirtualBox Media Manager).
+
+                # Attach and detach base disk first to have it registered with
+                # the VirtualBox Media Manager. Required by VirtualBox 6+ for
+                # configuring a multiattach volume.
+                vm.vm_attach_disk(vm_name, base_disk_path)
+                vm.vm_detach_disk(vm_name)
+
+            vm.vm_attach_disk_multi(vm_name, base_disk_path)
         else:
             size = disk
             disk_name = "{}-sd{}.vdi".format(vm_name, disk_letter)
