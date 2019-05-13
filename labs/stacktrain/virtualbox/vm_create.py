@@ -551,6 +551,13 @@ def vm_attach_disk(vm_name, disk, port=0):
 
 
 # disk can be either a path or a disk UUID
+def vm_disk_is_multiattach(disk):
+    output = vbm("showmediuminfo", disk, wbatch=False)
+    regex = re.compile(r"^Type:.*multiattach", re.MULTILINE)
+    return True if re.search(regex, output) else False
+
+
+# disk can be either a path or a disk UUID
 def vm_attach_disk_multi(vm_name, disk, port=0):
     vbm("modifyhd", "--type", "multiattach", disk)
 
