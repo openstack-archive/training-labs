@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up Block Storage service controller (cinder controller node)
-# https://docs.openstack.org/cinder/rocky/install/cinder-controller-install-ubuntu.html
+# https://docs.openstack.org/cinder/stein/install/cinder-controller-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

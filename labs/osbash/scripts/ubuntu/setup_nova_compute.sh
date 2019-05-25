@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install and configure a compute node
-# https://docs.openstack.org/nova/rocky/install/compute-install-ubuntu.html
+# https://docs.openstack.org/nova/stein/install/compute-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -136,7 +136,7 @@ node_ssh controller "sudo nova-manage cell_v2 discover_hosts --verbose"
 
 #------------------------------------------------------------------------------
 # Verify operation
-# https://docs.openstack.org/nova/rocky/install/verify.html
+# https://docs.openstack.org/nova/stein/install/verify.html
 #------------------------------------------------------------------------------
 
 echo "Verifying operation of the Compute service."
