@@ -132,7 +132,6 @@ dl.downloader.vm_proxy = vm_proxy
 
 provider = cfg_localrc.get_value("PROVIDER")
 logger.debug("Checking provider given by config/localarc: %s", provider)
-check_provider()
 distro_full = cfg_localrc.get_value("DISTRO")
 # ubuntu-14.04-server-amd64 -> ubuntu_14_04_server_amd64
 distro_full = re.sub(r'[-.]', '_', distro_full)
