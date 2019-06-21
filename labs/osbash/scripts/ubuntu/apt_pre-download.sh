@@ -30,7 +30,7 @@ apt_download python-argparse python-dev python-pip
 
 # Keystone
 apt_download keystone python3-openstackclient apache2 \
-    libapache2-mod-wsgi memcached python-memcache
+    memcached python-memcache
 
 # Glance
 apt_download glance python3-glanceclient
