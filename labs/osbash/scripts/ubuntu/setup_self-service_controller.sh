@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# https://docs.openstack.org/neutron/rocky/install/controller-install-option2-ubuntu.html
+# https://docs.openstack.org/neutron/stein/install/controller-install-option2-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
