@@ -29,11 +29,11 @@ apt_download mongodb-server mongodb-clients python-pymongo
 apt_download python-argparse python-dev python-pip
 
 # Keystone
-apt_download keystone python-openstackclient apache2 \
+apt_download keystone python3-openstackclient apache2 \
     libapache2-mod-wsgi memcached python-memcache
 
 # Glance
-apt_download glance python-glanceclient
+apt_download glance python3-glanceclient
 
 # Nova Controller
 apt_download nova-api nova-conductor nova-consoleauth \
@@ -45,10 +45,10 @@ apt_download nova-placement-api
 # Neutron Controller
 apt_download neutron-server neutron-plugin-ml2 \
     neutron-linuxbridge-agent neutron-dhcp-agent \
-    neutron-metadata-agent neutron-l3-agent python-neutronclient conntrack
+    neutron-metadata-agent neutron-l3-agent python3-neutronclient conntrack
 
 # Cinder Controller
-apt_download cinder-api cinder-scheduler python-cinderclient
+apt_download cinder-api cinder-scheduler python3-cinderclient
 
 # Horizon
 apt_download openstack-dashboard
@@ -63,11 +63,11 @@ apt_download nova-compute nova-compute-qemu qemu sysfsutils
 apt_download neutron-linuxbridge-agent
 
 # Heat
-apt_download heat-api heat-api-cfn heat-engine python-heatclient
+apt_download heat-api heat-api-cfn heat-engine python3-heatclient
 
 # Swift Controller
-apt_download swift swift-proxy python-swiftclient \
-    python-keystoneclient python-keystonemiddleware \
+apt_download swift swift-proxy python3-swiftclient \
+    python3-keystoneclient python3-keystonemiddleware \
     memcached
 
 # Swift Storage

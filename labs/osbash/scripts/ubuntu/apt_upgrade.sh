@@ -35,7 +35,7 @@ sudo apt -y clean
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing OpenStack client."
-sudo apt install -y python-openstackclient
+sudo apt install -y python3-openstackclient
 
 # Starting with bionic, the Ubuntu LTS switched to a new set of network
 # management. We install and use the legacy tools for the time being.
