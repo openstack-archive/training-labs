@@ -1,10 +1,10 @@
 # This file contains OpenStack configuration data. It is used by both
 # host (osbash, Windows batch) and VM guest scripts.
 
-# rocky                (production release; cloud-archive:rocky)
-# rocky-proposed       (pre-release testing: cloud-archive:rocky-proposed)
-# rocky-staging        (ppa:openstack-ubuntu-testing/rocky)
-: ${OPENSTACK_RELEASE:=rocky}
+# stein                (production release; cloud-archive:stein)
+# stein-proposed       (pre-release testing: cloud-archive:stein-proposed)
+# stein-staging        (ppa:openstack-ubuntu-testing/stein)
+: ${OPENSTACK_RELEASE:=stein}
 
 # CirrOS image URL
 if [ "$(uname -m)" = "x86_64" ]; then
