@@ -43,7 +43,7 @@ Osbash
 ~~~~~~
 
 Osbash is written in BASH and follows conventions of DevStack:
-`devstack <http://devstack.org/>`_.
+`devstack <https://docs.openstack.org/devstack/latest/>`_.
 
 DevStack bash style guidelines can be found at the bottom of:
 https://opendev.org/openstack/devstack/src/branch/master/HACKING.rst
@@ -107,7 +107,7 @@ Submitting patches
 These documents will help you submit patches to OpenStack projects (including
 this one):
 
-- http://docs.openstack.org/infra/manual/developers.html#development-workflow
+- https://docs.openstack.org/infra/manual/developers.html#development-workflow
 - https://wiki.openstack.org/wiki/GitCommitMessages
 
 If you change the behavior of the scripts as documented in the replace-guides,
@@ -122,7 +122,7 @@ Reviewing
 ---------
 
 Learn how to review (or what to expect when having your patches reviewed) here:
-- http://docs.openstack.org/infra/manual/developers.html#development-workflow
+- https://docs.openstack.org/infra/manual/developers.html#development-workflow
 
 TODO
 ----
