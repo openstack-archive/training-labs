@@ -128,7 +128,6 @@ echo "Creating the database tables for glance."
 sudo glance-manage db_sync
 
 echo "Restarting glance service."
-sudo service glance-registry restart
 sudo service glance-api restart
 
 #------------------------------------------------------------------------------
