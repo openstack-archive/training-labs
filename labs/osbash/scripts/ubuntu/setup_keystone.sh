@@ -158,13 +158,6 @@ openstack role add \
 
 echo "Verifying keystone installation."
 
-# Disable the temporary authentication token mechanism
-conf=/etc/keystone/keystone-paste.ini
-echo "Removing admin_token_auth from pipelines."
-sudo ls -l $conf
-sudo sed -i '/^pipeline = / s/admin_token_auth //' $conf
-sudo ls -l $conf
-
 # From this point on, we are going to use keystone for authentication
 unset OS_AUTH_URL OS_PASSWORD
 
