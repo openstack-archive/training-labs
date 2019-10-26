@@ -32,7 +32,7 @@ class ISOImage(distro.GenericISOImage):
         if arch == "amd64":
             self.release_name = "ubuntu-18.04-amd64"
             self.url = ("http://cdimage.ubuntu.com/releases/18.04/release/"
-                        "ubuntu-18.04.2-server-amd64.iso")
+                        "ubuntu-18.04.3-server-amd64.iso")
             self.md5 = "34416ff83179728d54583bf3f18d42d2"
             # ostype used by VirtualBox to choose icon and flags (64-bit,
             # IOAPIC)
