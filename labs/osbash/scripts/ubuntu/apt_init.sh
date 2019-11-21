@@ -47,24 +47,24 @@ sudo apt update
 # https://docs.openstack.org/install-guide/environment-packages-ubuntu.html
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # NOTE: Using pre-release staging ppa is not documented in install-guide
-# https://launchpad.net/~ubuntu-cloud-archive/+archive/ubuntu/stein-staging
+# https://launchpad.net/~ubuntu-cloud-archive/+archive/ubuntu/train-staging
 #--------------------------------------------------------------------------
 
 echo "Installing packages needed for add-apt-repository."
 sudo apt -y install software-properties-common
 
 case "$OPENSTACK_RELEASE" in
-    stein)
-        REPO=cloud-archive:stein
-        SRC_FILE=cloudarchive-stein.list
+    train)
+        REPO=cloud-archive:train
+        SRC_FILE=cloudarchive-train.list
         ;;
-    stein-proposed)
-        REPO=cloud-archive:stein-proposed
-        SRC_FILE=cloudarchive-stein-proposed.list
+    train-proposed)
+        REPO=cloud-archive:train-proposed
+        SRC_FILE=cloudarchive-train-proposed.list
         ;;
-    stein-staging)
-        REPO=ppa:ubuntu-cloud-archive/stein-staging
-        SRC_FILE=ubuntu-cloud-archive-ubuntu-stein-staging-bionic.list
+    train-staging)
+        REPO=ppa:ubuntu-cloud-archive/train-staging
+        SRC_FILE=ubuntu-cloud-archive-ubuntu-train-staging-bionic.list
         ;;
     *)
         echo >&2 "Unknown OpenStack release: $OPENSTACK_RELEASE. Aborting."
