@@ -144,14 +144,6 @@ function wait_for_nova_services {
     source "$CONFIG_DIR/admin-openstackrc.sh"
     echo "Checking for nova services in openstack compute service list."
 
-    echo -n "  nova-consoleauth"
-    until openstack compute service list --service nova-consoleauth | \
-            grep -q '| up '; do
-        sleep 1
-        echo -n .
-    done
-    echo
-
     echo -n "  nova-scheduler"
     until openstack compute service list --service nova-scheduler | \
             grep -q '| up '; do

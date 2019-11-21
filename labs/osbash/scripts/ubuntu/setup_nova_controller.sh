@@ -110,8 +110,8 @@ openstack endpoint create \
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing nova for controller node."
-sudo apt install -y nova-api nova-conductor nova-consoleauth \
-    nova-novncproxy nova-scheduler nova-placement-api
+sudo apt install -y nova-api nova-conductor nova-novncproxy nova-scheduler \
+    nova-placement-api
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Reduce memory usage (not in install-guide)

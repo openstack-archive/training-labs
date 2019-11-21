@@ -36,8 +36,7 @@ apt_download keystone python3-openstackclient apache2 \
 apt_download glance python3-glanceclient
 
 # Nova Controller
-apt_download nova-api nova-conductor nova-consoleauth \
-    nova-novncproxy nova-scheduler
+apt_download nova-api nova-conductor nova-novncproxy nova-scheduler
 
 # Placement Controller
 apt_download nova-placement-api
