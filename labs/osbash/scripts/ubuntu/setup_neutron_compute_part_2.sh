@@ -26,7 +26,6 @@ neutron_admin_user=neutron
 
 echo "Configuring Compute to use Networking."
 conf=/etc/nova/nova.conf
-iniset_sudo $conf neutron url http://controller:9696
 iniset_sudo $conf neutron auth_url http://controller:5000
 iniset_sudo $conf neutron auth_type password
 iniset_sudo $conf neutron project_domain_name default
