@@ -2,6 +2,7 @@
 
 # Sourcing this file calls functions fix_path_env and source_deploy.
 
+source "$CONFIG_DIR/credentials"
 source "$LIB_DIR/functions.sh"
 source "$LIB_DIR/functions-common-devstack"
 
@@ -300,8 +301,7 @@ $option = $value
 function mysql_exe {
     local cmd="$1"
     echo "mysql cmd: $cmd."
-    # XXX install-guide uses password, but distro install uses socket auth
-    sudo mysql -u "root" -e "$cmd"
+    sudo mysql -u "root" -p"$DATABASE_PASSWORD" -e "$cmd"
 }
 
 function setup_database {

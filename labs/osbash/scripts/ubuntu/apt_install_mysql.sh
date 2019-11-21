@@ -34,8 +34,8 @@ echo "Installing MySQL (MariaDB)."
 sudo apt install -y mariadb-server python-mysqldb
 
 # Not in the install-guide
-echo "Sanity check: distro default is socket auth."
-sudo mysql -u root -e quit
+echo "Sanity check: check if password login works for root."
+sudo mysql -u root -p"$DATABASE_PASSWORD" -e quit
 
 # Not in install-guide
 # To drop socket auth for root user and use root password:
