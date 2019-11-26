@@ -25,6 +25,7 @@ cmd snapshot_cycle -n controller glance_installed
 
 # Compute
 cmd queue ubuntu/setup_nova_controller.sh
+cmd queue ubuntu/setup_placement_controller.sh
 cmd snapshot_cycle -n controller nova-controller_installed
 
 # Networking

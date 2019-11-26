@@ -32,9 +32,6 @@ echo "Setting up first cell database."
 # https://docs.openstack.org/developer/nova/cells.html#fresh-install
 setup_database nova_cell0 "$NOVA_DB_USER" "$NOVA_DBPASS"
 
-echo "Setting up placement database."
-setup_database placement "$PLACEMENT_DB_USER" "$PLACEMENT_DBPASS"
-
 echo "Sourcing the admin credentials."
 source "$CONFIG_DIR/admin-openstackrc.sh"
 
@@ -75,49 +72,11 @@ openstack endpoint create \
     compute admin http://controller:8774/v2.1
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-echo "Creating placement user and giving it the admin role."
-openstack user create \
-    --domain default  \
-    --password "$PLACEMENT_PASS" \
-    "$placement_admin_user"
-
-openstack role add \
-    --project "$SERVICE_PROJECT_NAME" \
-    --user "$placement_admin_user" \
-    "$ADMIN_ROLE_NAME"
-
-echo "Creating the Placement API entry in the service catalog."
-openstack service create \
-    --name placement \
-    --description "Placement API" \
-    placement
-
-echo "Creating nova endpoints."
-openstack endpoint create \
-    --region "$REGION" \
-    placement public http://controller:8778
-
-openstack endpoint create \
-    --region "$REGION" \
-    placement internal http://controller:8778
-
-openstack endpoint create \
-    --region "$REGION" \
-    placement admin http://controller:8778
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Install and configure components
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Installing nova for controller node."
-sudo apt install -y nova-api nova-conductor nova-novncproxy nova-scheduler \
-    nova-placement-api
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Reduce memory usage (not in install-guide)
-conf=/etc/apache2/sites-enabled/nova-placement-api.conf
-sudo sed -i --follow-symlinks '/WSGIDaemonProcess/ s/processes=[0-9]*/processes=1/' $conf
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+sudo apt install -y nova-api nova-conductor nova-novncproxy nova-scheduler
 
 conf=/etc/nova/nova.conf
 
@@ -130,11 +89,6 @@ iniset_sudo $conf api_database connection "$database_url"
 database_url="mysql+pymysql://$NOVA_DB_USER:$NOVA_DBPASS@controller/nova"
 echo "Setting database connection: $database_url."
 iniset_sudo $conf database connection "$database_url"
-
-# Configure [placement_database] section.
-database_url="mysql+pymysql://$PLACEMENT_DB_USER:$PLACEMENT_DBPASS@controller/placement"
-echo "Setting placement database connection: $database_url."
-iniset_sudo $conf placement_database connection "$database_url"
 
 echo "Configuring nova services."
 
@@ -177,7 +131,7 @@ iniset_sudo $conf oslo_concurrency lock_path /var/lib/nova/tmp
 sudo grep "^log_dir" $conf
 sudo sed -i "/^log_dir/ d" $conf
 
-echo "Configuring Placement services."
+echo "Configuring access to the Placement service."
 iniset_sudo $conf placement region_name RegionOne
 iniset_sudo $conf placement project_domain_name Default
 iniset_sudo $conf placement project_name "$SERVICE_PROJECT_NAME"
@@ -187,7 +141,7 @@ iniset_sudo $conf placement auth_url http://controller:5000/v3
 iniset_sudo $conf placement username "$placement_admin_user"
 iniset_sudo $conf placement password "$PLACEMENT_PASS"
 
-echo "Populating the nova-api and placement databases."
+echo "Populating the nova-api databases."
 sudo nova-manage api_db sync
 
 echo "Registering the cell0 database."
@@ -215,8 +169,8 @@ wait_for_keystone
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 echo "Restarting nova services."
-declare -a nova_services=(nova-api nova-consoleauth nova-scheduler \
-    nova-conductor nova-novncproxy)
+declare -a nova_services=(nova-api nova-scheduler nova-conductor \
+    nova-novncproxy)
 
 for nova_service in "${nova_services[@]}"; do
     echo "Restarting $nova_service."
