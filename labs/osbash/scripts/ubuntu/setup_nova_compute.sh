@@ -35,12 +35,6 @@ echo "Configuring $conf."
 echo "Configuring RabbitMQ message queue access."
 iniset_sudo $conf DEFAULT transport_url "rabbit://openstack:$RABBIT_PASS@controller"
 
-if sudo grep "^os_region_name" $conf; then
-    sudo sed -i '/^os_region_name/ s/os_region_name/region_name/' $conf
-else
-    echo "WARNING os_region_name change no longer needed for $conf"
-fi
-
 # Configuring [api] section.
 iniset_sudo $conf api auth_strategy keystone
 
@@ -49,11 +43,12 @@ nova_admin_user=nova
 MY_MGMT_IP=$(get_node_ip_in_network "$(hostname)" "mgmt")
 
 # Configure [keystone_authtoken] section.
-iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
+iniset_sudo $conf keystone_authtoken www_authenticate_uri http://controller:5000/
+iniset_sudo $conf keystone_authtoken auth_url http://controller:5000/
 iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password
-iniset_sudo $conf keystone_authtoken project_domain_name default
-iniset_sudo $conf keystone_authtoken user_domain_name default
+iniset_sudo $conf keystone_authtoken project_domain_name Default
+iniset_sudo $conf keystone_authtoken user_domain_name Default
 iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
 iniset_sudo $conf keystone_authtoken username "$nova_admin_user"
 iniset_sudo $conf keystone_authtoken password "$NOVA_PASS"
@@ -87,13 +82,6 @@ iniset_sudo $conf placement user_domain_name Default
 iniset_sudo $conf placement auth_url http://controller:5000/v3
 iniset_sudo $conf placement username "$placement_admin_user"
 iniset_sudo $conf placement password "$PLACEMENT_PASS"
-
-
-# Delete log_dir line
-# According to the install-guide, "Due to a packaging bug, remove the log_dir
-# option from the [DEFAULT] section."
-sudo grep "^log_dir" $conf
-sudo sed -i "/^log_dir/ d" $conf
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Finalize installation
