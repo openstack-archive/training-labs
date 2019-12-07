@@ -104,26 +104,6 @@ iniset_sudo $conf glance_store stores "file,http"
 iniset_sudo $conf glance_store default_store file
 iniset_sudo $conf glance_store filesystem_store_datadir /var/lib/glance/images/
 
-echo "Configuring glance-registry.conf."
-conf=/etc/glance/glance-registry.conf
-
-# Database section
-iniset_sudo $conf database connection "$database_url"
-
-# Keystone authtoken section
-iniset_sudo $conf keystone_authtoken www_authenticate_uri http://controller:5000
-iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
-iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
-iniset_sudo $conf keystone_authtoken auth_type password
-iniset_sudo $conf keystone_authtoken project_domain_name Default
-iniset_sudo $conf keystone_authtoken user_domain_name Default
-iniset_sudo $conf keystone_authtoken project_name "$SERVICE_PROJECT_NAME"
-iniset_sudo $conf keystone_authtoken username "$glance_admin_user"
-iniset_sudo $conf keystone_authtoken password "$GLANCE_PASS"
-
-# Paste deploy section
-iniset_sudo $conf paste_deploy flavor "keystone"
-
 echo "Creating the database tables for glance."
 sudo glance-manage db_sync
 
