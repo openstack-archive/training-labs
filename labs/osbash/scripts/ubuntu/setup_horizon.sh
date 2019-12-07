@@ -13,7 +13,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up OpenStack Dashboard (horizon)
-# https://docs.openstack.org/horizon/stein/install/install-ubuntu.html
+# https://docs.openstack.org/horizon/train/install/install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Set up keystone for controller node
-# https://docs.openstack.org/keystone/stein/install/keystone-install-ubuntu.html
+# https://docs.openstack.org/keystone/train/install/keystone-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -116,7 +116,7 @@ export OS_IDENTITY_API_VERSION=3
 
 #------------------------------------------------------------------------------
 # Create a domain, projects, users, and roles
-# https://docs.openstack.org/keystone/stein/install/keystone-users-ubuntu.html
+# https://docs.openstack.org/keystone/train/install/keystone-users-ubuntu.html
 #------------------------------------------------------------------------------
 
 # Wait for keystone to come up
@@ -153,7 +153,7 @@ openstack role add \
 
 #------------------------------------------------------------------------------
 # Verify operation
-# https://docs.openstack.org/keystone/stein/install/keystone-verify-ubuntu.html
+# https://docs.openstack.org/keystone/train/install/keystone-verify-ubuntu.html
 #------------------------------------------------------------------------------
 
 echo "Verifying keystone installation."

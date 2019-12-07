@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install the Image Service (glance).
-# https://docs.openstack.org/glance/stein/install/install-ubuntu.html
+# https://docs.openstack.org/glance/train/install/install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -112,7 +112,7 @@ sudo service glance-api restart
 
 #------------------------------------------------------------------------------
 # Verify the Image Service installation
-# https://docs.openstack.org/glance/stein/install/verify.html
+# https://docs.openstack.org/glance/train/install/verify.html
 #------------------------------------------------------------------------------
 
 echo -n "Waiting for glance to start."

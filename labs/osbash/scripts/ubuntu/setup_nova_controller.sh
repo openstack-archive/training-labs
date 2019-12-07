@@ -14,7 +14,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install Compute controller services
-# https://docs.openstack.org/nova/stein/install/controller-install-ubuntu.html
+# https://docs.openstack.org/nova/train/install/controller-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

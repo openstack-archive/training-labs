@@ -15,7 +15,7 @@ indicate_current_auto
 
 #------------------------------------------------------------------------------
 # Install and configure compute node
-# https://docs.openstack.org/neutron/stein/install/compute-install-ubuntu.html
+# https://docs.openstack.org/neutron/train/install/compute-install-ubuntu.html
 #------------------------------------------------------------------------------
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -47,7 +47,7 @@ sudo service neutron-linuxbridge-agent restart
 
 #------------------------------------------------------------------------------
 # Networking Option 2: Self-service networks
-# https://docs.openstack.org/neutron/stein/install/verify-option2.html
+# https://docs.openstack.org/neutron/traitrain/install/verify-option2.html
 #------------------------------------------------------------------------------
 
 echo "Sourcing the admin credentials."
