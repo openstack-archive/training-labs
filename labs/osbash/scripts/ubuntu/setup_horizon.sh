@@ -83,7 +83,7 @@ cat << API | sudo tee -a $conf
 OPENSTACK_API_VERSIONS = {
     "identity": 3,
     "image": 2,
-    "volume": 2,
+    "volume": 3,
 }
 API
 
@@ -123,4 +123,4 @@ sudo sed -i --follow-symlinks '/WSGIDaemonProcess/ s/threads=[0-9]*/threads=2/' 
 
 echo "Reloading the web server configuration."
 # Restarting instead of reloading for reasons explained in comment above.
-sudo service apache2 restart
+sudo systemctl restart apache2.service
