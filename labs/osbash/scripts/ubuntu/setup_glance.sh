@@ -124,12 +124,12 @@ echo
 
 echo "Adding pre-downloaded CirrOS image as $CIRROS_IMG_NAME to glance."
 
-openstack image create "$CIRROS_IMG_NAME" \
+glance image-create --name "$CIRROS_IMG_NAME" \
     --file "$HOME/img/$(basename $CIRROS_URL)" \
     --disk-format qcow2 --container-format bare \
     --public
 
 echo "Verifying that the image was successfully added to the service."
 
-echo "openstack image list"
-openstack image list
+echo "glance image-list"
+glance image-list
