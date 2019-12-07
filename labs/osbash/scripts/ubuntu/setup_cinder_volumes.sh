@@ -24,16 +24,12 @@ echo "IP address of this node's interface in management network: $MY_MGMT_IP."
 echo "Installing qemu support package for non-raw image types."
 sudo apt install -y qemu
 
-# not in install-guide (needed to prevent lvcreate error):
-echo "Installing thin-provisioning-tools."
-sudo apt install -y thin-provisioning-tools
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Prerequisites
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-echo "Installing the Logical Volume Manager (LVM)."
-sudo apt install -y lvm2
+echo "Installing the supporting utility packages."
+sudo apt install -y lvm2 thin-provisioning-tools
 
 echo "Configuring LVM physical and logical volumes."
 
@@ -89,7 +85,7 @@ iniset_sudo $conf DEFAULT transport_url "rabbit://openstack:$RABBIT_PASS@control
 iniset_sudo $conf DEFAULT auth_strategy keystone
 
 # Configure [keystone_authtoken] section.
-iniset_sudo $conf keystone_authtoken auth_uri http://controller:5000
+iniset_sudo $conf keystone_authtoken www_authenticate_uri http://controller:5000
 iniset_sudo $conf keystone_authtoken auth_url http://controller:5000
 iniset_sudo $conf keystone_authtoken memcached_servers controller:11211
 iniset_sudo $conf keystone_authtoken auth_type password
