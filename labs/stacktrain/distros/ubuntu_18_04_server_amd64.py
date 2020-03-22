@@ -37,8 +37,8 @@ class ISOImage(distro.GenericISOImage):
             #            "xenial-server-cloudimg-amd64-disk1.img")
             #self.md5 = "f4a9830fb482d07eec07c8532a1c265e"
             self.url = ("http://cdimage.ubuntu.com/releases/18.04/release/"
-                        "ubuntu-18.04.3-server-amd64.iso")
-            self.md5 = "cb7cd5a0c94899a04a536441c8b6d2bf"
+                        "ubuntu-18.04.4-server-amd64.iso")
+            self.md5 = "d5bc5c59c24191bb45dd85fc6a420b34"
             # ostype used by VirtualBox to choose icon and flags (64-bit,
             # IOAPIC)
             conf.vbox_ostype = "Ubuntu_64"
