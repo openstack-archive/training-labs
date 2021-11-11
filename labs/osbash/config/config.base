@@ -1,7 +1,0 @@
-# Base disk VM configuration. Used by osbash/wbatch (host and guest).
-
-# Port forwarding
-VM_SSH_PORT=2229
-
-# Our default RAM size (512 MB) is not sufficient for installation
-VM_MEM=1024

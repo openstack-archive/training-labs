@@ -1,6 +1,0 @@
-ECHO %time% Deleting old iface_config.bat
-IF EXIST "%~dp0\iface_config.bat" DEL "%~dp0\iface_config.bat"
-ECHO.
-
-REM vim: set ai ts=4 sw=4 et ft=dosbatch:
-
